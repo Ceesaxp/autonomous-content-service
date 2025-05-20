@@ -1,0 +1,1690 @@
+openapi: 3.0.0
+info:
+  title: Autonomous Content Creation Service API
+  description: |
+    API for the Autonomous Content Creation Service, providing endpoints for client management,
+    project management, content creation, and financial operations.
+  version: 1.0.0
+  contact:
+    name: Autonomous Content Service
+    url: https://github.com/Ceesaxp/autonomous-content-service
+
+servers:
+  - url: /api/v1
+    description: API server
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Authentication
+    description: Authentication endpoints
+  - name: Clients
+    description: Client management endpoints
+  - name: Projects
+    description: Project management endpoints
+  - name: Content
+    description: Content management endpoints
+  - name: Feedback
+    description: Feedback management endpoints
+  - name: Transactions
+    description: Financial transaction endpoints
+  - name: System
+    description: System capabilities and monitoring endpoints
+  - name: Webhooks
+    description: Webhook notification endpoints
+
+paths:
+  /auth/login:
+    post:
+      summary: Authenticate a client
+      description: Authenticates a client and returns a JWT token
+      tags:
+        - Authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  expiresAt:
+                    type: string
+                    format: date-time
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/register:
+    post:
+      summary: Register a new client
+      description: Registers a new client and returns a JWT token
+      tags:
+        - Authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientRegistration'
+      responses:
+        '201':
+          description: Client registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clientId:
+                    type: string
+                    format: uuid
+                  token:
+                    type: string
+                  expiresAt:
+                    type: string
+                    format: date-time
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Client already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /clients/{clientId}:
+    get:
+      summary: Get client information
+      description: Retrieves information about a specific client
+      tags:
+        - Clients
+      parameters:
+        - $ref: '#/components/parameters/ClientId'
+      responses:
+        '200':
+          description: Client information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    put:
+      summary: Update client information
+      description: Updates information for a specific client
+      tags:
+        - Clients
+      parameters:
+        - $ref: '#/components/parameters/ClientId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientUpdate'
+      responses:
+        '200':
+          description: Client information updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /clients/{clientId}/profile:
+    get:
+      summary: Get client profile information
+      description: Retrieves profile information for a specific client
+      tags:
+        - Clients
+      parameters:
+        - $ref: '#/components/parameters/ClientId'
+      responses:
+        '200':
+          description: Client profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientProfile'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    put:
+      summary: Update client profile
+      description: Updates profile information for a specific client
+      tags:
+        - Clients
+      parameters:
+        - $ref: '#/components/parameters/ClientId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientProfileUpdate'
+      responses:
+        '200':
+          description: Client profile updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientProfile'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /projects:
+    get:
+      summary: List projects
+      description: Retrieves a list of projects with optional filtering
+      tags:
+        - Projects
+      parameters:
+        - $ref: '#/components/parameters/ClientIdQuery'
+        - $ref: '#/components/parameters/StatusQuery'
+        - $ref: '#/components/parameters/Pagination'
+      responses:
+        '200':
+          description: Projects retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProjectSummary'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+    post:
+      summary: Create a new project
+      description: Creates a new content creation project
+      tags:
+        - Projects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectCreate'
+      responses:
+        '201':
+          description: Project created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /projects/{projectId}:
+    get:
+      summary: Get project details
+      description: Retrieves detailed information about a specific project
+      tags:
+        - Projects
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '200':
+          description: Project details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    put:
+      summary: Update project details
+      description: Updates information for a specific project
+      tags:
+        - Projects
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectUpdate'
+      responses:
+        '200':
+          description: Project updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    delete:
+      summary: Cancel a project
+      description: Cancels a specific project (does not delete it completely)
+      tags:
+        - Projects
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      responses:
+        '204':
+          description: Project cancelled successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /projects/{projectId}/content:
+    get:
+      summary: List content for a project
+      description: Retrieves a list of content items for a specific project
+      tags:
+        - Content
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+        - $ref: '#/components/parameters/ContentStatusQuery'
+      responses:
+        '200':
+          description: Content list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContentSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    post:
+      summary: Request new content
+      description: Requests a new content item for a specific project
+      tags:
+        - Content
+      parameters:
+        - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentRequest'
+      responses:
+        '201':
+          description: Content requested successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /content/{contentId}:
+    get:
+      summary: Get content details
+      description: Retrieves detailed information about a specific content item
+      tags:
+        - Content
+      parameters:
+        - $ref: '#/components/parameters/ContentId'
+      responses:
+        '200':
+          description: Content details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    put:
+      summary: Update content
+      description: Updates a specific content item
+      tags:
+        - Content
+      parameters:
+        - $ref: '#/components/parameters/ContentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentUpdate'
+      responses:
+        '200':
+          description: Content updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /content/{contentId}/versions:
+    get:
+      summary: Get content version history
+      description: Retrieves version history for a specific content item
+      tags:
+        - Content
+      parameters:
+        - $ref: '#/components/parameters/ContentId'
+      responses:
+        '200':
+          description: Content versions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ContentVersion'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /content/{contentId}/approve:
+    post:
+      summary: Approve content
+      description: Approves a specific content item
+      tags:
+        - Content
+      parameters:
+        - $ref: '#/components/parameters/ContentId'
+      responses:
+        '200':
+          description: Content approved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          description: Content cannot be approved in its current state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /feedback:
+    get:
+      summary: List feedback
+      description: Retrieves a list of feedback with optional filtering
+      tags:
+        - Feedback
+      parameters:
+        - $ref: '#/components/parameters/ContentIdQuery'
+        - $ref: '#/components/parameters/ProjectIdQuery'
+        - $ref: '#/components/parameters/Pagination'
+      responses:
+        '200':
+          description: Feedback list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Feedback'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+    post:
+      summary: Submit feedback
+      description: Submits feedback for a project or content item
+      tags:
+        - Feedback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FeedbackSubmit'
+      responses:
+        '201':
+          description: Feedback submitted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feedback'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /feedback/{feedbackId}:
+    get:
+      summary: Get feedback details
+      description: Retrieves detailed information about specific feedback
+      tags:
+        - Feedback
+      parameters:
+        - $ref: '#/components/parameters/FeedbackId'
+      responses:
+        '200':
+          description: Feedback details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feedback'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    put:
+      summary: Update feedback status
+      description: Updates the status of specific feedback
+      tags:
+        - Feedback
+      parameters:
+        - $ref: '#/components/parameters/FeedbackId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [New, Acknowledged, Implemented, Rejected]
+      responses:
+        '200':
+          description: Feedback status updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Feedback'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /transactions:
+    get:
+      summary: List transactions
+      description: Retrieves a list of financial transactions with optional filtering
+      tags:
+        - Transactions
+      parameters:
+        - $ref: '#/components/parameters/ClientIdQuery'
+        - $ref: '#/components/parameters/ProjectIdQuery'
+        - name: type
+          in: query
+          description: Filter by transaction type
+          schema:
+            type: string
+            enum: [Payment, Refund, Fee, Subscription, ApiCost]
+        - name: status
+          in: query
+          description: Filter by transaction status
+          schema:
+            type: string
+            enum: [Pending, Completed, Failed, Disputed]
+        - name: startDate
+          in: query
+          description: Filter by transactions after this date
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          description: Filter by transactions before this date
+          schema:
+            type: string
+            format: date
+        - $ref: '#/components/parameters/Pagination'
+      responses:
+        '200':
+          description: Transactions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transaction'
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    
+    post:
+      summary: Create a payment transaction
+      description: Creates a new payment transaction
+      tags:
+        - Transactions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentCreate'
+      responses:
+        '201':
+          description: Payment transaction created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /transactions/{transactionId}:
+    get:
+      summary: Get transaction details
+      description: Retrieves detailed information about a specific transaction
+      tags:
+        - Transactions
+      parameters:
+        - $ref: '#/components/parameters/TransactionId'
+      responses:
+        '200':
+          description: Transaction details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /capabilities:
+    get:
+      summary: List system capabilities
+      description: Retrieves a list of system capabilities
+      tags:
+        - System
+      parameters:
+        - name: type
+          in: query
+          description: Filter by capability type
+          schema:
+            type: string
+            enum: [ContentCreation, ContentEditing, ClientCommunication, MarketAnalysis, FinancialTransaction]
+        - name: status
+          in: query
+          description: Filter by capability status
+          schema:
+            type: string
+            enum: [Active, Learning, Deprecated]
+      responses:
+        '200':
+          description: System capabilities retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SystemCapability'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+  /capabilities/{capabilityId}:
+    get:
+      summary: Get capability details
+      description: Retrieves detailed information about a specific system capability
+      tags:
+        - System
+      parameters:
+        - $ref: '#/components/parameters/CapabilityId'
+      responses:
+        '200':
+          description: Capability details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemCapability'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /webhooks:
+    post:
+      summary: Register a webhook
+      description: Registers a new webhook for event notifications
+      tags:
+        - Webhooks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookRegistration'
+      responses:
+        '201':
+          description: Webhook registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    
+    get:
+      summary: List webhooks
+      description: Retrieves a list of registered webhooks
+      tags:
+        - Webhooks
+      responses:
+        '200':
+          description: Webhooks retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Webhook'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /webhooks/{webhookId}:
+    get:
+      summary: Get webhook details
+      description: Retrieves detailed information about a specific webhook
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookId'
+      responses:
+        '200':
+          description: Webhook details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webhook'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+    delete:
+      summary: Delete a webhook
+      description: Deletes a specific webhook
+      tags:
+        - Webhooks
+      parameters:
+        - $ref: '#/components/parameters/WebhookId'
+      responses:
+        '204':
+          description: Webhook deleted successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    ClientId:
+      name: clientId
+      in: path
+      required: true
+      description: ID of the client
+      schema:
+        type: string
+        format: uuid
+    
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      description: ID of the project
+      schema:
+        type: string
+        format: uuid
+    
+    ContentId:
+      name: contentId
+      in: path
+      required: true
+      description: ID of the content item
+      schema:
+        type: string
+        format: uuid
+    
+    FeedbackId:
+      name: feedbackId
+      in: path
+      required: true
+      description: ID of the feedback
+      schema:
+        type: string
+        format: uuid
+    
+    TransactionId:
+      name: transactionId
+      in: path
+      required: true
+      description: ID of the transaction
+      schema:
+        type: string
+        format: uuid
+    
+    CapabilityId:
+      name: capabilityId
+      in: path
+      required: true
+      description: ID of the system capability
+      schema:
+        type: string
+        format: uuid
+    
+    WebhookId:
+      name: webhookId
+      in: path
+      required: true
+      description: ID of the webhook
+      schema:
+        type: string
+        format: uuid
+    
+    ClientIdQuery:
+      name: clientId
+      in: query
+      required: false
+      description: Filter by client ID
+      schema:
+        type: string
+        format: uuid
+    
+    ProjectIdQuery:
+      name: projectId
+      in: query
+      required: false
+      description: Filter by project ID
+      schema:
+        type: string
+        format: uuid
+    
+    ContentIdQuery:
+      name: contentId
+      in: query
+      required: false
+      description: Filter by content ID
+      schema:
+        type: string
+        format: uuid
+    
+    StatusQuery:
+      name: status
+      in: query
+      required: false
+      description: Filter by status
+      schema:
+        type: string
+    
+    ContentStatusQuery:
+      name: status
+      in: query
+      required: false
+      description: Filter by content status
+      schema:
+        type: string
+        enum: [Planning, Researching, Drafting, Editing, Review, Approved, Published, Archived]
+    
+    Pagination:
+      name: page
+      in: query
+      required: false
+      description: Page number (starting from 1)
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      name: limit
+      in: query
+      required: false
+      description: Number of items per page
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+    
+    Pagination:
+      type: object
+      properties:
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
+        currentPage:
+          type: integer
+        itemsPerPage:
+          type: integer
+    
+    Address:
+      type: object
+      required:
+        - street
+        - city
+        - country
+      properties:
+        street:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        postalCode:
+          type: string
+        country:
+          type: string
+    
+    Money:
+      type: object
+      required:
+        - amount
+        - currency
+      properties:
+        amount:
+          type: number
+          format: float
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+    
+    ClientRegistration:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - phone
+        - billingAddress
+        - timezone
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 8
+        phone:
+          type: string
+        billingAddress:
+          $ref: '#/components/schemas/Address'
+        timezone:
+          type: string
+    
+    ClientUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        billingAddress:
+          $ref: '#/components/schemas/Address'
+        timezone:
+          type: string
+    
+    Client:
+      type: object
+      required:
+        - clientId
+        - name
+        - email
+        - phone
+        - billingAddress
+        - timezone
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        clientId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        billingAddress:
+          $ref: '#/components/schemas/Address'
+        timezone:
+          type: string
+        status:
+          type: string
+          enum: [Active, Inactive, Pending, Suspended]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    
+    ClientProfileUpdate:
+      type: object
+      properties:
+        industry:
+          type: string
+        brandVoice:
+          type: string
+        targetAudience:
+          type: string
+        contentGoals:
+          type: array
+          items:
+            type: string
+        stylePreferences:
+          type: object
+        exampleContent:
+          type: array
+          items:
+            type: string
+            format: uri
+        competitorUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+    
+    ClientProfile:
+      type: object
+      required:
+        - profileId
+        - clientId
+        - industry
+        - contentGoals
+        - updatedAt
+      properties:
+        profileId:
+          type: string
+          format: uuid
+        clientId:
+          type: string
+          format: uuid
+        industry:
+          type: string
+        brandVoice:
+          type: string
+        targetAudience:
+          type: string
+        contentGoals:
+          type: array
+          items:
+            type: string
+        stylePreferences:
+          type: object
+        exampleContent:
+          type: array
+          items:
+            type: string
+            format: uri
+        competitorUrls:
+          type: array
+          items:
+            type: string
+            format: uri
+        updatedAt:
+          type: string
+          format: date-time
+    
+    ProjectCreate:
+      type: object
+      required:
+        - title
+        - description
+        - contentType
+        - deadline
+        - budget
+      properties:
+        title:
+          type: string
+          minLength: 5
+          maxLength: 100
+        description:
+          type: string
+        contentType:
+          type: string
+          enum: [BlogPost, SocialPost, EmailNewsletter, WebsiteCopy, TechnicalArticle, ProductDescription, PressRelease]
+        deadline:
+          type: string
+          format: date-time
+        budget:
+          $ref: '#/components/schemas/Money'
+        priority:
+          type: string
+          enum: [High, Medium, Low]
+          default: Medium
+    
+    ProjectUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 5
+          maxLength: 100
+        description:
+          type: string
+        deadline:
+          type: string
+          format: date-time
+        budget:
+          $ref: '#/components/schemas/Money'
+        priority:
+          type: string
+          enum: [High, Medium, Low]
+        status:
+          type: string
+          enum: [Draft, Planning, InProgress, Review, Completed, Cancelled]
+    
+    ProjectSummary:
+      type: object
+      required:
+        - projectId
+        - clientId
+        - title
+        - contentType
+        - deadline
+        - status
+        - createdAt
+      properties:
+        projectId:
+          type: string
+          format: uuid
+        clientId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        contentType:
+          type: string
+          enum: [BlogPost, SocialPost, EmailNewsletter, WebsiteCopy, TechnicalArticle, ProductDescription, PressRelease]
+        deadline:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [Draft, Planning, InProgress, Review, Completed, Cancelled]
+        createdAt:
+          type: string
+          format: date-time
+    
+    Project:
+      type: object
+      required:
+        - projectId
+        - clientId
+        - title
+        - description
+        - contentType
+        - deadline
+        - budget
+        - priority
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        projectId:
+          type: string
+          format: uuid
+        clientId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        contentType:
+          type: string
+          enum: [BlogPost, SocialPost, EmailNewsletter, WebsiteCopy, TechnicalArticle, ProductDescription, PressRelease]
+        deadline:
+          type: string
+          format: date-time
+        budget:
+          $ref: '#/components/schemas/Money'
+        priority:
+          type: string
+          enum: [High, Medium, Low]
+        status:
+          type: string
+          enum: [Draft, Planning, InProgress, Review, Completed, Cancelled]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContentSummary'
+    
+    ContentRequest:
+      type: object
+      required:
+        - title
+        - type
+      properties:
+        title:
+          type: string
+        type:
+          type: string
+          enum: [BlogPost, SocialPost, EmailNewsletter, WebsiteCopy, TechnicalArticle, ProductDescription, PressRelease]
+        metadata:
+          type: object
+          description: Additional metadata for content creation
+    
+    ContentUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        data:
+          type: string
+        metadata:
+          type: object
+        status:
+          type: string
+          enum: [Planning, Researching, Drafting, Editing, Review, Approved, Published, Archived]
+    
+    ContentSummary:
+      type: object
+      required:
+        - contentId
+        - projectId
+        - title
+        - type
+        - status
+        - version
+        - wordCount
+        - createdAt
+      properties:
+        contentId:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        type:
+          type: string
+          enum: [BlogPost, SocialPost, EmailNewsletter, WebsiteCopy, TechnicalArticle, ProductDescription, PressRelease]
+        status:
+          type: string
+          enum: [Planning, Researching, Drafting, Editing, Review, Approved, Published, Archived]
+        version:
+          type: integer
+        wordCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+    
+    Content:
+      type: object
+      required:
+        - contentId
+        - projectId
+        - title
+        - type
+        - status
+        - version
+        - wordCount
+        - createdAt
+        - updatedAt
+      properties:
+        contentId:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        title:
+          type: string
+        type:
+          type: string
+          enum: [BlogPost, SocialPost, EmailNewsletter, WebsiteCopy, TechnicalArticle, ProductDescription, PressRelease]
+        status:
+          type: string
+          enum: [Planning, Researching, Drafting, Editing, Review, Approved, Published, Archived]
+        data:
+          type: string
+        metadata:
+          type: object
+        version:
+          type: integer
+        wordCount:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        statistics:
+          type: object
+          properties:
+            readabilityScore:
+              type: number
+              format: float
+            seoScore:
+              type: number
+              format: float
+            engagementScore:
+              type: number
+              format: float
+            plagiarismScore:
+              type: number
+              format: float
+    
+    ContentVersion:
+      type: object
+      required:
+        - versionId
+        - contentId
+        - versionNumber
+        - data
+        - createdAt
+        - createdBy
+      properties:
+        versionId:
+          type: string
+          format: uuid
+        contentId:
+          type: string
+          format: uuid
+        versionNumber:
+          type: integer
+        data:
+          type: string
+        metadata:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+        createdBy:
+          type: string
+    
+    FeedbackSubmit:
+      type: object
+      properties:
+        contentId:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [Revision, Comment, Rating]
+          default: Comment
+        score:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 10
+        comment:
+          type: string
+      required:
+        - comment
+      oneOf:
+        - required: [contentId]
+        - required: [projectId]
+    
+    Feedback:
+      type: object
+      required:
+        - feedbackId
+        - source
+        - type
+        - status
+        - createdAt
+      properties:
+        feedbackId:
+          type: string
+          format: uuid
+        contentId:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        source:
+          type: string
+          enum: [Client, System, ThirdParty]
+        type:
+          type: string
+          enum: [Revision, Comment, Rating]
+        score:
+          type: number
+          format: float
+        comment:
+          type: string
+        status:
+          type: string
+          enum: [New, Acknowledged, Implemented, Rejected]
+        createdAt:
+          type: string
+          format: date-time
+    
+    PaymentCreate:
+      type: object
+      required:
+        - amount
+        - paymentMethod
+        - projectId
+      properties:
+        amount:
+          $ref: '#/components/schemas/Money'
+        paymentMethod:
+          type: string
+          enum: [CreditCard, BankTransfer, Cryptocurrency, PayPal]
+        projectId:
+          type: string
+          format: uuid
+        description:
+          type: string
+    
+    PaymentResponse:
+      type: object
+      required:
+        - transactionId
+        - status
+        - redirectUrl
+      properties:
+        transactionId:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [Pending, Completed, Failed]
+        redirectUrl:
+          type: string
+          format: uri
+          description: URL to redirect the client for payment processing (if applicable)
+    
+    Transaction:
+      type: object
+      required:
+        - transactionId
+        - clientId
+        - amount
+        - type
+        - status
+        - paymentMethod
+        - description
+        - timestamp
+      properties:
+        transactionId:
+          type: string
+          format: uuid
+        clientId:
+          type: string
+          format: uuid
+        projectId:
+          type: string
+          format: uuid
+        amount:
+          $ref: '#/components/schemas/Money'
+        type:
+          type: string
+          enum: [Payment, Refund, Fee, Subscription, ApiCost]
+        status:
+          type: string
+          enum: [Pending, Completed, Failed, Disputed]
+        paymentMethod:
+          type: string
+          enum: [CreditCard, BankTransfer, Cryptocurrency, PayPal]
+        externalReference:
+          type: string
+        description:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    
+    SystemCapability:
+      type: object
+      required:
+        - capabilityId
+        - name
+        - description
+        - type
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        capabilityId:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+          enum: [ContentCreation, ContentEditing, ClientCommunication, MarketAnalysis, FinancialTransaction]
+        status:
+          type: string
+          enum: [Active, Learning, Deprecated]
+        performanceMetrics:
+          type: object
+        apiDependencies:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    
+    WebhookRegistration:
+      type: object
+      required:
+        - url
+        - events
+        - secret
+      properties:
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+            enum: [ClientRegistered, ProjectCreated, ContentUpdated, ContentApproved, FeedbackReceived, PaymentReceived, PaymentFailed, ProjectStatusChanged]
+        secret:
+          type: string
+          description: Secret key for webhook signature validation
+        description:
+          type: string
+    
+    Webhook:
+      type: object
+      required:
+        - webhookId
+        - url
+        - events
+        - createdAt
+      properties:
+        webhookId:
+          type: string
+          format: uuid
+        url:
+          type: string
+          format: uri
+        events:
+          type: array
+          items:
+            type: string
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        lastTriggeredAt:
+          type: string
+          format: date-time
