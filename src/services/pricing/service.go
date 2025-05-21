@@ -414,12 +414,11 @@ func (s *PricingServiceImpl) CalculateResourceCost(ctx context.Context, req *Cal
 func (s *PricingServiceImpl) RecordResourceUsage(ctx context.Context, req *RecordResourceUsageRequest) error {
 	return s.costCalculator.TrackResourceUsage(ctx, &TrackResourceUsageRequest{
 		ProjectID:    req.ProjectID,
-		ContentType:  req.ContentType,
 		ResourceType: req.ResourceType,
-		ResourceName: req.ResourceName,
-		Quantity:     req.Quantity,
+		Usage:        req.Quantity,
 		Unit:         req.Unit,
 		Cost:         req.Cost,
+		Timestamp:    time.Now(),
 		Metadata:     req.Metadata,
 	})
 }
@@ -522,7 +521,22 @@ func (s *PricingServiceImpl) StopPricingExperiment(ctx context.Context, experime
 }
 
 func (s *PricingServiceImpl) AnalyzePricingExperiment(ctx context.Context, experimentID string) (*entities.ExperimentResults, error) {
-	return s.experimentService.GenerateExperimentReport(ctx, experimentID)
+	report, err := s.experimentService.GenerateExperimentReport(ctx, experimentID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate experiment report: %w", err)
+	}
+
+	// Convert ExperimentReportResult to entities.ExperimentResults
+	return &entities.ExperimentResults{
+		WinningVariant:          "", // Will be determined from the report
+		ConfidenceLevel:         0.0, // Will be calculated from the report
+		StatisticalSignificance: false, // Will be determined from the report
+		EffectSize:              0.0, // Will be calculated from the report
+		Recommendation:          report.Summary,
+		MetricImprovements:      make(map[string]float64),
+		AnalysisData:            report.Results,
+		AnalyzedAt:              report.GeneratedAt,
+	}, nil
 }
 
 func (s *PricingServiceImpl) GetExperimentVariantForClient(ctx context.Context, clientID string, contentType entities.ContentType) (*entities.PricingVariant, error) {
@@ -577,4 +591,3 @@ func generateID() string {
 // Type aliases for missing request types
 type ContentCreationCostRequest = CalculateResourceCostRequest
 type ContentCreationCostResponse = CalculateResourceCostResponse
-type TrackResourceUsageRequest = RecordResourceUsageRequest

@@ -7,30 +7,30 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/autonomous-content-service/src/domain/entities"
-	"github.com/autonomous-content-service/src/services/payment"
-	"github.com/stripe/stripe-go/v74"
-	"github.com/stripe/stripe-go/v74/client"
-	"github.com/stripe/stripe-go/v74/webhook"
+	"github.com/Ceesaxp/autonomous-content-service/src/domain/entities"
+	"github.com/Ceesaxp/autonomous-content-service/src/services/payment"
+	"github.com/stripe/stripe-go/v82"
+	"github.com/stripe/stripe-go/v82/client"
+	"github.com/stripe/stripe-go/v82/webhook"
 )
 
 // StripeProcessor implements payment processing for Stripe
 type StripeProcessor struct {
-	client          *client.API
-	webhookSecret   string
-	config          *StripeConfig
+	client        *client.API
+	webhookSecret string
+	config        *StripeConfig
 }
 
 // StripeConfig holds Stripe-specific configuration
 type StripeConfig struct {
-	SecretKey       string
-	PublishableKey  string
-	WebhookSecret   string
-	EndpointSecret  string
-	ConnectAccountID *string
-	FeesMode        string // "separate" or "included"
+	SecretKey           string
+	PublishableKey      string
+	WebhookSecret       string
+	EndpointSecret      string
+	ConnectAccountID    *string
+	FeesMode            string // "separate" or "included"
 	StatementDescriptor string
-	CaptureMethod   string // "automatic" or "manual"
+	CaptureMethod       string // "automatic" or "manual"
 }
 
 // NewStripeProcessor creates a new Stripe payment processor
@@ -65,9 +65,9 @@ func (s *StripeProcessor) ProcessPayment(ctx context.Context, request *payment.P
 
 	// Create payment intent
 	params := &stripe.PaymentIntentParams{
-		Amount:      stripe.Int64(amount),
-		Currency:    stripe.String(request.Currency),
-		Description: stripe.String(request.Description),
+		Amount:        stripe.Int64(amount),
+		Currency:      stripe.String(request.Currency),
+		Description:   stripe.String(request.Description),
 		CaptureMethod: stripe.String(s.config.CaptureMethod),
 	}
 
@@ -187,7 +187,7 @@ func (s *StripeProcessor) GetPaymentStatus(ctx context.Context, externalID strin
 	default:
 		status = entities.PaymentStatusFailed
 		if intent.LastPaymentError != nil {
-			reason := intent.LastPaymentError.Message
+			reason := intent.LastPaymentError.Msg
 			failureReason = &reason
 		}
 	}
@@ -207,9 +207,8 @@ func (s *StripeProcessor) GetPaymentStatus(ctx context.Context, externalID strin
 		ProcessorFee:  processorFee,
 		ProcessedAt:   processedAt,
 		FailureReason: failureReason,
-		Metadata: map[string]interface{}{
+		Metadata: map[string]any{
 			"stripe_status": intent.Status,
-			"charges":       len(intent.Charges.Data),
 		},
 	}
 
@@ -224,11 +223,20 @@ func (s *StripeProcessor) ProcessRefund(ctx context.Context, request *payment.Re
 		return nil, fmt.Errorf("failed to get payment intent: %w", err)
 	}
 
-	if len(intent.Charges.Data) == 0 {
-		return nil, fmt.Errorf("no charges found for payment intent")
+	// For Stripe v74+, we need to retrieve charges separately
+	chargeIter := s.client.Charges.List(&stripe.ChargeListParams{
+		PaymentIntent: stripe.String(intent.ID),
+	})
+
+	var charge *stripe.Charge
+	for chargeIter.Next() {
+		charge = chargeIter.Charge()
+		break // Get the first charge
 	}
 
-	charge := intent.Charges.Data[0]
+	if charge == nil {
+		return nil, fmt.Errorf("no charges found for payment intent")
+	}
 
 	// Create refund parameters
 	params := &stripe.RefundParams{
@@ -308,7 +316,7 @@ func (s *StripeProcessor) ProcessWebhook(ctx context.Context, payload []byte) (*
 	}
 
 	response := &payment.WebhookResponse{
-		EventType: event.Type,
+		EventType: string(event.Type),
 		Metadata: map[string]interface{}{
 			"stripe_event_id": event.ID,
 			"created":         event.Created,
@@ -374,15 +382,15 @@ func (s *StripeProcessor) CalculateFees(amount int64, currency string) int64 {
 	// Stripe standard rates: 2.9% + 30¢ for US cards
 	// International cards: 3.4% + 30¢
 	// For simplicity, using standard rate
-	
+
 	percentageFee := float64(amount) * 0.029 // 2.9%
 	fixedFee := int64(30)                    // 30 cents
-	
+
 	if currency != "USD" {
 		// International rate
 		percentageFee = float64(amount) * 0.034 // 3.4%
 	}
-	
+
 	totalFee := int64(percentageFee) + fixedFee
 	return totalFee
 }

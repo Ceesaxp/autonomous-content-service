@@ -273,6 +273,241 @@ type UpdatePricingExperimentRequest struct {
 	TrafficSplit map[string]float64         `json:"traffic_split,omitempty"`
 }
 
+// Cost calculation types
+type LLMCostRequest struct {
+	ModelName    string  `json:"model_name"`
+	InputTokens  int     `json:"input_tokens"`
+	OutputTokens int     `json:"output_tokens"`
+	RequestCount int     `json:"request_count"`
+}
+
+type LLMCostResponse struct {
+	TotalCost       float64 `json:"total_cost"`
+	InputCost       float64 `json:"input_cost"`
+	OutputCost      float64 `json:"output_cost"`
+	CostPerToken    float64 `json:"cost_per_token"`
+	CostPerRequest  float64 `json:"cost_per_request"`
+}
+
+type ProcessingCostRequest struct {
+	ProcessingTime time.Duration          `json:"processing_time"`
+	CPUUsage       float64                `json:"cpu_usage"`
+	MemoryUsage    float64                `json:"memory_usage"`
+	Metadata       map[string]interface{} `json:"metadata,omitempty"`
+}
+
+type ProcessingCostResponse struct {
+	TotalCost   float64            `json:"total_cost"`
+	CPUCost     float64            `json:"cpu_cost"`
+	MemoryCost  float64            `json:"memory_cost"`
+	OtherCosts  map[string]float64 `json:"other_costs,omitempty"`
+}
+
+type InfrastructureCostRequest struct {
+	ServiceType  string             `json:"service_type"`
+	Usage        float64            `json:"usage"`
+	Unit         string             `json:"unit"`
+	Duration     time.Duration      `json:"duration"`
+	Region       string             `json:"region"`
+	Metadata     map[string]interface{} `json:"metadata,omitempty"`
+}
+
+type InfrastructureCostResponse struct {
+	TotalCost     float64            `json:"total_cost"`
+	CostBreakdown map[string]float64 `json:"cost_breakdown"`
+	Unit          string             `json:"unit"`
+	Rate          float64            `json:"rate"`
+}
+
+type ResourceUtilizationRequest struct {
+	TimeRange   repositories.TimeRange `json:"time_range"`
+	ResourceType string                `json:"resource_type"`
+	Granularity string                 `json:"granularity"`
+}
+
+type ResourceUtilizationResponse struct {
+	Utilization []ResourceUtilizationPoint `json:"utilization"`
+	Average     float64                    `json:"average"`
+	Peak        float64                    `json:"peak"`
+	TotalCost   float64                    `json:"total_cost"`
+}
+
+type ResourceUtilizationPoint struct {
+	Timestamp time.Time `json:"timestamp"`
+	Usage     float64   `json:"usage"`
+	Cost      float64   `json:"cost"`
+}
+
+type EstimateResourceCostRequest struct {
+	ProjectID       string                 `json:"project_id"`
+	ContentType     entities.ContentType   `json:"content_type"`
+	EstimatedUsage  ResourceUsageEstimate  `json:"estimated_usage"`
+	Duration        time.Duration          `json:"duration"`
+	Metadata        map[string]interface{} `json:"metadata,omitempty"`
+}
+
+type EstimateResourceCostResponse struct {
+	EstimatedCost   float64            `json:"estimated_cost"`
+	CostBreakdown   map[string]float64 `json:"cost_breakdown"`
+	ConfidenceLevel float64            `json:"confidence_level"`
+	ValidUntil      time.Time          `json:"valid_until"`
+}
+
+// Additional request/response types
+type TrackResourceUsageRequest struct {
+	ProjectID      string                 `json:"project_id"`
+	ResourceType   string                 `json:"resource_type"`
+	Usage          float64                `json:"usage"`
+	Unit           string                 `json:"unit"`
+	Cost           float64                `json:"cost"`
+	Timestamp      time.Time              `json:"timestamp"`
+	Metadata       map[string]interface{} `json:"metadata,omitempty"`
+}
+
+type OptimizeResourceAllocationRequest struct {
+	ProjectID       string                 `json:"project_id"`
+	CurrentUsage    ResourceUsageEstimate  `json:"current_usage"`
+	OptimizationGoal string                `json:"optimization_goal"` // cost, performance, efficiency
+	Constraints     map[string]interface{} `json:"constraints,omitempty"`
+}
+
+type OptimizeResourceAllocationResponse struct {
+	RecommendedAllocation ResourceUsageEstimate  `json:"recommended_allocation"`
+	EstimatedSavings      float64                `json:"estimated_savings"`
+	PerformanceImpact     float64                `json:"performance_impact"`
+	ImplementationSteps   []string               `json:"implementation_steps"`
+}
+
+type CostSavingOpportunitiesRequest struct {
+	TimeRange           repositories.TimeRange `json:"time_range"`
+	CurrentSpending     float64                `json:"current_spending"`
+	OptimizationTargets []string               `json:"optimization_targets"`
+}
+
+type CostSavingOpportunitiesResponse struct {
+	Opportunities      []CostSavingOpportunity `json:"opportunities"`
+	TotalPotentialSavings float64              `json:"total_potential_savings"`
+	ImplementationPlan []string                `json:"implementation_plan"`
+}
+
+type CostSavingOpportunity struct {
+	Type                 string  `json:"type"`
+	Description          string  `json:"description"`
+	PotentialSavings     float64 `json:"potential_savings"`
+	ImplementationEffort string  `json:"implementation_effort"`
+	Priority             string  `json:"priority"`
+}
+
+type CostReportRequest struct {
+	TimeRange      repositories.TimeRange `json:"time_range"`
+	ReportType     string                 `json:"report_type"`
+	Granularity    string                 `json:"granularity"`
+	IncludeForecast bool                   `json:"include_forecast"`
+	Filters        map[string]interface{} `json:"filters,omitempty"`
+}
+
+type CostReportResponse struct {
+	ReportData      map[string]interface{} `json:"report_data"`
+	Summary         CostReportSummary      `json:"summary"`
+	Trends          []CostTrendPoint       `json:"trends"`
+	Forecast        []CostForecastPoint    `json:"forecast,omitempty"`
+	GeneratedAt     time.Time              `json:"generated_at"`
+}
+
+type CostReportSummary struct {
+	TotalCost       float64 `json:"total_cost"`
+	AverageDailyCost float64 `json:"average_daily_cost"`
+	CostChange      float64 `json:"cost_change"`
+	MajorDrivers    []string `json:"major_drivers"`
+}
+
+type CostTrendPoint struct {
+	Timestamp time.Time `json:"timestamp"`
+	Cost      float64   `json:"cost"`
+	Category  string    `json:"category"`
+}
+
+type CostForecastPoint struct {
+	Timestamp      time.Time `json:"timestamp"`
+	PredictedCost  float64   `json:"predicted_cost"`
+	ConfidenceRange [2]float64 `json:"confidence_range"`
+}
+
+type DesignExperimentRequest struct {
+	Name             string                 `json:"name"`
+	Description      string                 `json:"description"`
+	Hypothesis       string                 `json:"hypothesis"`
+	ExperimentType   string                 `json:"experiment_type"`
+	TargetMetric     string                 `json:"target_metric"`
+	Duration         time.Duration          `json:"duration"`
+	TrafficPercent   float64                `json:"traffic_percent"`
+	Parameters       map[string]interface{} `json:"parameters"`
+}
+
+// Experiment management types
+type ExperimentValidationResult struct {
+	IsValid     bool     `json:"is_valid"`
+	Issues      []string `json:"issues"`
+	Warnings    []string `json:"warnings"`
+	Confidence  float64  `json:"confidence"`
+}
+
+type ExperimentMonitoringResult struct {
+	Status       string             `json:"status"`
+	Progress     float64            `json:"progress"`
+	Metrics      map[string]float64 `json:"metrics"`
+	Participants int                `json:"participants"`
+	Issues       []string           `json:"issues"`
+}
+
+type CreateExperimentVariantRequest struct {
+	ExperimentID string                 `json:"experiment_id"`
+	Name         string                 `json:"name"`
+	Description  string                 `json:"description"`
+	Parameters   map[string]interface{} `json:"parameters"`
+	Traffic      float64                `json:"traffic"`
+}
+
+type RecordExperimentEventRequest struct {
+	ExperimentID string                 `json:"experiment_id"`
+	VariantID    string                 `json:"variant_id"`
+	EventType    string                 `json:"event_type"`
+	Properties   map[string]interface{} `json:"properties"`
+	Timestamp    time.Time              `json:"timestamp"`
+}
+
+type StatisticalSignificanceResult struct {
+	IsSignificant   bool    `json:"is_significant"`
+	PValue          float64 `json:"p_value"`
+	Confidence      float64 `json:"confidence"`
+	SampleSize      int     `json:"sample_size"`
+	EffectSize      float64 `json:"effect_size"`
+	PowerAnalysis   float64 `json:"power_analysis"`
+}
+
+type ExperimentReportResult struct {
+	Summary     string                 `json:"summary"`
+	Results     map[string]interface{} `json:"results"`
+	Charts      []string               `json:"charts"`
+	Insights    []string               `json:"insights"`
+	GeneratedAt time.Time              `json:"generated_at"`
+}
+
+type VariantRecommendationResult struct {
+	WinningVariant string             `json:"winning_variant"`
+	Confidence     float64            `json:"confidence"`
+	ExpectedLift   float64            `json:"expected_lift"`
+	Reasoning      []string           `json:"reasoning"`
+	NextSteps      []string           `json:"next_steps"`
+}
+
+type AutoCreateExperimentsRequest struct {
+	ContentTypes     []entities.ContentType `json:"content_types"`
+	MaxExperiments   int                    `json:"max_experiments"`
+	Duration         time.Duration          `json:"duration"`
+	TrafficThreshold float64                `json:"traffic_threshold"`
+}
+
 type ContentSpecification struct {
 	Title           string                 `json:"title"`
 	WordCount       int                    `json:"word_count"`

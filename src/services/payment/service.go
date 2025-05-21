@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/autonomous-content-service/src/domain/entities"
-	"github.com/autonomous-content-service/src/domain/repositories"
+	"github.com/Ceesaxp/autonomous-content-service/src/domain/entities"
+	"github.com/Ceesaxp/autonomous-content-service/src/domain/repositories"
 	"github.com/google/uuid"
 )
 
@@ -96,14 +96,14 @@ func (s *ServiceImpl) ProcessPayment(ctx context.Context, request *PaymentReques
 	if fraudResult.ShouldBlock() {
 		payment.Status = entities.PaymentStatusFailed
 		payment.FailureReason = &fraudResult.Explanation
-		
+
 		if err := s.paymentRepo.CreatePayment(ctx, payment); err != nil {
 			return nil, fmt.Errorf("failed to create blocked payment: %w", err)
 		}
 
 		// Send fraud notification
 		s.sendFraudNotification(ctx, payment, fraudResult)
-		
+
 		return payment, fmt.Errorf("payment blocked due to fraud risk: %s", fraudResult.Explanation)
 	}
 
@@ -132,17 +132,17 @@ func (s *ServiceImpl) ProcessPayment(ctx context.Context, request *PaymentReques
 		reason := err.Error()
 		payment.FailureReason = &reason
 		payment.UpdatedAt = time.Now()
-		
+
 		s.paymentRepo.UpdatePayment(ctx, payment)
-		
+
 		// Schedule retry if eligible
 		if payment.CanRetry() {
 			s.scheduleRetry(ctx, payment)
 		}
-		
+
 		// Send failure notification
 		s.sendPaymentNotification(ctx, payment, entities.NotificationTypePaymentFailed)
-		
+
 		return payment, fmt.Errorf("payment processing failed: %w", err)
 	}
 
@@ -152,13 +152,13 @@ func (s *ServiceImpl) ProcessPayment(ctx context.Context, request *PaymentReques
 	payment.ProcessorFee = response.ProcessorFee
 	payment.NetAmount = response.NetAmount
 	payment.TransactionHash = response.TransactionHash
-	
+
 	if response.Status == entities.PaymentStatusCompleted {
 		now := time.Now()
 		payment.ProcessedAt = &now
 		payment.ConfirmedAt = &now
 	}
-	
+
 	payment.UpdatedAt = time.Now()
 
 	if err := s.paymentRepo.UpdatePayment(ctx, payment); err != nil {
@@ -224,6 +224,7 @@ func (s *ServiceImpl) CancelPayment(ctx context.Context, id string) error {
 		if exists {
 			// Attempt to cancel with processor (implementation depends on processor)
 			// For now, we'll just update our records
+			processor.GetPaymentStatus(ctx, *payment.ExternalID) // Just a plug
 		}
 	}
 
@@ -288,36 +289,36 @@ func (s *ServiceImpl) CreateInvoice(ctx context.Context, request *InvoiceRequest
 	// Calculate tax amount
 	taxAmount := int64(0)
 	totalAmount := request.Amount
-	
+
 	for _, item := range request.LineItems {
 		taxAmount += item.TaxAmount
 	}
-	
+
 	if taxAmount > 0 {
 		totalAmount += taxAmount
 	}
 
 	invoice := &entities.Invoice{
-		ID:               uuid.New().String(),
-		InvoiceNumber:    invoiceNumber,
-		ClientID:         request.ClientID,
-		ProjectID:        request.ProjectID,
-		Amount:           request.Amount,
-		Currency:         request.Currency,
-		TaxAmount:        taxAmount,
-		TotalAmount:      totalAmount,
-		Status:           entities.InvoiceStatusDraft,
-		DueDate:          request.DueDate,
-		Description:      request.Description,
-		LineItems:        request.LineItems,
-		PaymentTerms:     request.PaymentTerms,
-		PaymentMethods:   request.PaymentMethods,
-		AutoReminders:    request.AutoReminders,
-		Notes:            request.Notes,
-		Metadata:         request.Metadata,
-		RemainingAmount:  totalAmount,
-		CreatedAt:        time.Now(),
-		UpdatedAt:        time.Now(),
+		ID:              uuid.New().String(),
+		InvoiceNumber:   invoiceNumber,
+		ClientID:        request.ClientID,
+		ProjectID:       request.ProjectID,
+		Amount:          request.Amount,
+		Currency:        request.Currency,
+		TaxAmount:       taxAmount,
+		TotalAmount:     totalAmount,
+		Status:          entities.InvoiceStatusDraft,
+		DueDate:         request.DueDate,
+		Description:     request.Description,
+		LineItems:       request.LineItems,
+		PaymentTerms:    request.PaymentTerms,
+		PaymentMethods:  request.PaymentMethods,
+		AutoReminders:   request.AutoReminders,
+		Notes:           request.Notes,
+		Metadata:        request.Metadata,
+		RemainingAmount: totalAmount,
+		CreatedAt:       time.Now(),
+		UpdatedAt:       time.Now(),
 	}
 
 	if err := s.paymentRepo.CreateInvoice(ctx, invoice); err != nil {
@@ -507,7 +508,7 @@ func (s *ServiceImpl) ProcessRefund(ctx context.Context, request *RefundRequest)
 		reason := err.Error()
 		refund.FailureReason = &reason
 		refund.UpdatedAt = time.Now()
-		
+
 		s.paymentRepo.UpdateRefund(ctx, refund)
 		return refund, fmt.Errorf("refund processing failed: %w", err)
 	}
@@ -561,7 +562,7 @@ func (s *ServiceImpl) AnalyzeFraud(ctx context.Context, payment *entities.Paymen
 func (s *ServiceImpl) SendNotification(ctx context.Context, request *NotificationRequest) error {
 	notification := &entities.PaymentNotification{
 		ID:               uuid.New().String(),
-		PaymentID:        request.PaymentID,
+		PaymentID:        *request.PaymentID,
 		InvoiceID:        request.InvoiceID,
 		ClientID:         request.ClientID,
 		NotificationType: request.NotificationType,
@@ -627,7 +628,23 @@ func (s *ServiceImpl) SendNotification(ctx context.Context, request *Notificatio
 
 // GetPaymentStats retrieves payment statistics
 func (s *ServiceImpl) GetPaymentStats(ctx context.Context, startDate, endDate time.Time) (*PaymentStats, error) {
-	return s.paymentRepo.GetPaymentStats(ctx, startDate, endDate)
+	repoStats, err := s.paymentRepo.GetPaymentStats(ctx, startDate, endDate)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get payment stats: %w", err)
+	}
+
+	// Convert repository.PaymentStats to service.PaymentStats
+	return &PaymentStats{
+		TotalPayments:      repoStats.TotalPayments,
+		TotalAmount:        repoStats.TotalAmount,
+		SuccessfulPayments: repoStats.SuccessfulPayments,
+		FailedPayments:     repoStats.FailedPayments,
+		RefundedPayments:   repoStats.RefundedPayments,
+		RefundedAmount:     repoStats.RefundedAmount,
+		AverageAmount:      repoStats.AverageAmount,
+		SuccessRate:        repoStats.SuccessRate,
+		TotalFees:          repoStats.TotalFees,
+	}, nil
 }
 
 // Helper methods
@@ -637,7 +654,7 @@ func (s *ServiceImpl) scheduleRetry(ctx context.Context, payment *entities.Payme
 	nextRetry := time.Now().Add(backoff)
 	payment.NextRetryAt = &nextRetry
 	payment.UpdatedAt = time.Now()
-	
+
 	s.paymentRepo.UpdatePayment(ctx, payment)
 }
 
@@ -647,7 +664,7 @@ func (s *ServiceImpl) handleInvoicePayment(ctx context.Context, invoiceID string
 
 func (s *ServiceImpl) sendPaymentNotification(ctx context.Context, payment *entities.Payment, notificationType entities.NotificationType) error {
 	var subject, content string
-	
+
 	switch notificationType {
 	case entities.NotificationTypePaymentReceived:
 		subject = "Payment Received"

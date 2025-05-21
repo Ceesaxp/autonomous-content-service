@@ -39,14 +39,11 @@ func main() {
 
 	// Initialize repositories
 	clientRepo := database.NewClientRepository(db)
-	clientProfileRepo := database.NewClientProfileRepository(db)
 	projectRepo := database.NewProjectRepository(db)
 	contentRepo := database.NewContentRepository(db)
 	contentVersionRepo := database.NewContentVersionRepository(db)
 	feedbackRepo := database.NewFeedbackRepository(db)
-	systemCapabilityRepo := database.NewSystemCapabilityRepository(db)
 	eventRepo := database.NewEventRepository(db)
-	transactionRepo := database.NewTransactionRepository(db)
 
 	// Initialize services
 	llmClient := content_creation.NewOpenAIClient(
