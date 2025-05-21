@@ -21,6 +21,11 @@ func NewClientRepository(db *sql.DB) repositories.ClientRepository {
 	return &PostgresClientRepository{db: db}
 }
 
+func (r *PostgresClientRepository) FindByStatus(ctx context.Context, status entities.ClientStatus, offset, limit int) ([]*entities.Client, int, error) {
+	// Placeholder implementation
+	return nil, 0, nil
+}
+
 func (r *PostgresClientRepository) FindByID(ctx context.Context, id uuid.UUID) (*entities.Client, error) {
 	// Placeholder implementation
 	return nil, nil
@@ -111,12 +116,27 @@ func (r *PostgresProjectRepository) FindByID(ctx context.Context, id uuid.UUID) 
 	return nil, nil
 }
 
-func (r *PostgresProjectRepository) FindByClientID(ctx context.Context, clientID uuid.UUID) ([]*entities.Project, error) {
+func (r *PostgresProjectRepository) FindByStatus(ctx context.Context, status entities.ProjectStatus, offset, limit int) ([]*entities.Project, int, error) {
 	// Placeholder implementation
-	return nil, nil
+	return nil, 0, nil
 }
 
-func (r *PostgresProjectRepository) FindByStatus(ctx context.Context, status entities.ProjectStatus, offset, limit int) ([]*entities.Project, int, error) {
+func (r *PostgresProjectRepository) FindActive(ctx context.Context, offset, limit int) ([]*entities.Project, int, error) {
+	// Placeholder implementation
+	return nil, 0, nil
+}
+
+func (r *PostgresProjectRepository) FindAll(ctx context.Context, offset, limit int) ([]*entities.Project, int, error) {
+	// Placeholder implementation
+	return nil, 0, nil
+}
+
+func (r *PostgresProjectRepository) FindByClientID(ctx context.Context, clientID uuid.UUID, offset, limit int) ([]*entities.Project, int, error) {
+	// Placeholder implementation
+	return nil, 0, nil
+}
+
+func (r *PostgresProjectRepository) FindByDeadlineRange(ctx context.Context, start, end time.Time, offset, limit int) ([]*entities.Project, int, error) {
 	// Placeholder implementation
 	return nil, 0, nil
 }
@@ -356,9 +376,14 @@ func NewEventRepository(db *sql.DB) repositories.EventRepository {
 	return &PostgresEventRepository{db: db}
 }
 
-func (r *PostgresEventRepository) FindByID(ctx context.Context, id uuid.UUID) (*events.Event, error) {
+func (r *PostgresEventRepository) FindByID(ctx context.Context, id uuid.UUID) (interface{}, error) {
 	// Placeholder implementation
 	return nil, nil
+}
+
+func (r *PostgresEventRepository) FindByAggregateID(ctx context.Context, aggregateID uuid.UUID, offset, limit int) ([]interface{}, int, error) {
+	// Placeholder implementation
+	return nil, 0, nil
 }
 
 func (r *PostgresEventRepository) FindByEntityID(ctx context.Context, entityID uuid.UUID, eventType string, offset, limit int) ([]*events.Event, int, error) {
@@ -366,7 +391,21 @@ func (r *PostgresEventRepository) FindByEntityID(ctx context.Context, entityID u
 	return nil, 0, nil
 }
 
-func (r *PostgresEventRepository) Create(ctx context.Context, event interface{}) error {
+func (r *PostgresEventRepository) FindByTimeRange(ctx context.Context, start, end time.Time, offset, limit int) ([]interface{}, int, error) {
+	// Placeholder implementation
+	return nil, 0, nil
+}
+
+func (r *PostgresEventRepository) FindByType(ctx context.Context, eventType string, offset, limit int) ([]interface{}, int, error) {
+	// Placeholder implementation
+	return nil, 0, nil
+}
+
+func (r *PostgresEventRepository) FindLatest(ctx context.Context, limit int) ([]interface{}, error) {
+	return nil, nil
+}
+
+func (r *PostgresEventRepository) Save(ctx context.Context, event interface{}) error {
 	// Placeholder implementation
 	return nil
 }
