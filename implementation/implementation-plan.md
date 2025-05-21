@@ -61,6 +61,15 @@ Implement performance metrics collection, success/failure analysis, capability g
 ### Step 5.3: Risk Management System
 Develop automated content verification for legal compliance, copyright infringement detection, and security measures, along with incident response automation.
 
+### Step 5.4: Legal & Compliance System
+Design and implement contract generation/signature, IP licensing, data-privacy policies, and regulatory compliance automations.
+
+### Step 5.5: DAO-style Governance & Treasury
+Design and implement tokenized governance, on-chain proposal/voting/execution, multisig treasury and oracle-based triggers.
+
+### Step 5.6: HR, Resource & Talent Management System
+Implement autonomous recruiting, evaluation, onboarding, performance management, and payment for human contributors and autonomous agents.
+
 ## Phase 6: System Integration and Deployment
 
 ### Step 6.1: Service Orchestration
@@ -110,3 +119,11 @@ The system requires:
 3. Message queuing systems for event distribution
 4. Domain and SSL certificates for web presence
 5. API access credentials for all integrated services
+
+## Questions for Product Team
+
+- What jurisdictions should the autonomous business entity operate under, and what legal enforcement mechanisms are required?
+- What token economics parameters (supply, distribution, vesting, governance thresholds) should govern the DAO?
+- How should resources and talent (human and autonomous agents) be managed, and what compliance rules must the HR system enforce?
+- What on-chain governance parameters (quorum, voting period, emergency veto) are required for DAO operation?
+- What HR compliance and reporting requirements (tax, labor laws, NDAs) need to be automated?

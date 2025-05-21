@@ -30,6 +30,24 @@
    - Upgrade mechanisms
    - Risk management
 
+6. **Legal & Compliance**
+   - Contract generation & signature automation
+   - Data privacy & regulatory compliance
+   - Intellectual property management
+   - Regulatory reporting & filings
+
+7. **HR & Talent Management**
+   - Human and autonomous agent engagement
+   - Onboarding, training & performance management
+   - Compensation & payroll automation
+   - Offboarding & knowledge transfer
+
+8. **DAO Governance & Treasury**
+   - Token economics & distribution
+   - On-chain proposal & voting framework
+   - Multisig treasury & execution oracles
+   - Emergency controls & upgrade mechanisms
+
 ## Business Process Flow
 
 The system operates in a continuous loop:
