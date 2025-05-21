@@ -1,3 +1,5 @@
+github.com/ceesaxp/autonomous-content-service v0.0.0-20250520123629-6464571e21b8 h1:eBMmtoK3IpPtHGASjq3695lQF/BxICF6NN/JWfEYP+0=
+github.com/ceesaxp/autonomous-content-service v0.0.0-20250520123629-6464571e21b8/go.mod h1:OLwaOwvoh42+FXf5LOP+BJgqQWHkg6AhlhWfYAOZ3GQ=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
