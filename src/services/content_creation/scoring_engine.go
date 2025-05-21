@@ -60,19 +60,19 @@ type ScoreBreakdown struct {
 type QualityGrade string
 
 const (
-	GradeExcellent QualityGrade = "excellent"  // 90-100
-	GradeGood      QualityGrade = "good"       // 80-89
-	GradeSatisfactory QualityGrade = "satisfactory" // 70-79
+	GradeExcellent        QualityGrade = "excellent"         // 90-100
+	GradeGood             QualityGrade = "good"              // 80-89
+	GradeSatisfactory     QualityGrade = "satisfactory"      // 70-79
 	GradeNeedsImprovement QualityGrade = "needs_improvement" // 60-69
-	GradePoor      QualityGrade = "poor"       // 0-59
+	GradePoor             QualityGrade = "poor"              // 0-59
 )
 
 // ScoreDistribution shows score distribution across categories
 type ScoreDistribution struct {
-	ContentQuality   float64 `json:"contentQuality"`
-	TechnicalQuality float64 `json:"technicalQuality"`
+	ContentQuality    float64 `json:"contentQuality"`
+	TechnicalQuality  float64 `json:"technicalQuality"`
 	AudienceAlignment float64 `json:"audienceAlignment"`
-	Optimization     float64 `json:"optimization"`
+	Optimization      float64 `json:"optimization"`
 }
 
 // CalculateCriterionScore calculates score for a specific criterion
@@ -87,16 +87,16 @@ func (s *ScoringEngine) CalculateCriterionScore(evaluation *DetailedEvaluation, 
 func (s *ScoringEngine) CalculateOverallScore(request OverallScoreRequest) float64 {
 	// Base weights for overall calculation
 	baseWeights := map[string]float64{
-		"criteria":    0.60, // 60% from criteria evaluation
-		"factcheck":   0.15, // 15% from fact checking
-		"plagiarism":  0.10, // 10% from plagiarism detection
-		"style":       0.10, // 10% from style analysis
-		"multipass":   0.05, // 5% from multi-pass improvement
+		"criteria":   0.60, // 60% from criteria evaluation
+		"factcheck":  0.15, // 15% from fact checking
+		"plagiarism": 0.10, // 10% from plagiarism detection
+		"style":      0.10, // 10% from style analysis
+		"multipass":  0.05, // 5% from multi-pass improvement
 	}
 
 	// Calculate weighted criteria score
 	criteriaScore := s.calculateWeightedCriteriaScore(request.CriteriaScores)
-	
+
 	// Calculate overall score
 	overallScore := (criteriaScore * baseWeights["criteria"]) +
 		(request.FactCheckScore * baseWeights["factcheck"]) +
@@ -111,7 +111,7 @@ func (s *ScoringEngine) CalculateOverallScore(request OverallScoreRequest) float
 // CalculateDetailedScore provides comprehensive score breakdown
 func (s *ScoringEngine) CalculateDetailedScore(request OverallScoreRequest, contentType entities.ContentType) *ScoreBreakdown {
 	weights := s.getWeightsForContentType(contentType)
-	
+
 	breakdown := &ScoreBreakdown{
 		WeightedScores: make(map[string]float64),
 		CategoryScores: make(map[string]float64),
@@ -124,17 +124,17 @@ func (s *ScoringEngine) CalculateDetailedScore(request OverallScoreRequest, cont
 	for criterion, score := range request.CriteriaScores {
 		weight := s.getCriterionWeight(criterion, weights)
 		weightedScore := score * weight
-		
+
 		breakdown.WeightedScores[criterion] = weightedScore
 		weightedSum += weightedScore
 		totalWeight += weight
 	}
 
-	// Calculate criteria score
-	criteriaScore := 0.0
-	if totalWeight > 0 {
-		criteriaScore = weightedSum / totalWeight
-	}
+	// Calculate criteria score -- NOT USED?
+	// criteriaScore := 0.0
+	// if totalWeight > 0 {
+	// 	criteriaScore = weightedSum / totalWeight
+	// }
 
 	// Calculate category scores
 	breakdown.CategoryScores = s.calculateCategoryScores(request.CriteriaScores, weights)
@@ -351,21 +351,21 @@ func (s *ScoringEngine) getCriterionWeight(criterion string, weights ContentType
 // getBaseCriterionWeight gets base weight for a criterion
 func (s *ScoringEngine) getBaseCriterionWeight(criterion string) float64 {
 	baseWeights := map[string]float64{
-		string(CriterionReadability):    1.2,
-		string(CriterionAccuracy):       1.5,
-		string(CriterionEngagement):     1.3,
-		string(CriterionClarity):        1.2,
-		string(CriterionCoherence):      1.1,
-		string(CriterionCompleteness):   1.0,
-		string(CriterionRelevance):      1.2,
-		string(CriterionOriginality):    1.0,
-		string(CriterionTone):           1.1,
-		string(CriterionStructure):      1.1,
-		string(CriterionGrammar):        1.3,
-		string(CriterionSEO):            1.0,
-		string(CriterionCallToAction):   1.0,
+		string(CriterionReadability):     1.2,
+		string(CriterionAccuracy):        1.5,
+		string(CriterionEngagement):      1.3,
+		string(CriterionClarity):         1.2,
+		string(CriterionCoherence):       1.1,
+		string(CriterionCompleteness):    1.0,
+		string(CriterionRelevance):       1.2,
+		string(CriterionOriginality):     1.0,
+		string(CriterionTone):            1.1,
+		string(CriterionStructure):       1.1,
+		string(CriterionGrammar):         1.3,
+		string(CriterionSEO):             1.0,
+		string(CriterionCallToAction):    1.0,
 		string(CriterionEmotionalImpact): 1.0,
-		string(CriterionCredibility):    1.2,
+		string(CriterionCredibility):     1.2,
 	}
 
 	if weight, exists := baseWeights[criterion]; exists {

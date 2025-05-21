@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/Ceesaxp/autonomous-content-service/domain/entities"
+	"github.com/Ceesaxp/autonomous-content-service/src/domain/entities"
 )
 
 // PaymentRepository defines the interface for payment data access

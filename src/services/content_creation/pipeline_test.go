@@ -96,9 +96,14 @@ func (m *MockProjectRepository) FindByID(ctx context.Context, id uuid.UUID) (*en
 	return args.Get(0).(*entities.Project), args.Error(1)
 }
 
-func (m *MockProjectRepository) FindByClientID(ctx context.Context, clientID uuid.UUID) ([]*entities.Project, error) {
-	args := m.Called(ctx, clientID)
-	return args.Get(0).([]*entities.Project), args.Error(1)
+func (m *MockProjectRepository) FindByClientID(ctx context.Context, clientID uuid.UUID, page int, pageSize int) ([]*entities.Project, int, error) {
+	args := m.Called(ctx, clientID, page, pageSize)
+	return args.Get(0).([]*entities.Project), args.Int(1), args.Error(2)
+}
+
+func (m *MockProjectRepository) FindByDeadlineRange(ctx context.Context, startDate time.Time, endDate time.Time, page int, pageSize int) ([]*entities.Project, int, error) {
+	args := m.Called(ctx, startDate, endDate, page, pageSize)
+	return args.Get(0).([]*entities.Project), args.Int(1), args.Error(2)
 }
 
 func (m *MockProjectRepository) FindByStatus(ctx context.Context, status entities.ProjectStatus, offset, limit int) ([]*entities.Project, int, error) {
@@ -126,13 +131,23 @@ func (m *MockProjectRepository) Delete(ctx context.Context, id uuid.UUID) error 
 	return args.Error(0)
 }
 
+func (m *MockProjectRepository) FindActive(ctx context.Context, page int, pageSize int) ([]*entities.Project, int, error) {
+	args := m.Called(ctx, page, pageSize)
+	return args.Get(0).([]*entities.Project), args.Int(1), args.Error(2)
+}
+
+func (m *MockProjectRepository) FindAll(ctx context.Context, page int, pageSize int) ([]*entities.Project, int, error) {
+	args := m.Called(ctx, page, pageSize)
+	return args.Get(0).([]*entities.Project), args.Int(1), args.Error(2)
+}
+
 type MockEventRepository struct {
 	mock.Mock
 }
 
-func (m *MockEventRepository) FindByID(ctx context.Context, id uuid.UUID) (*events.Event, error) {
+func (m *MockEventRepository) FindByID(ctx context.Context, id uuid.UUID) (interface{}, error) {
 	args := m.Called(ctx, id)
-	return args.Get(0).(*events.Event), args.Error(1)
+	return args.Get(0), args.Error(1)
 }
 
 func (m *MockEventRepository) FindByEntityID(ctx context.Context, entityID uuid.UUID, eventType string, offset, limit int) ([]*events.Event, int, error) {
@@ -140,9 +155,34 @@ func (m *MockEventRepository) FindByEntityID(ctx context.Context, entityID uuid.
 	return args.Get(0).([]*events.Event), args.Int(1), args.Error(2)
 }
 
-func (m *MockEventRepository) Create(ctx context.Context, event interface{}) error {
+func (m *MockEventRepository) Create(ctx context.Context, event *events.BaseEvent) error {
 	args := m.Called(ctx, event)
 	return args.Error(0)
+}
+
+func (m *MockEventRepository) Save(ctx context.Context, event interface{}) error {
+	args := m.Called(ctx, event)
+	return args.Error(0)
+}
+
+func (m *MockEventRepository) FindByAggregateID(ctx context.Context, aggregateID uuid.UUID, page int, pageSize int) ([]interface{}, int, error) {
+	args := m.Called(ctx, aggregateID, page, pageSize)
+	return args.Get(0).([]interface{}), args.Int(1), args.Error(2)
+}
+
+func (m *MockEventRepository) FindByTimeRange(ctx context.Context, startTime time.Time, endTime time.Time, page int, pageSize int) ([]interface{}, int, error) {
+	args := m.Called(ctx, startTime, endTime, page, pageSize)
+	return args.Get(0).([]interface{}), args.Int(1), args.Error(2)
+}
+
+func (m *MockEventRepository) FindByType(ctx context.Context, eventType string, page int, pageSize int) ([]interface{}, int, error) {
+	args := m.Called(ctx, eventType, page, pageSize)
+	return args.Get(0).([]interface{}), args.Int(1), args.Error(2)
+}
+
+func (m *MockEventRepository) FindLatest(ctx context.Context, limit int) ([]interface{}, error) {
+	args := m.Called(ctx, limit)
+	return args.Get(0).([]interface{}), args.Error(1)
 }
 
 type MockLLMClient struct {
@@ -221,6 +261,18 @@ func (m *MockQualityChecker) CheckContent(ctx context.Context, content *entities
 	return args.Get(0).(QualityCheckOutput), args.Error(1)
 }
 
+// Types are declared elsewhere in the codebase and imported here for testing
+
+// MockPromptTemplateManager mocks the prompt template manager
+type MockPromptTemplateManager struct {
+	mock.Mock
+}
+
+func (m *MockPromptTemplateManager) GeneratePrompt(contentType entities.ContentType, stage string, data interface{}) (string, error) {
+	args := m.Called(contentType, stage, data)
+	return args.String(0), args.Error(1)
+}
+
 // Test functions
 
 func TestContentPipeline_CreateContent(t *testing.T) {
@@ -236,12 +288,12 @@ func TestContentPipeline_CreateContent(t *testing.T) {
 
 	// Setup pipeline
 	config := PipelineConfig{
-		MaxRetries:           2,
-		ContextWindowSize:    4096,
-		EnableFactChecking:   true,
+		MaxRetries:            2,
+		ContextWindowSize:     4096,
+		EnableFactChecking:    true,
 		EnablePlagiarismCheck: true,
-		SEOOptimization:      true,
-		StageTimeoutSeconds:  30,
+		SEOOptimization:       true,
+		StageTimeoutSeconds:   30,
 	}
 
 	pipeline := NewContentPipeline(
@@ -305,9 +357,9 @@ func TestContentPipeline_CreateContent(t *testing.T) {
 	// Quality check expectations
 	mockQualityChecker.On("CheckContent", mock.Anything, mock.Anything, mock.Anything).Return(QualityCheckOutput{
 		ReadabilityScore: 85.0,
-		SEOScore:        78.0,
-		EngagementScore: 82.0,
-		PlagiarismScore: 0.95,
+		SEOScore:         78.0,
+		EngagementScore:  82.0,
+		PlagiarismScore:  0.95,
 		SuggestionsByCategory: map[string][]string{
 			"SEO": {"Add more keywords"},
 		},
@@ -422,7 +474,7 @@ func TestContentPipeline_StageExecution(t *testing.T) {
 
 	t.Run("Editing Stage", func(t *testing.T) {
 		content.UpdateContent("Draft content to edit", "test")
-		
+
 		mockContextManager.On("AddEntry", mock.Anything, content.ProjectID, mock.Anything).Return(nil).Once()
 		mockLLMClient.On("Generate", mock.Anything, mock.Anything).Return("Edited content", nil).Once()
 
@@ -436,7 +488,7 @@ func TestContentPipeline_StageExecution(t *testing.T) {
 
 	t.Run("Finalization Stage", func(t *testing.T) {
 		content.UpdateContent("Content to finalize", "test")
-		
+
 		mockContextManager.On("AddEntry", mock.Anything, content.ProjectID, mock.Anything).Return(nil).Once()
 		mockLLMClient.On("Generate", mock.Anything, mock.Anything).Return("Final content", nil).Once()
 
@@ -485,7 +537,7 @@ func TestContentPipeline_ErrorHandling(t *testing.T) {
 
 	t.Run("Research Stage Error", func(t *testing.T) {
 		content, _ := entities.NewContent(uuid.New(), "Test Content", entities.ContentTypeBlogPost)
-		
+
 		mockProjectRepo.On("FindByID", mock.Anything, content.ProjectID).Return(nil, assert.AnError)
 		mockEventRepo.On("Create", mock.Anything, mock.Anything).Return(nil)
 
@@ -510,7 +562,7 @@ func TestContentPipeline_ErrorHandling(t *testing.T) {
 	t.Run("Context Timeout", func(t *testing.T) {
 		content, _ := entities.NewContent(uuid.New(), "Test Content", entities.ContentTypeBlogPost)
 		content.UpdateMetadata("research", map[string]interface{}{"summary": "test"})
-		
+
 		testProject, _ := entities.NewProject(
 			uuid.New(),
 			"Test Project",
@@ -523,7 +575,7 @@ func TestContentPipeline_ErrorHandling(t *testing.T) {
 		mockProjectRepo.On("FindByID", mock.Anything, content.ProjectID).Return(testProject, nil)
 		mockEventRepo.On("Create", mock.Anything, mock.Anything).Return(nil)
 		mockContextManager.On("SwitchContext", mock.Anything, content.ProjectID).Return(nil)
-		
+
 		// Simulate a slow LLM response that times out
 		mockLLMClient.On("Generate", mock.Anything, mock.Anything).Run(func(args mock.Arguments) {
 			time.Sleep(2 * time.Second) // Longer than timeout

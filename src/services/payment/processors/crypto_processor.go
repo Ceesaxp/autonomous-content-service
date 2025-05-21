@@ -8,11 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/autonomous-content-service/src/domain/entities"
-	"github.com/autonomous-content-service/src/services/payment"
+	"github.com/Ceesaxp/autonomous-content-service/src/domain/entities"
+	"github.com/Ceesaxp/autonomous-content-service/src/services/payment"
 	"github.com/ethereum/go-ethereum"
 	"github.com/ethereum/go-ethereum/accounts/abi"
-	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -21,31 +20,31 @@ import (
 
 // CryptoProcessor implements cryptocurrency payment processing
 type CryptoProcessor struct {
-	ethClient    *ethclient.Client
-	privateKey   *ecdsa.PrivateKey
-	walletAddr   common.Address
-	config       *CryptoConfig
-	contracts    map[string]*TokenContract
+	ethClient  *ethclient.Client
+	privateKey *ecdsa.PrivateKey
+	walletAddr common.Address
+	config     *CryptoConfig
+	contracts  map[string]*TokenContract
 }
 
 // CryptoConfig holds cryptocurrency configuration
 type CryptoConfig struct {
-	EthereumNodeURL     string
-	PrivateKey          string
-	WalletAddress       string
+	EthereumNodeURL       string
+	PrivateKey            string
+	WalletAddress         string
 	RequiredConfirmations map[string]int64 // currency -> confirmations
-	GasPriceMultiplier  float64
-	MaxGasPrice         int64
-	TokenContracts     map[string]string // currency -> contract address
-	WebhookURL         string
+	GasPriceMultiplier    float64
+	MaxGasPrice           int64
+	TokenContracts        map[string]string // currency -> contract address
+	WebhookURL            string
 }
 
 // TokenContract represents an ERC20 token contract
 type TokenContract struct {
-	Address   common.Address
-	ABI       abi.ABI
-	Decimals  uint8
-	Symbol    string
+	Address  common.Address
+	ABI      abi.ABI
+	Decimals uint8
+	Symbol   string
 }
 
 // NewCryptoProcessor creates a new cryptocurrency payment processor
@@ -67,7 +66,7 @@ func NewCryptoProcessor(config *CryptoConfig) (payment.PaymentProcessor, error) 
 
 	// Initialize token contracts
 	contracts := make(map[string]*TokenContract)
-	
+
 	// Standard ERC20 ABI
 	erc20ABI, err := abi.JSON(strings.NewReader(erc20ABIString))
 	if err != nil {
@@ -109,7 +108,7 @@ func (c *CryptoProcessor) GetName() string {
 // GetSupportedMethods returns supported cryptocurrency payment methods
 func (c *CryptoProcessor) GetSupportedMethods() []entities.PaymentMethod {
 	methods := []entities.PaymentMethod{entities.PaymentMethodEthereum}
-	
+
 	for currency := range c.contracts {
 		switch strings.ToUpper(currency) {
 		case "USDC":
@@ -118,7 +117,7 @@ func (c *CryptoProcessor) GetSupportedMethods() []entities.PaymentMethod {
 			methods = append(methods, entities.PaymentMethodDAI)
 		}
 	}
-	
+
 	return methods
 }
 
@@ -226,7 +225,7 @@ func (c *CryptoProcessor) GetPaymentStatus(ctx context.Context, externalID strin
 	}
 
 	txHash := common.HexToHash(externalID)
-	
+
 	// Get transaction receipt
 	receipt, err := c.ethClient.TransactionReceipt(ctx, txHash)
 	if err != nil {
@@ -250,11 +249,11 @@ func (c *CryptoProcessor) GetPaymentStatus(ctx context.Context, externalID strin
 	}
 
 	confirmations := currentBlock - receipt.BlockNumber.Uint64()
-	
+
 	// Determine currency and amount
 	var currency string
 	var amount int64
-	
+
 	if tx.To().Hex() == c.walletAddr.Hex() && len(tx.Data()) == 0 {
 		// ETH transaction
 		currency = "ETH"
@@ -275,7 +274,7 @@ func (c *CryptoProcessor) GetPaymentStatus(ctx context.Context, externalID strin
 	// Determine status based on confirmations
 	var status entities.PaymentStatus
 	var failureReason *string
-	
+
 	requiredConfirmations := c.config.RequiredConfirmations[currency]
 	if requiredConfirmations == 0 {
 		requiredConfirmations = 12 // Default
@@ -323,14 +322,14 @@ func (c *CryptoProcessor) GetPaymentStatus(ctx context.Context, externalID strin
 func (c *CryptoProcessor) ProcessRefund(ctx context.Context, request *payment.RefundRequest) (*payment.RefundResponse, error) {
 	// For crypto, refunds require sending a new transaction
 	// This is a simplified implementation
-	
+
 	// Get original payment details to determine refund address
 	// In a real implementation, this would be stored in the payment record
 	refundAddr := common.HexToAddress("0x0000000000000000000000000000000000000000") // Placeholder
-	
+
 	// Determine currency from payment ID (simplified)
 	currency := "ETH" // This should be retrieved from the original payment
-	
+
 	var txHash string
 	var err error
 
@@ -353,12 +352,12 @@ func (c *CryptoProcessor) ProcessRefund(ctx context.Context, request *payment.Re
 	if gasPrice == nil {
 		gasPrice = big.NewInt(20000000000) // 20 gwei default
 	}
-	
+
 	var gasLimit uint64 = 21000 // ETH transfer
 	if currency != "ETH" {
 		gasLimit = 65000 // ERC20 transfer
 	}
-	
+
 	processorFee := new(big.Int).Mul(gasPrice, big.NewInt(int64(gasLimit))).Int64()
 	netRefund := request.Amount - processorFee
 
@@ -510,12 +509,12 @@ func (c *CryptoProcessor) sendETH(ctx context.Context, to common.Address, amount
 func (c *CryptoProcessor) sendToken(ctx context.Context, to common.Address, amount int64, contract *TokenContract) (string, error) {
 	// Create transfer method call data
 	transferMethodID := crypto.Keccak256([]byte("transfer(address,uint256)"))[:4]
-	
+
 	// Encode parameters: address (32 bytes) + amount (32 bytes)
 	addressPadded := common.LeftPadBytes(to.Bytes(), 32)
 	amountBig := big.NewInt(amount)
 	amountPadded := common.LeftPadBytes(amountBig.Bytes(), 32)
-	
+
 	data := append(transferMethodID, addressPadded...)
 	data = append(data, amountPadded...)
 
@@ -557,7 +556,7 @@ func (c *CryptoProcessor) sendToken(ctx context.Context, to common.Address, amou
 func (c *CryptoProcessor) parseTokenTransaction(tx *types.Transaction) (string, int64, error) {
 	// Simplified token transaction parsing
 	// In a real implementation, this would properly decode the transaction data
-	
+
 	data := tx.Data()
 	if len(data) < 68 {
 		return "", 0, fmt.Errorf("invalid token transaction data")
@@ -566,7 +565,7 @@ func (c *CryptoProcessor) parseTokenTransaction(tx *types.Transaction) (string, 
 	// Extract method ID
 	methodID := data[:4]
 	transferMethodID := crypto.Keccak256([]byte("transfer(address,uint256)"))[:4]
-	
+
 	if string(methodID) != string(transferMethodID) {
 		return "", 0, fmt.Errorf("not a transfer transaction")
 	}

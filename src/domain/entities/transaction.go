@@ -9,15 +9,6 @@ import (
 // PaymentMethodType represents the type of payment method
 type PaymentMethodType string
 
-const (
-	PaymentMethodCreditCard     PaymentMethodType = "CreditCard"
-	PaymentMethodBankTransfer   PaymentMethodType = "BankTransfer"
-	PaymentMethodPayPal         PaymentMethodType = "PayPal"
-	PaymentMethodCryptocurrency PaymentMethodType = "Cryptocurrency"
-	PaymentMethodStripe         PaymentMethodType = "Stripe"
-	PaymentMethodSquare         PaymentMethodType = "Square"
-)
-
 // TransactionStatus represents the status of a transaction
 type TransactionStatus string
 
@@ -41,19 +32,19 @@ const (
 
 // Transaction represents a financial transaction
 type Transaction struct {
-	TransactionID   uuid.UUID         `json:"transactionId"`
-	ClientID        uuid.UUID         `json:"clientId"`
-	ProjectID       *uuid.UUID        `json:"projectId,omitempty"`
-	Type            TransactionType   `json:"type"`
-	Status          TransactionStatus `json:"status"`
-	Amount          Money             `json:"amount"`
-	PaymentMethod   PaymentMethodType `json:"paymentMethod"`
-	PaymentReference string           `json:"paymentReference,omitempty"`
-	Description     string            `json:"description"`
-	ProcessedAt     *time.Time        `json:"processedAt,omitempty"`
-	CreatedAt       time.Time         `json:"createdAt"`
-	UpdatedAt       time.Time         `json:"updatedAt"`
-	Metadata        map[string]interface{} `json:"metadata"`
+	TransactionID    uuid.UUID              `json:"transactionId"`
+	ClientID         uuid.UUID              `json:"clientId"`
+	ProjectID        *uuid.UUID             `json:"projectId,omitempty"`
+	Type             TransactionType        `json:"type"`
+	Status           TransactionStatus      `json:"status"`
+	Amount           Money                  `json:"amount"`
+	PaymentMethod    PaymentMethodType      `json:"paymentMethod"`
+	PaymentReference string                 `json:"paymentReference,omitempty"`
+	Description      string                 `json:"description"`
+	ProcessedAt      *time.Time             `json:"processedAt,omitempty"`
+	CreatedAt        time.Time              `json:"createdAt"`
+	UpdatedAt        time.Time              `json:"updatedAt"`
+	Metadata         map[string]interface{} `json:"metadata"`
 }
 
 // NewTransaction creates a new transaction
@@ -82,7 +73,7 @@ func NewTransaction(
 func (t *Transaction) UpdateStatus(status TransactionStatus) {
 	t.Status = status
 	t.UpdatedAt = time.Now()
-	
+
 	if status == TransactionStatusCompleted {
 		now := time.Now()
 		t.ProcessedAt = &now

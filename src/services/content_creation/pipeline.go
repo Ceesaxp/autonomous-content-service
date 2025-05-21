@@ -310,14 +310,16 @@ func (p *ContentPipeline) executeStage(ctx context.Context, content *entities.Co
 // recordEvent creates and stores an event for pipeline progress
 func (p *ContentPipeline) recordEvent(ctx context.Context, contentID, projectID uuid.UUID, stage PipelineStage, status string, elapsed time.Duration, details string) {
 	event := &events.ContentRequestedEvent{
-		EventID:   uuid.New(),
-		EventType: fmt.Sprintf("pipeline.%s.%s", stage, status),
-		Timestamp: time.Now(),
-		Data: map[string]interface{}{
-			"stage":       stage,
-			"status":      status,
-			"timeElapsed": elapsed.String(),
-			"details":     details,
+		BaseEvent: events.BaseEvent{
+			EventID:   uuid.New(),
+			EventType: fmt.Sprintf("pipeline.%s.%s", stage, status),
+			Timestamp: time.Now(),
+			Data: map[string]interface{}{
+				"stage":       stage,
+				"status":      status,
+				"timeElapsed": elapsed.String(),
+				"details":     details,
+			},
 		},
 		ContentID: contentID,
 		ProjectID: projectID,

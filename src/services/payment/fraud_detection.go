@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/autonomous-content-service/src/domain/entities"
-	"github.com/autonomous-content-service/src/domain/repositories"
+	"github.com/Ceesaxp/autonomous-content-service/src/domain/entities"
+	"github.com/Ceesaxp/autonomous-content-service/src/domain/repositories"
 )
 
 // FraudDetectionImpl implements fraud detection for payments
@@ -23,17 +23,17 @@ type FraudDetectionImpl struct {
 
 // FraudConfig holds fraud detection configuration
 type FraudConfig struct {
-	MaxVelocityCount    int             // Max payments per time window
-	VelocityWindow      time.Duration   // Time window for velocity check
-	UnusualAmountFactor float64         // Factor for unusual amount detection
-	MaxAmountThreshold  int64           // Max allowed amount
-	MinAmountThreshold  int64           // Min allowed amount
-	SuspiciousCountries []string        // List of high-risk countries
-	RequireVerificationAmount int64     // Amount above which verification is required
-	BlockScore          float64         // Score above which to block
-	ReviewScore         float64         // Score above which to review
-	IPGeolocationAPI    string          // IP geolocation service URL
-	DeviceFingerprintRequired bool      // Whether device fingerprint is required
+	MaxVelocityCount          int           // Max payments per time window
+	VelocityWindow            time.Duration // Time window for velocity check
+	UnusualAmountFactor       float64       // Factor for unusual amount detection
+	MaxAmountThreshold        int64         // Max allowed amount
+	MinAmountThreshold        int64         // Min allowed amount
+	SuspiciousCountries       []string      // List of high-risk countries
+	RequireVerificationAmount int64         // Amount above which verification is required
+	BlockScore                float64       // Score above which to block
+	ReviewScore               float64       // Score above which to review
+	IPGeolocationAPI          string        // IP geolocation service URL
+	DeviceFingerprintRequired bool          // Whether device fingerprint is required
 }
 
 // NewFraudDetectionService creates a new fraud detection service
@@ -191,7 +191,7 @@ func (f *FraudDetectionImpl) GetRiskProfile(ctx context.Context, clientID string
 	var preferredMethods []entities.PaymentMethod
 	var locations []string
 	var devices []string
-	
+
 	methodCounts := make(map[entities.PaymentMethod]int)
 	locationCounts := make(map[string]int)
 
@@ -247,14 +247,14 @@ func (f *FraudDetectionImpl) GetRiskProfile(ctx context.Context, clientID string
 	if successfulPayments+failedPayments > 0 {
 		failureRate := float64(failedPayments) / float64(successfulPayments+failedPayments)
 		riskScore = failureRate * 0.5 // Max 0.5 from failure rate
-		
+
 		// Add location-based risk
 		for _, location := range locations {
 			if f.isSuspiciousLocation(location) {
 				riskScore += 0.2
 			}
 		}
-		
+
 		// Add device-based risk
 		if len(devices) > 5 { // Too many different devices
 			riskScore += 0.1
@@ -294,8 +294,8 @@ func (f *FraudDetectionImpl) GetRiskProfile(ctx context.Context, clientID string
 
 func (f *FraudDetectionImpl) checkVelocity(ctx context.Context, payment *entities.Payment) (bool, float64, string) {
 	// Get recent payments for this client
-	since := time.Now().Add(-f.config.VelocityWindow)
-	
+	//since := time.Now().Add(-f.config.VelocityWindow)
+
 	// This would query payments in the time window
 	// For demonstration, we'll simulate
 	recentPaymentCount := 3 // Simulated count
@@ -336,8 +336,8 @@ func (f *FraudDetectionImpl) checkUnusualAmount(ctx context.Context, payment *en
 	currentAmount := float64(payment.Amount)
 
 	// Check if current amount is significantly different from average
-	if currentAmount > averageAmount*f.config.UnusualAmountFactor || 
-	   currentAmount < averageAmount/f.config.UnusualAmountFactor {
+	if currentAmount > averageAmount*f.config.UnusualAmountFactor ||
+		currentAmount < averageAmount/f.config.UnusualAmountFactor {
 		deviation := math.Abs(currentAmount-averageAmount) / averageAmount
 		score := math.Min(deviation/5.0, 0.3) // Max 0.3 from amount
 		return true, score, fmt.Sprintf("Unusual amount: %.2f vs average %.2f", currentAmount, averageAmount)
@@ -398,7 +398,7 @@ func (f *FraudDetectionImpl) checkSuspiciousLocation(ctx context.Context, paymen
 				break
 			}
 		}
-		
+
 		if !isKnownLocation {
 			return true, 0.2, fmt.Sprintf("Payment from unusual location: %s", location)
 		}
@@ -456,7 +456,7 @@ func (f *FraudDetectionImpl) checkNewPaymentMethod(ctx context.Context, payment 
 
 func (f *FraudDetectionImpl) checkTimePatterns(ctx context.Context, payment *entities.Payment) (bool, float64, string) {
 	hour := payment.CreatedAt.Hour()
-	
+
 	// Flag payments during unusual hours (2 AM - 6 AM)
 	if hour >= 2 && hour <= 6 {
 		return true, 0.1, fmt.Sprintf("Payment during unusual hours: %02d:00", hour)
@@ -464,7 +464,7 @@ func (f *FraudDetectionImpl) checkTimePatterns(ctx context.Context, payment *ent
 
 	// Check for weekend large payments
 	if (payment.CreatedAt.Weekday() == time.Saturday || payment.CreatedAt.Weekday() == time.Sunday) &&
-	   payment.Amount > f.config.MaxAmountThreshold/2 {
+		payment.Amount > f.config.MaxAmountThreshold/2 {
 		return true, 0.1, "Large payment during weekend"
 	}
 
@@ -495,10 +495,10 @@ func (f *FraudDetectionImpl) checkFailedVerification(ctx context.Context, paymen
 func (f *FraudDetectionImpl) calculateConfidence(score float64, flagCount int) float64 {
 	// Base confidence on score
 	confidence := score
-	
+
 	// Increase confidence with more flags
 	confidence += float64(flagCount) * 0.05
-	
+
 	// Cap at 1.0
 	return math.Min(confidence, 1.0)
 }
@@ -507,13 +507,13 @@ func (f *FraudDetectionImpl) isProxyIP(ip string) bool {
 	// Simplified proxy detection
 	// In reality, this would use a proxy detection service
 	proxyPatterns := []string{"proxy", "vpn", "tor"}
-	
+
 	for _, pattern := range proxyPatterns {
 		if strings.Contains(strings.ToLower(ip), pattern) {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -522,7 +522,7 @@ func (f *FraudDetectionImpl) isPrivateIP(ip string) bool {
 	if parsedIP == nil {
 		return true // Invalid IP
 	}
-	
+
 	return parsedIP.IsPrivate() || parsedIP.IsLoopback()
 }
 
@@ -532,7 +532,7 @@ func (f *FraudDetectionImpl) getLocationFromIP(ip string) string {
 	if strings.HasPrefix(ip, "192.168.") || strings.HasPrefix(ip, "10.") {
 		return "Private Network"
 	}
-	
+
 	return "Unknown Location" // Placeholder
 }
 
@@ -548,10 +548,10 @@ func (f *FraudDetectionImpl) isSuspiciousLocation(location string) bool {
 func (f *FraudDetectionImpl) extractDeviceFingerprint(userAgent string) string {
 	// Simplified device fingerprinting based on user agent
 	// In reality, this would be much more sophisticated
-	
+
 	// Extract browser and OS info
 	var browser, os string
-	
+
 	if strings.Contains(userAgent, "Chrome") {
 		browser = "Chrome"
 	} else if strings.Contains(userAgent, "Firefox") {
@@ -559,7 +559,7 @@ func (f *FraudDetectionImpl) extractDeviceFingerprint(userAgent string) string {
 	} else if strings.Contains(userAgent, "Safari") {
 		browser = "Safari"
 	}
-	
+
 	if strings.Contains(userAgent, "Windows") {
 		os = "Windows"
 	} else if strings.Contains(userAgent, "Mac") {
@@ -567,7 +567,7 @@ func (f *FraudDetectionImpl) extractDeviceFingerprint(userAgent string) string {
 	} else if strings.Contains(userAgent, "Linux") {
 		os = "Linux"
 	}
-	
+
 	return fmt.Sprintf("%s_%s", browser, os)
 }
 
@@ -579,7 +579,7 @@ func (f *FraudDetectionImpl) isValidCryptoAddress(address string) bool {
 		matched, _ := regexp.MatchString("^[0-9a-fA-F]+$", hexPart)
 		return matched
 	}
-	
+
 	// Add validation for other crypto address formats as needed
 	return false
 }
