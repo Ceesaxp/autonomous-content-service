@@ -7,6 +7,9 @@ This phase implements the governance and self-improvement mechanisms that enable
 1. Decision Protocol Implementation
 2. Self-Improvement Mechanism
 3. Risk Management System
+4. Legal & Compliance System
+5. DAO-style Governance & Treasury
+6. HR, Resource & Talent Management System
 
 ## Implementation Steps
 
