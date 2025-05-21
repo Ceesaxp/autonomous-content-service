@@ -7,20 +7,12 @@ import (
 	"github.com/google/uuid"
 )
 
-// Content event types
-const (
-	EventTypeContentRequested     EventType = "ContentRequested"
-	EventTypeContentStageAdvanced EventType = "ContentStageAdvanced"
-	EventTypeContentUpdated       EventType = "ContentUpdated"
-	EventTypeContentApproved      EventType = "ContentApproved"
-)
-
 // ContentRequestedEvent is triggered when new content is requested
 type ContentRequestedEvent struct {
 	BaseEvent
-	ContentID   uuid.UUID `json:"contentId"`
-	ProjectID   uuid.UUID `json:"projectId"`
-	Title       string    `json:"title"`
+	ContentID   uuid.UUID            `json:"contentId"`
+	ProjectID   uuid.UUID            `json:"projectId"`
+	Title       string               `json:"title"`
 	ContentType entities.ContentType `json:"contentType"`
 }
 
@@ -74,9 +66,9 @@ func NewContentUpdatedEvent(content *entities.Content) ContentUpdatedEvent {
 // ContentApprovedEvent is triggered when content is approved
 type ContentApprovedEvent struct {
 	BaseEvent
-	ContentID       uuid.UUID `json:"contentId"`
-	ProjectID       uuid.UUID `json:"projectId"`
-	ApprovalTime    time.Time `json:"approvalTime"`
+	ContentID    uuid.UUID `json:"contentId"`
+	ProjectID    uuid.UUID `json:"projectId"`
+	ApprovalTime time.Time `json:"approvalTime"`
 }
 
 // NewContentApprovedEvent creates a new ContentApprovedEvent

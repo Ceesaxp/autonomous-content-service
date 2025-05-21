@@ -5,13 +5,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// Client event types
-const (
-	EventTypeClientRegistered    EventType = "ClientRegistered"
-	EventTypeClientProfileUpdated EventType = "ClientProfileUpdated"
-	EventTypeClientStatusChanged  EventType = "ClientStatusChanged"
-)
-
 // ClientRegisteredEvent is triggered when a new client registers
 type ClientRegisteredEvent struct {
 	BaseEvent
@@ -21,7 +14,7 @@ type ClientRegisteredEvent struct {
 // NewClientRegisteredEvent creates a new ClientRegisteredEvent
 func NewClientRegisteredEvent(clientID uuid.UUID) ClientRegisteredEvent {
 	return ClientRegisteredEvent{
-		BaseEvent: NewBaseEvent(EventTypeClientRegistered, clientID),
+		BaseEvent: *NewBaseEventWithID(EventTypeClientRegistered, clientID),
 		ClientID:  clientID,
 	}
 }
@@ -36,7 +29,7 @@ type ClientProfileUpdatedEvent struct {
 // NewClientProfileUpdatedEvent creates a new ClientProfileUpdatedEvent
 func NewClientProfileUpdatedEvent(clientID uuid.UUID, updatedFields map[string]interface{}) ClientProfileUpdatedEvent {
 	return ClientProfileUpdatedEvent{
-		BaseEvent:     NewBaseEvent(EventTypeClientProfileUpdated, clientID),
+		BaseEvent:     *NewBaseEventWithID(EventTypeClientProfileUpdated, clientID),
 		ClientID:      clientID,
 		UpdatedFields: updatedFields,
 	}
@@ -45,16 +38,16 @@ func NewClientProfileUpdatedEvent(clientID uuid.UUID, updatedFields map[string]i
 // ClientStatusChangedEvent is triggered when client status changes
 type ClientStatusChangedEvent struct {
 	BaseEvent
-	ClientID  uuid.UUID            `json:"clientId"`
+	ClientID  uuid.UUID             `json:"clientId"`
 	OldStatus entities.ClientStatus `json:"oldStatus"`
 	NewStatus entities.ClientStatus `json:"newStatus"`
-	Reason    string               `json:"reason"`
+	Reason    string                `json:"reason"`
 }
 
 // NewClientStatusChangedEvent creates a new ClientStatusChangedEvent
 func NewClientStatusChangedEvent(clientID uuid.UUID, oldStatus, newStatus entities.ClientStatus, reason string) ClientStatusChangedEvent {
 	return ClientStatusChangedEvent{
-		BaseEvent: NewBaseEvent(EventTypeClientStatusChanged, clientID),
+		BaseEvent: *NewBaseEventWithID(EventTypeClientStatusChanged, clientID),
 		ClientID:  clientID,
 		OldStatus: oldStatus,
 		NewStatus: newStatus,

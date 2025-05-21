@@ -46,6 +46,7 @@ func main() {
 	feedbackRepo := database.NewFeedbackRepository(db)
 	systemCapabilityRepo := database.NewSystemCapabilityRepository(db)
 	eventRepo := database.NewEventRepository(db)
+	transactionRepo := database.NewTransactionRepository(db)
 
 	// Initialize services
 	llmClient := content_creation.NewOpenAIClient(
@@ -69,11 +70,6 @@ func main() {
 		config.ContextWindowSize,
 	)
 
-	researcher := content_creation.NewLLMResearcher(
-		llmClient,
-		searchService,
-	)
-
 	qualityChecker := content_creation.NewLLMQualityChecker(
 		llmClient,
 		plagiarismAPI,
@@ -88,6 +84,12 @@ func main() {
 		EnablePlagiarismCheck: config.EnablePlagiarism,
 		SEOOptimization:      config.EnableSEO,
 	}
+
+	// Initialize the researcher
+	researcher := content_creation.NewLLMResearcher(
+		llmClient,
+		searchService,
+	)
 
 	contentPipeline := content_creation.NewContentPipeline(
 		contentRepo,

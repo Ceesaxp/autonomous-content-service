@@ -5,21 +5,14 @@ import (
 	"github.com/google/uuid"
 )
 
-// System event types
-const (
-	EventTypeCapabilityPerformanceDeclined EventType = "CapabilityPerformanceDeclined"
-	EventTypeCapabilityUpgraded           EventType = "CapabilityUpgraded"
-	EventTypeAnomalyDetected              EventType = "AnomalyDetected"
-)
-
 // CapabilityPerformanceDeclinedEvent is triggered when performance metrics for a capability fall below threshold
 type CapabilityPerformanceDeclinedEvent struct {
 	BaseEvent
-	CapabilityID     uuid.UUID              `json:"capabilityId"`
-	CapabilityType   entities.CapabilityType `json:"capabilityType"`
-	AffectedMetrics  []string               `json:"affectedMetrics"`
-	CurrentValues    map[string]float64     `json:"currentValues"`
-	ThresholdValues  map[string]float64     `json:"thresholdValues"`
+	CapabilityID    uuid.UUID               `json:"capabilityId"`
+	CapabilityType  entities.CapabilityType `json:"capabilityType"`
+	AffectedMetrics []string                `json:"affectedMetrics"`
+	CurrentValues   map[string]float64      `json:"currentValues"`
+	ThresholdValues map[string]float64      `json:"thresholdValues"`
 }
 
 // NewCapabilityPerformanceDeclinedEvent creates a new CapabilityPerformanceDeclinedEvent
@@ -41,10 +34,10 @@ func NewCapabilityPerformanceDeclinedEvent(
 // CapabilityUpgradedEvent is triggered when a system capability is enhanced
 type CapabilityUpgradedEvent struct {
 	BaseEvent
-	CapabilityID      uuid.UUID              `json:"capabilityId"`
-	CapabilityType    entities.CapabilityType `json:"capabilityType"`
-	UpgradeDetails    string                 `json:"upgradeDetails"`
-	PerformanceGains  map[string]interface{} `json:"performanceGains"`
+	CapabilityID     uuid.UUID               `json:"capabilityId"`
+	CapabilityType   entities.CapabilityType `json:"capabilityType"`
+	UpgradeDetails   string                  `json:"upgradeDetails"`
+	PerformanceGains map[string]interface{}  `json:"performanceGains"`
 }
 
 // NewCapabilityUpgradedEvent creates a new CapabilityUpgradedEvent
@@ -54,10 +47,10 @@ func NewCapabilityUpgradedEvent(
 	performanceGains map[string]interface{},
 ) CapabilityUpgradedEvent {
 	return CapabilityUpgradedEvent{
-		BaseEvent:       NewBaseEvent(EventTypeCapabilityUpgraded, capability.CapabilityID),
-		CapabilityID:    capability.CapabilityID,
-		CapabilityType:  capability.Type,
-		UpgradeDetails:  upgradeDetails,
+		BaseEvent:        NewBaseEvent(EventTypeCapabilityUpgraded, capability.CapabilityID),
+		CapabilityID:     capability.CapabilityID,
+		CapabilityType:   capability.Type,
+		UpgradeDetails:   upgradeDetails,
 		PerformanceGains: performanceGains,
 	}
 }
@@ -65,10 +58,10 @@ func NewCapabilityUpgradedEvent(
 // AnomalyDetectedEvent is triggered when unusual patterns are detected in system behavior
 type AnomalyDetectedEvent struct {
 	BaseEvent
-	AnomalyType       string                 `json:"anomalyType"`
+	AnomalyType        string                 `json:"anomalyType"`
 	AffectedComponents []string               `json:"affectedComponents"`
-	AnomalyData       map[string]interface{} `json:"anomalyData"`
-	Severity          string                 `json:"severity"` // "Low", "Medium", "High", "Critical"
+	AnomalyData        map[string]interface{} `json:"anomalyData"`
+	Severity           string                 `json:"severity"` // "Low", "Medium", "High", "Critical"
 }
 
 // NewAnomalyDetectedEvent creates a new AnomalyDetectedEvent

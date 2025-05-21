@@ -7,20 +7,12 @@ import (
 	"github.com/google/uuid"
 )
 
-// Project event types
-const (
-	EventTypeProjectCreated           EventType = "ProjectCreated"
-	EventTypeProjectStatusChanged     EventType = "ProjectStatusChanged"
-	EventTypeProjectDeadlineApproaching EventType = "ProjectDeadlineApproaching"
-	EventTypeProjectCompleted         EventType = "ProjectCompleted"
-)
-
 // ProjectCreatedEvent is triggered when a new project is created
 type ProjectCreatedEvent struct {
 	BaseEvent
-	ProjectID   uuid.UUID `json:"projectId"`
-	ClientID    uuid.UUID `json:"clientId"`
-	Title       string    `json:"title"`
+	ProjectID   uuid.UUID            `json:"projectId"`
+	ClientID    uuid.UUID            `json:"clientId"`
+	Title       string               `json:"title"`
 	ContentType entities.ContentType `json:"contentType"`
 }
 
@@ -38,7 +30,7 @@ func NewProjectCreatedEvent(project *entities.Project) ProjectCreatedEvent {
 // ProjectStatusChangedEvent is triggered when project status changes
 type ProjectStatusChangedEvent struct {
 	BaseEvent
-	ProjectID uuid.UUID             `json:"projectId"`
+	ProjectID uuid.UUID              `json:"projectId"`
 	OldStatus entities.ProjectStatus `json:"oldStatus"`
 	NewStatus entities.ProjectStatus `json:"newStatus"`
 }
@@ -56,8 +48,8 @@ func NewProjectStatusChangedEvent(projectID uuid.UUID, oldStatus, newStatus enti
 // ProjectDeadlineApproachingEvent is triggered when a project's deadline is approaching
 type ProjectDeadlineApproachingEvent struct {
 	BaseEvent
-	ProjectID    uuid.UUID `json:"projectId"`
-	Deadline     time.Time `json:"deadline"`
+	ProjectID     uuid.UUID `json:"projectId"`
+	Deadline      time.Time `json:"deadline"`
 	DaysRemaining int       `json:"daysRemaining"`
 }
 
@@ -74,10 +66,10 @@ func NewProjectDeadlineApproachingEvent(projectID uuid.UUID, deadline time.Time,
 // ProjectCompletedEvent is triggered when a project is completed
 type ProjectCompletedEvent struct {
 	BaseEvent
-	ProjectID       uuid.UUID `json:"projectId"`
-	ClientID        uuid.UUID `json:"clientId"`
-	CompletionTime  time.Time `json:"completionTime"`
-	ContentCount    int       `json:"contentCount"`
+	ProjectID      uuid.UUID `json:"projectId"`
+	ClientID       uuid.UUID `json:"clientId"`
+	CompletionTime time.Time `json:"completionTime"`
+	ContentCount   int       `json:"contentCount"`
 }
 
 // NewProjectCompletedEvent creates a new ProjectCompletedEvent
