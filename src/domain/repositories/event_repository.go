@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/Ceesaxp/autonomous-content-service/src/domain/events"
 	"github.com/google/uuid"
 )
 
@@ -17,7 +16,7 @@ type EventRepository interface {
 	FindByID(ctx context.Context, id uuid.UUID) (interface{}, error)
 
 	// FindByType retrieves events by type
-	FindByType(ctx context.Context, eventType events.EventType, offset, limit int) ([]interface{}, int, error)
+	FindByType(ctx context.Context, eventType string, offset, limit int) ([]interface{}, int, error)
 
 	// FindByAggregateID retrieves events for a specific aggregate
 	FindByAggregateID(ctx context.Context, aggregateID uuid.UUID, offset, limit int) ([]interface{}, int, error)

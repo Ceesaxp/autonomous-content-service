@@ -8,24 +8,24 @@ import (
 // FeedbackReceivedEvent is triggered when new feedback is submitted
 type FeedbackReceivedEvent struct {
 	BaseEvent
-	FeedbackID   uuid.UUID               `json:"feedbackId"`
-	ContentID    *uuid.UUID              `json:"contentId,omitempty"`
-	ProjectID    *uuid.UUID              `json:"projectId,omitempty"`
-	Source       entities.FeedbackSource `json:"source"`
-	FeedbackType entities.FeedbackType   `json:"feedbackType"`
-	Score        *float64                `json:"score,omitempty"`
+	FeedbackID   uuid.UUID                `json:"feedbackId"`
+	ContentID    *uuid.UUID               `json:"contentId,omitempty"`
+	ProjectID    *uuid.UUID               `json:"projectId,omitempty"`
+	Source       entities.FeedbackSource  `json:"source"`
+	FeedbackType entities.FeedbackType    `json:"feedbackType"`
+	Rating       *entities.FeedbackRating `json:"rating,omitempty"`
 }
 
 // NewFeedbackReceivedEvent creates a new FeedbackReceivedEvent
 func NewFeedbackReceivedEvent(feedback *entities.Feedback) FeedbackReceivedEvent {
 	return FeedbackReceivedEvent{
-		BaseEvent:    NewBaseEvent(EventTypeFeedbackReceived, feedback.FeedbackID),
+		BaseEvent:    *NewBaseEventWithID(EventTypeFeedbackReceived, feedback.FeedbackID),
 		FeedbackID:   feedback.FeedbackID,
 		ContentID:    feedback.ContentID,
 		ProjectID:    feedback.ProjectID,
 		Source:       feedback.Source,
 		FeedbackType: feedback.Type,
-		Score:        feedback.Score,
+		Rating:       feedback.Rating,
 	}
 }
 
@@ -41,7 +41,7 @@ type RevisionRequestedEvent struct {
 // NewRevisionRequestedEvent creates a new RevisionRequestedEvent
 func NewRevisionRequestedEvent(contentID, feedbackID, clientID uuid.UUID, details string) RevisionRequestedEvent {
 	return RevisionRequestedEvent{
-		BaseEvent:  NewBaseEvent(EventTypeRevisionRequested, contentID),
+		BaseEvent:  *NewBaseEventWithID(EventTypeRevisionRequested, contentID),
 		ContentID:  contentID,
 		FeedbackID: feedbackID,
 		ClientID:   clientID,

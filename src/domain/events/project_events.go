@@ -19,7 +19,7 @@ type ProjectCreatedEvent struct {
 // NewProjectCreatedEvent creates a new ProjectCreatedEvent
 func NewProjectCreatedEvent(project *entities.Project) ProjectCreatedEvent {
 	return ProjectCreatedEvent{
-		BaseEvent:   NewBaseEvent(EventTypeProjectCreated, project.ProjectID),
+		BaseEvent:   *NewBaseEventWithID(EventTypeProjectCreated, project.ProjectID),
 		ProjectID:   project.ProjectID,
 		ClientID:    project.ClientID,
 		Title:       project.Title,
@@ -38,7 +38,7 @@ type ProjectStatusChangedEvent struct {
 // NewProjectStatusChangedEvent creates a new ProjectStatusChangedEvent
 func NewProjectStatusChangedEvent(projectID uuid.UUID, oldStatus, newStatus entities.ProjectStatus) ProjectStatusChangedEvent {
 	return ProjectStatusChangedEvent{
-		BaseEvent: NewBaseEvent(EventTypeProjectStatusChanged, projectID),
+		BaseEvent: *NewBaseEventWithID(EventTypeProjectStatusChanged, projectID),
 		ProjectID: projectID,
 		OldStatus: oldStatus,
 		NewStatus: newStatus,
@@ -56,7 +56,7 @@ type ProjectDeadlineApproachingEvent struct {
 // NewProjectDeadlineApproachingEvent creates a new ProjectDeadlineApproachingEvent
 func NewProjectDeadlineApproachingEvent(projectID uuid.UUID, deadline time.Time, daysRemaining int) ProjectDeadlineApproachingEvent {
 	return ProjectDeadlineApproachingEvent{
-		BaseEvent:     NewBaseEvent(EventTypeProjectDeadlineApproaching, projectID),
+		BaseEvent:     *NewBaseEventWithID(EventTypeProjectDeadlineApproaching, projectID),
 		ProjectID:     projectID,
 		Deadline:      deadline,
 		DaysRemaining: daysRemaining,
@@ -75,7 +75,7 @@ type ProjectCompletedEvent struct {
 // NewProjectCompletedEvent creates a new ProjectCompletedEvent
 func NewProjectCompletedEvent(project *entities.Project) ProjectCompletedEvent {
 	return ProjectCompletedEvent{
-		BaseEvent:      NewBaseEvent(EventTypeProjectCompleted, project.ProjectID),
+		BaseEvent:      *NewBaseEventWithID(EventTypeProjectCompleted, project.ProjectID),
 		ProjectID:      project.ProjectID,
 		ClientID:       project.ClientID,
 		CompletionTime: time.Now(),

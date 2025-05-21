@@ -19,7 +19,7 @@ type ContentRequestedEvent struct {
 // NewContentRequestedEvent creates a new ContentRequestedEvent
 func NewContentRequestedEvent(content *entities.Content) ContentRequestedEvent {
 	return ContentRequestedEvent{
-		BaseEvent:   NewBaseEvent(EventTypeContentRequested, content.ContentID),
+		BaseEvent:   *NewBaseEventWithID(EventTypeContentRequested, content.ContentID),
 		ContentID:   content.ContentID,
 		ProjectID:   content.ProjectID,
 		Title:       content.Title,
@@ -38,7 +38,7 @@ type ContentStageAdvancedEvent struct {
 // NewContentStageAdvancedEvent creates a new ContentStageAdvancedEvent
 func NewContentStageAdvancedEvent(contentID uuid.UUID, oldStage, newStage entities.ContentStatus) ContentStageAdvancedEvent {
 	return ContentStageAdvancedEvent{
-		BaseEvent: NewBaseEvent(EventTypeContentStageAdvanced, contentID),
+		BaseEvent: *NewBaseEventWithID(EventTypeContentStageAdvanced, contentID),
 		ContentID: contentID,
 		OldStage:  oldStage,
 		NewStage:  newStage,
@@ -56,7 +56,7 @@ type ContentUpdatedEvent struct {
 // NewContentUpdatedEvent creates a new ContentUpdatedEvent
 func NewContentUpdatedEvent(content *entities.Content) ContentUpdatedEvent {
 	return ContentUpdatedEvent{
-		BaseEvent:     NewBaseEvent(EventTypeContentUpdated, content.ContentID),
+		BaseEvent:     *NewBaseEventWithID(EventTypeContentUpdated, content.ContentID),
 		ContentID:     content.ContentID,
 		VersionNumber: content.Version,
 		WordCount:     content.WordCount,
@@ -74,7 +74,7 @@ type ContentApprovedEvent struct {
 // NewContentApprovedEvent creates a new ContentApprovedEvent
 func NewContentApprovedEvent(content *entities.Content) ContentApprovedEvent {
 	return ContentApprovedEvent{
-		BaseEvent:    NewBaseEvent(EventTypeContentApproved, content.ContentID),
+		BaseEvent:    *NewBaseEventWithID(EventTypeContentApproved, content.ContentID),
 		ContentID:    content.ContentID,
 		ProjectID:    content.ProjectID,
 		ApprovalTime: time.Now(),

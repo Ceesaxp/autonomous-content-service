@@ -22,7 +22,7 @@ func NewCapabilityPerformanceDeclinedEvent(
 	currentValues, thresholdValues map[string]float64,
 ) CapabilityPerformanceDeclinedEvent {
 	return CapabilityPerformanceDeclinedEvent{
-		BaseEvent:       NewBaseEvent(EventTypeCapabilityPerformanceDeclined, capability.CapabilityID),
+		BaseEvent:       *NewBaseEventWithID(EventTypeCapabilityPerformanceDeclined, capability.CapabilityID),
 		CapabilityID:    capability.CapabilityID,
 		CapabilityType:  capability.Type,
 		AffectedMetrics: affectedMetrics,
@@ -47,7 +47,7 @@ func NewCapabilityUpgradedEvent(
 	performanceGains map[string]interface{},
 ) CapabilityUpgradedEvent {
 	return CapabilityUpgradedEvent{
-		BaseEvent:        NewBaseEvent(EventTypeCapabilityUpgraded, capability.CapabilityID),
+		BaseEvent:        *NewBaseEventWithID(EventTypeCapabilityUpgraded, capability.CapabilityID),
 		CapabilityID:     capability.CapabilityID,
 		CapabilityType:   capability.Type,
 		UpgradeDetails:   upgradeDetails,
@@ -75,7 +75,7 @@ func NewAnomalyDetectedEvent(
 	anomalyID := uuid.New()
 
 	return AnomalyDetectedEvent{
-		BaseEvent:          NewBaseEvent(EventTypeAnomalyDetected, anomalyID),
+		BaseEvent:          *NewBaseEventWithID(EventTypeAnomalyDetected, anomalyID),
 		AnomalyType:        anomalyType,
 		AffectedComponents: affectedComponents,
 		AnomalyData:        anomalyData,

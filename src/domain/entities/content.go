@@ -11,13 +11,13 @@ import (
 type ContentType string
 
 const (
-	ContentTypeBlogPost          ContentType = "BlogPost"
-	ContentTypeSocialPost        ContentType = "SocialPost"
-	ContentTypeEmailNewsletter   ContentType = "EmailNewsletter"
-	ContentTypeWebsiteCopy       ContentType = "WebsiteCopy"
-	ContentTypeTechnicalArticle  ContentType = "TechnicalArticle"
+	ContentTypeBlogPost           ContentType = "BlogPost"
+	ContentTypeSocialPost         ContentType = "SocialPost"
+	ContentTypeEmailNewsletter    ContentType = "EmailNewsletter"
+	ContentTypeWebsiteCopy        ContentType = "WebsiteCopy"
+	ContentTypeTechnicalArticle   ContentType = "TechnicalArticle"
 	ContentTypeProductDescription ContentType = "ProductDescription"
-	ContentTypePressRelease      ContentType = "PressRelease"
+	ContentTypePressRelease       ContentType = "PressRelease"
 )
 
 // ContentStatus represents the status of content
@@ -37,44 +37,44 @@ const (
 // ContentStatistics contains metrics about the content
 type ContentStatistics struct {
 	ReadabilityScore float64 `json:"readabilityScore"`
-	SEOScore        float64 `json:"seoScore"`
-	EngagementScore float64 `json:"engagementScore"`
-	PlagiarismScore float64 `json:"plagiarismScore"`
+	SEOScore         float64 `json:"seoScore"`
+	EngagementScore  float64 `json:"engagementScore"`
+	PlagiarismScore  float64 `json:"plagiarismScore"`
 }
 
 // Content represents a piece of content created within a project
 type Content struct {
-	ContentID   uuid.UUID      `json:"contentId"`
-	ProjectID   uuid.UUID      `json:"projectId"`
-	Title       string         `json:"title"`
-	Type        ContentType    `json:"type"`
-	Status      ContentStatus  `json:"status"`
-	Data        string         `json:"data"`
-	Metadata    map[string]interface{} `json:"metadata"`
-	Version     int            `json:"version"`
-	WordCount   int            `json:"wordCount"`
-	CreatedAt   time.Time      `json:"createdAt"`
-	UpdatedAt   time.Time      `json:"updatedAt"`
-	Versions    []*ContentVersion `json:"versions,omitempty"`
-	Statistics  *ContentStatistics `json:"statistics,omitempty"`
+	ContentID  uuid.UUID              `json:"contentId"`
+	ProjectID  uuid.UUID              `json:"projectId"`
+	Title      string                 `json:"title"`
+	Type       ContentType            `json:"type"`
+	Status     ContentStatus          `json:"status"`
+	Data       string                 `json:"data"`
+	Metadata   map[string]interface{} `json:"metadata"`
+	Version    int                    `json:"version"`
+	WordCount  int                    `json:"wordCount"`
+	CreatedAt  time.Time              `json:"createdAt"`
+	UpdatedAt  time.Time              `json:"updatedAt"`
+	Versions   []*ContentVersion      `json:"versions,omitempty"`
+	Statistics *ContentStatistics     `json:"statistics,omitempty"`
 }
 
 // NewContent creates a new content item with the given properties
 func NewContent(projectID uuid.UUID, title string, contentType ContentType) (*Content, error) {
 	content := &Content{
-		ContentID:   uuid.New(),
-		ProjectID:   projectID,
-		Title:       title,
-		Type:        contentType,
-		Status:      ContentStatusPlanning,
-		Data:        "",
-		Metadata:    make(map[string]interface{}),
-		Version:     1,
-		WordCount:   0,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-		Versions:    []*ContentVersion{},
-		Statistics:  &ContentStatistics{},
+		ContentID:  uuid.New(),
+		ProjectID:  projectID,
+		Title:      title,
+		Type:       contentType,
+		Status:     ContentStatusPlanning,
+		Data:       "",
+		Metadata:   make(map[string]interface{}),
+		Version:    1,
+		WordCount:  0,
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
+		Versions:   []*ContentVersion{},
+		Statistics: &ContentStatistics{},
 	}
 
 	if err := content.Validate(); err != nil {
