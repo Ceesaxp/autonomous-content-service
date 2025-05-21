@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/Ceesaxp/autonomous-content-service/src/domain/entities"
@@ -13,51 +14,51 @@ import (
 
 // ContentHandler handles content-related HTTP requests
 type ContentHandler struct {
-	ContentRepository repositories.ContentRepository
-	ProjectRepository repositories.ProjectRepository
+	ContentRepository  repositories.ContentRepository
+	ProjectRepository  repositories.ProjectRepository
 	FeedbackRepository repositories.FeedbackRepository
-	ContentPipeline   *content_creation.ContentPipeline
+	ContentPipeline    *content_creation.ContentPipeline
 }
 
 // NewContentHandler creates a new content handler
 func NewContentHandler(contentRepo repositories.ContentRepository, projectRepo repositories.ProjectRepository, feedbackRepo repositories.FeedbackRepository, contentPipeline *content_creation.ContentPipeline) *ContentHandler {
 	return &ContentHandler{
-		ContentRepository: contentRepo,
-		ProjectRepository: projectRepo,
+		ContentRepository:  contentRepo,
+		ProjectRepository:  projectRepo,
 		FeedbackRepository: feedbackRepo,
-		ContentPipeline:   contentPipeline,
+		ContentPipeline:    contentPipeline,
 	}
 }
 
 // ContentRequest represents a request to create new content
 type ContentRequest struct {
-	Title string                `json:"title"`
-	Type  entities.ContentType `json:"type"`
+	Title    string                 `json:"title"`
+	Type     entities.ContentType   `json:"type"`
 	Metadata map[string]interface{} `json:"metadata,omitempty"`
 }
 
 // ContentResponse represents a content response
 type ContentResponse struct {
-	ContentID   string                 `json:"contentId"`
-	ProjectID   string                 `json:"projectId"`
-	Title       string                 `json:"title"`
-	Type        entities.ContentType   `json:"type"`
-	Status      entities.ContentStatus `json:"status"`
-	Data        string                 `json:"data,omitempty"`
-	Metadata    map[string]interface{} `json:"metadata,omitempty"`
-	Version     int                    `json:"version"`
-	WordCount   int                    `json:"wordCount"`
-	CreatedAt   string                 `json:"createdAt"`
-	UpdatedAt   string                 `json:"updatedAt"`
-	Statistics  *StatisticsResponse    `json:"statistics,omitempty"`
+	ContentID  string                 `json:"contentId"`
+	ProjectID  string                 `json:"projectId"`
+	Title      string                 `json:"title"`
+	Type       entities.ContentType   `json:"type"`
+	Status     entities.ContentStatus `json:"status"`
+	Data       string                 `json:"data,omitempty"`
+	Metadata   map[string]interface{} `json:"metadata,omitempty"`
+	Version    int                    `json:"version"`
+	WordCount  int                    `json:"wordCount"`
+	CreatedAt  string                 `json:"createdAt"`
+	UpdatedAt  string                 `json:"updatedAt"`
+	Statistics *StatisticsResponse    `json:"statistics,omitempty"`
 }
 
 // StatisticsResponse represents content statistics in API responses
 type StatisticsResponse struct {
 	ReadabilityScore float64 `json:"readabilityScore"`
-	SEOScore        float64 `json:"seoScore"`
-	EngagementScore float64 `json:"engagementScore"`
-	PlagiarismScore float64 `json:"plagiarismScore"`
+	SEOScore         float64 `json:"seoScore"`
+	EngagementScore  float64 `json:"engagementScore"`
+	PlagiarismScore  float64 `json:"plagiarismScore"`
 }
 
 // ContentVersionResponse represents a content version response
@@ -104,7 +105,7 @@ func (h *ContentHandler) CreateContent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if project exists
-	project, err := h.ProjectRepository.FindByID(r.Context(), projectID)
+	_, err = h.ProjectRepository.FindByID(r.Context(), projectID) // project
 	if err != nil {
 		http.Error(w, "Project not found", http.StatusNotFound)
 		return
@@ -127,26 +128,26 @@ func (h *ContentHandler) CreateContent(w http.ResponseWriter, r *http.Request) {
 
 	// Prepare response
 	res := ContentResponse{
-		ContentID:   content.ContentID.String(),
-		ProjectID:   content.ProjectID.String(),
-		Title:       content.Title,
-		Type:        content.Type,
-		Status:      content.Status,
-		Data:        content.Data,
-		Metadata:    content.Metadata,
-		Version:     content.Version,
-		WordCount:   content.WordCount,
-		CreatedAt:   content.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt:   content.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		ContentID: content.ContentID.String(),
+		ProjectID: content.ProjectID.String(),
+		Title:     content.Title,
+		Type:      content.Type,
+		Status:    content.Status,
+		Data:      content.Data,
+		Metadata:  content.Metadata,
+		Version:   content.Version,
+		WordCount: content.WordCount,
+		CreatedAt: content.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		UpdatedAt: content.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 
 	// Add statistics if available
 	if content.Statistics != nil {
 		res.Statistics = &StatisticsResponse{
 			ReadabilityScore: content.Statistics.ReadabilityScore,
-			SEOScore:        content.Statistics.SEOScore,
-			EngagementScore: content.Statistics.EngagementScore,
-			PlagiarismScore: content.Statistics.PlagiarismScore,
+			SEOScore:         content.Statistics.SEOScore,
+			EngagementScore:  content.Statistics.EngagementScore,
+			PlagiarismScore:  content.Statistics.PlagiarismScore,
 		}
 	}
 
@@ -175,26 +176,26 @@ func (h *ContentHandler) GetContent(w http.ResponseWriter, r *http.Request) {
 
 	// Prepare response
 	res := ContentResponse{
-		ContentID:   content.ContentID.String(),
-		ProjectID:   content.ProjectID.String(),
-		Title:       content.Title,
-		Type:        content.Type,
-		Status:      content.Status,
-		Data:        content.Data,
-		Metadata:    content.Metadata,
-		Version:     content.Version,
-		WordCount:   content.WordCount,
-		CreatedAt:   content.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt:   content.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		ContentID: content.ContentID.String(),
+		ProjectID: content.ProjectID.String(),
+		Title:     content.Title,
+		Type:      content.Type,
+		Status:    content.Status,
+		Data:      content.Data,
+		Metadata:  content.Metadata,
+		Version:   content.Version,
+		WordCount: content.WordCount,
+		CreatedAt: content.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		UpdatedAt: content.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 
 	// Add statistics if available
 	if content.Statistics != nil {
 		res.Statistics = &StatisticsResponse{
 			ReadabilityScore: content.Statistics.ReadabilityScore,
-			SEOScore:        content.Statistics.SEOScore,
-			EngagementScore: content.Statistics.EngagementScore,
-			PlagiarismScore: content.Statistics.PlagiarismScore,
+			SEOScore:         content.Statistics.SEOScore,
+			EngagementScore:  content.Statistics.EngagementScore,
+			PlagiarismScore:  content.Statistics.PlagiarismScore,
 		}
 	}
 
@@ -260,25 +261,25 @@ func (h *ContentHandler) UpdateContent(w http.ResponseWriter, r *http.Request) {
 
 	// Prepare response
 	res := ContentResponse{
-		ContentID:   content.ContentID.String(),
-		ProjectID:   content.ProjectID.String(),
-		Title:       content.Title,
-		Type:        content.Type,
-		Status:      content.Status,
-		Data:        content.Data,
-		Metadata:    content.Metadata,
-		Version:     content.Version,
-		WordCount:   content.WordCount,
-		CreatedAt:   content.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt:   content.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		ContentID: content.ContentID.String(),
+		ProjectID: content.ProjectID.String(),
+		Title:     content.Title,
+		Type:      content.Type,
+		Status:    content.Status,
+		Data:      content.Data,
+		Metadata:  content.Metadata,
+		Version:   content.Version,
+		WordCount: content.WordCount,
+		CreatedAt: content.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		UpdatedAt: content.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 
 	if content.Statistics != nil {
 		res.Statistics = &StatisticsResponse{
 			ReadabilityScore: content.Statistics.ReadabilityScore,
-			SEOScore:        content.Statistics.SEOScore,
-			EngagementScore: content.Statistics.EngagementScore,
-			PlagiarismScore: content.Statistics.PlagiarismScore,
+			SEOScore:         content.Statistics.SEOScore,
+			EngagementScore:  content.Statistics.EngagementScore,
+			PlagiarismScore:  content.Statistics.PlagiarismScore,
 		}
 	}
 
@@ -355,6 +356,7 @@ func (h *ContentHandler) ApproveContent(w http.ResponseWriter, r *http.Request) 
 
 	// Update content status
 	originalStatus := content.Status
+	log.Printf("Updating content status from %v to %v", originalStatus, content.Status)
 	content.UpdateStatus(entities.ContentStatusApproved)
 
 	// Save updates
@@ -366,25 +368,25 @@ func (h *ContentHandler) ApproveContent(w http.ResponseWriter, r *http.Request) 
 
 	// Prepare response
 	res := ContentResponse{
-		ContentID:   content.ContentID.String(),
-		ProjectID:   content.ProjectID.String(),
-		Title:       content.Title,
-		Type:        content.Type,
-		Status:      content.Status,
-		Data:        content.Data,
-		Metadata:    content.Metadata,
-		Version:     content.Version,
-		WordCount:   content.WordCount,
-		CreatedAt:   content.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
-		UpdatedAt:   content.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		ContentID: content.ContentID.String(),
+		ProjectID: content.ProjectID.String(),
+		Title:     content.Title,
+		Type:      content.Type,
+		Status:    content.Status,
+		Data:      content.Data,
+		Metadata:  content.Metadata,
+		Version:   content.Version,
+		WordCount: content.WordCount,
+		CreatedAt: content.CreatedAt.Format("2006-01-02T15:04:05Z07:00"),
+		UpdatedAt: content.UpdatedAt.Format("2006-01-02T15:04:05Z07:00"),
 	}
 
 	if content.Statistics != nil {
 		res.Statistics = &StatisticsResponse{
 			ReadabilityScore: content.Statistics.ReadabilityScore,
-			SEOScore:        content.Statistics.SEOScore,
-			EngagementScore: content.Statistics.EngagementScore,
-			PlagiarismScore: content.Statistics.PlagiarismScore,
+			SEOScore:         content.Statistics.SEOScore,
+			EngagementScore:  content.Statistics.EngagementScore,
+			PlagiarismScore:  content.Statistics.PlagiarismScore,
 		}
 	}
 
