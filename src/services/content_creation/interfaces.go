@@ -39,8 +39,8 @@ type PlagiarismAPI interface {
 
 // PlagiarismDetail contains details about detected plagiarism
 type PlagiarismDetail struct {
-	Fragment   string `json:"fragment"`
-	Source     string `json:"source"`
+	Fragment   string  `json:"fragment"`
+	Source     string  `json:"source"`
 	Percentage float64 `json:"percentage"`
 }
 
@@ -55,29 +55,29 @@ type SearchService interface {
 
 // SearchResult represents a search result
 type SearchResult struct {
-	Title        string `json:"title"`
-	URL          string `json:"url"`
-	Snippet      string `json:"snippet"`
-	Authors      string `json:"authors"`
+	Title         string `json:"title"`
+	URL           string `json:"url"`
+	Snippet       string `json:"snippet"`
+	Authors       string `json:"authors"`
 	PublishedDate string `json:"publishedDate"`
-	Relevance    int    `json:"relevance"`
+	Relevance     int    `json:"relevance"`
 }
 
 // OpenAIClient is a client for interacting with the OpenAI API
 type OpenAIClient struct {
-	APIKey     string
-	Model      string
-	MaxTokens  int
+	APIKey      string
+	Model       string
+	MaxTokens   int
 	Temperature float64
-	HTTPClient *http.Client
+	HTTPClient  *http.Client
 }
 
 // NewOpenAIClient creates a new client for the OpenAI API
 func NewOpenAIClient(apiKey, model string, maxTokens int, temperature float64) *OpenAIClient {
 	return &OpenAIClient{
-		APIKey:     apiKey,
-		Model:      model,
-		MaxTokens:  maxTokens,
+		APIKey:      apiKey,
+		Model:       model,
+		MaxTokens:   maxTokens,
 		Temperature: temperature,
 		HTTPClient: &http.Client{
 			Timeout: 30 * time.Second,
@@ -93,10 +93,10 @@ type OpenAIMessage struct {
 
 // OpenAIRequest represents a request to the OpenAI API
 type OpenAIRequest struct {
-	Model       string         `json:"model"`
+	Model       string          `json:"model"`
 	Messages    []OpenAIMessage `json:"messages"`
-	MaxTokens   int            `json:"max_tokens"`
-	Temperature float64        `json:"temperature"`
+	MaxTokens   int             `json:"max_tokens"`
+	Temperature float64         `json:"temperature"`
 }
 
 // OpenAIResponse represents a response from the OpenAI API
@@ -131,7 +131,7 @@ func (c *OpenAIClient) Generate(ctx context.Context, prompt interface{}) (string
 		messages = []OpenAIMessage{
 			{Role: "system", Content: "You are a helpful content creation assistant."},
 		}
-		
+
 		// Context strings are added as separate messages
 		for i, content := range p {
 			role := "user"
@@ -142,38 +142,6 @@ func (c *OpenAIClient) Generate(ctx context.Context, prompt interface{}) (string
 				}
 			}
 			messages = append(messages, OpenAIMessage{Role: role, Content: content})
-		}
-	case outliningPrompt:
-		messages = []OpenAIMessage{
-			{Role: "system", Content: "You are a skilled content outliner."},
-			{Role: "user", Content: p.Prompt},
-		}
-		for _, ctx := range p.Context {
-			messages = append(messages, OpenAIMessage{Role: "user", Content: ctx})
-		}
-	case draftingPrompt:
-		messages = []OpenAIMessage{
-			{Role: "system", Content: "You are a professional content writer."},
-			{Role: "user", Content: p.Prompt},
-		}
-		for _, ctx := range p.Context {
-			messages = append(messages, OpenAIMessage{Role: "user", Content: ctx})
-		}
-	case editingPrompt:
-		messages = []OpenAIMessage{
-			{Role: "system", Content: "You are an expert content editor."},
-			{Role: "user", Content: p.Prompt},
-		}
-		for _, ctx := range p.Context {
-			messages = append(messages, OpenAIMessage{Role: "user", Content: ctx})
-		}
-	case finalizationPrompt:
-		messages = []OpenAIMessage{
-			{Role: "system", Content: "You are a content finalization specialist."},
-			{Role: "user", Content: p.Prompt},
-		}
-		for _, ctx := range p.Context {
-			messages = append(messages, OpenAIMessage{Role: "user", Content: ctx})
 		}
 	default:
 		return "", &InvalidPromptError{PromptType: prompt}
@@ -254,11 +222,11 @@ type WebSearchService struct {
 // NewWebSearchService creates a new web search service
 func NewWebSearchService(apiKey, searchURL string) *WebSearchService {
 	return &WebSearchService{
-		APIKey:     apiKey,
+		APIKey: apiKey,
 		HTTPClient: &http.Client{
 			Timeout: 10 * time.Second,
 		},
-		SearchURL:  searchURL,
+		SearchURL: searchURL,
 	}
 }
 
@@ -374,12 +342,12 @@ func parseSearchResults(respBody []byte) ([]SearchResult, error) {
 	// Convert API-specific format to SearchResult
 	for i, item := range response.Items {
 		results = append(results, SearchResult{
-			Title:        item.Title,
-			URL:          item.Link,
-			Snippet:      item.Snippet,
-			Authors:      item.Authors,
+			Title:         item.Title,
+			URL:           item.Link,
+			Snippet:       item.Snippet,
+			Authors:       item.Authors,
 			PublishedDate: item.PublishedAt,
-			Relevance:    len(response.Items) - i, // Higher relevance for earlier results
+			Relevance:     len(response.Items) - i, // Higher relevance for earlier results
 		})
 	}
 
@@ -449,8 +417,8 @@ func (s *BasicReadabilityScorer) AnalyzeReadability(ctx context.Context, content
 	// Calculate Flesch-Kincaid Grade Level
 	var fkgl float64
 	if sentenceCount > 0 {
-		fkgl = 0.39 * (float64(wordCount) / float64(sentenceCount)) +
-			11.8 * (float64(syllableCount) / float64(wordCount)) - 15.59
+		fkgl = 0.39*(float64(wordCount)/float64(sentenceCount)) +
+			11.8*(float64(syllableCount)/float64(wordCount)) - 15.59
 	}
 
 	// Convert to a score out of 100 (higher is more readable)
@@ -610,8 +578,8 @@ func NewBasicSEOAnalyzer() *BasicSEOAnalyzer {
 // AnalyzeSEO evaluates content for search engine optimization
 func (s *BasicSEOAnalyzer) AnalyzeSEO(ctx context.Context, title, content string) (float64, []string, []string, error) {
 	// Extract potential keywords from title and content
-	titleWords := extractKeywords(title)
-	contentWords := extractKeywords(content)
+	titleWords := extractKeywordsFromText(title)
+	//contentWords := extractKeywordsFromText(content)
 
 	// Find most frequently used words in content
 	wordFrequency := map[string]int{}
@@ -673,23 +641,23 @@ func (s *BasicSEOAnalyzer) AnalyzeSEO(ctx context.Context, title, content string
 	}
 
 	// 2. Content length analysis
-	contentWords := countWords(content)
+	contentWordCount := countWords(content)
 	contentLengthScore := 0.0
-	if contentWords >= 300 {
+	if contentWordCount >= 300 {
 		contentLengthScore = 100.0
-	} else if contentWords >= 100 {
-		contentLengthScore = float64(contentWords) / 3.0
+	} else if contentWordCount >= 100 {
+		contentLengthScore = float64(contentWordCount) / 3.0
 	}
 
 	// 3. Keyword usage analysis
 	keywordUsageScore := 0.0
 	keywordDensity := 0.0
-	if contentWords > 0 {
+	if contentWordCount > 0 {
 		keywordCount := 0
 		for _, keyword := range keywords {
 			keywordCount += strings.Count(strings.ToLower(content), strings.ToLower(keyword))
 		}
-		keywordDensity = float64(keywordCount) / float64(contentWords)
+		keywordDensity = float64(keywordCount) / float64(contentWordCount)
 	}
 
 	if keywordDensity >= 0.01 && keywordDensity <= 0.03 {
@@ -730,7 +698,7 @@ func (s *BasicSEOAnalyzer) AnalyzeSEO(ctx context.Context, title, content string
 		suggestions = append(suggestions, "Shorten the title (aim for 30-60 characters) for better SEO.")
 	}
 
-	if contentWords < 300 {
+	if contentWordCount < 300 {
 		suggestions = append(suggestions, "Increase content length to at least 300 words for better SEO.")
 	}
 
@@ -791,7 +759,24 @@ func NewSimplePlagiarismAPI() *SimplePlagiarismAPI {
 // CheckPlagiarism detects potential plagiarism in content
 func (p *SimplePlagiarismAPI) CheckPlagiarism(ctx context.Context, content string) (float64, []PlagiarismDetail, error) {
 	// This is a simplified implementation; a real one would use a proper plagiarism detection service
-	
+
 	// For now, we'll just return a high originality score and no detected plagiarism
 	return 0.95, []PlagiarismDetail{}, nil
+}
+
+// extractKeywordsFromText extracts keywords from text
+func extractKeywordsFromText(text string) []string {
+	words := strings.Fields(strings.ToLower(text))
+	keywords := []string{}
+
+	for _, word := range words {
+		// Remove punctuation
+		word = strings.Trim(word, ".,!?;:\"'()[]")
+		// Filter out stop words and short words
+		if len(word) > 3 && !isStopWord(word) {
+			keywords = append(keywords, word)
+		}
+	}
+
+	return keywords
 }
