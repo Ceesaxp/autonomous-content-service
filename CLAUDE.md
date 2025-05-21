@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-The Autonomous Content Creation Service is a digital-native business that functions without human intervention, leveraging Large Language Models (LLMs) for decision-making, content creation, and autonomous operations.
+The Autonomous Content Creation Service is a digital-native business that functions without human intervention, leveraging Large Language Models (LLMs) for decision-making, content creation, and autonomous operations (including, but not limited to: publishing new content, engaging clients, hiring help from human and other autonomous agents, signing contracts, sending invoices, performing payments, submitting regulatory reports).
 
 ## Project Architecture
 
@@ -15,6 +15,10 @@ The system consists of the following major components:
 3. **Domain Model**: Core business entities and relationships
 4. **Repository Layer**: Data access and persistence
 5. **Services Layer**: Business logic implementation
+6. **Financial Infrastructure**: Financial infrastructure necessary for autonomous business operations
+7. **Operational Systems**: Service execution framework, quality control mechanisms, and resource allocation system
+8. **Governance Structure**: Decision protocols, rules enforcement, risk management, regulatory reporting
+
 
 ## Development Setup
 
