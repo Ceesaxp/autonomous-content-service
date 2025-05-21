@@ -2,7 +2,6 @@ package content_creation
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"math"
 	"sort"

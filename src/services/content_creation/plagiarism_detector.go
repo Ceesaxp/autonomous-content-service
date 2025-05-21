@@ -5,7 +5,6 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
-	"sort"
 	"strings"
 	"time"
 
@@ -30,27 +29,27 @@ func NewPlagiarismDetector(plagiarismAPI PlagiarismAPI, llmClient LLMClient) *Pl
 
 // PlagiarismCheckRequest contains parameters for plagiarism detection
 type PlagiarismCheckRequest struct {
-	Content     string
-	ContentType entities.ContentType
-	CheckWeb    bool
+	Content       string
+	ContentType   entities.ContentType
+	CheckWeb      bool
 	CheckDatabase bool
-	Sensitivity float64 // 0.0 to 1.0, higher = more sensitive
+	Sensitivity   float64 // 0.0 to 1.0, higher = more sensitive
 }
 
 // PlagiarismResult contains comprehensive plagiarism detection results
 type PlagiarismResult struct {
-	OriginalityScore    float64             `json:"originalityScore"`
-	OverallRisk         RiskLevel           `json:"overallRisk"`
-	TotalMatches        int                 `json:"totalMatches"`
-	HighRiskMatches     int                 `json:"highRiskMatches"`
-	MediumRiskMatches   int                 `json:"mediumRiskMatches"`
-	LowRiskMatches      int                 `json:"lowRiskMatches"`
-	Matches             []PlagiarismMatch   `json:"matches"`
-	Patterns            []SuspiciousPattern `json:"patterns"`
-	Fingerprint         ContentFingerprint  `json:"fingerprint"`
-	Recommendations     []string            `json:"recommendations"`
-	ProcessingTime      time.Duration       `json:"processingTime"`
-	ConfidenceLevel     float64             `json:"confidenceLevel"`
+	OriginalityScore  float64             `json:"originalityScore"`
+	OverallRisk       RiskLevel           `json:"overallRisk"`
+	TotalMatches      int                 `json:"totalMatches"`
+	HighRiskMatches   int                 `json:"highRiskMatches"`
+	MediumRiskMatches int                 `json:"mediumRiskMatches"`
+	LowRiskMatches    int                 `json:"lowRiskMatches"`
+	Matches           []PlagiarismMatch   `json:"matches"`
+	Patterns          []SuspiciousPattern `json:"patterns"`
+	Fingerprint       ContentFingerprint  `json:"fingerprint"`
+	Recommendations   []string            `json:"recommendations"`
+	ProcessingTime    time.Duration       `json:"processingTime"`
+	ConfidenceLevel   float64             `json:"confidenceLevel"`
 }
 
 // PlagiarismMatch represents a detected match with external content
@@ -94,11 +93,11 @@ type Location struct {
 
 // ContentFingerprint represents a unique fingerprint of content
 type ContentFingerprint struct {
-	Hash            string            `json:"hash"`
-	WordFrequency   map[string]int    `json:"wordFrequency"`
-	PhraseHashes    []string          `json:"phraseHashes"`
-	StyleMetrics    StyleMetrics      `json:"styleMetrics"`
-	SemanticVectors []float64         `json:"semanticVectors"`
+	Hash            string         `json:"hash"`
+	WordFrequency   map[string]int `json:"wordFrequency"`
+	PhraseHashes    []string       `json:"phraseHashes"`
+	StyleMetrics    StyleMetrics   `json:"styleMetrics"`
+	SemanticVectors []float64      `json:"semanticVectors"`
 }
 
 // StyleMetrics captures writing style characteristics
@@ -144,7 +143,7 @@ const (
 // CheckPlagiarism performs comprehensive plagiarism detection
 func (p *PlagiarismDetector) CheckPlagiarism(ctx context.Context, request PlagiarismCheckRequest) (*PlagiarismResult, error) {
 	startTime := time.Now()
-	
+
 	result := &PlagiarismResult{
 		Matches:         []PlagiarismMatch{},
 		Patterns:        []SuspiciousPattern{},
@@ -583,7 +582,7 @@ func (cf *ContentFingerprinter) generatePhraseHashes(content string) []string {
 func (cf *ContentFingerprinter) calculateStyleMetrics(content string) StyleMetrics {
 	sentences := strings.Split(content, ".")
 	words := strings.Fields(content)
-	
+
 	// Average sentence length
 	avgSentenceLength := 0.0
 	if len(sentences) > 0 {
@@ -614,6 +613,6 @@ func (cf *ContentFingerprinter) calculateStyleMetrics(content string) StyleMetri
 		VocabularyRichness:    vocabRichness,
 		ReadabilityScore:      70.0, // Placeholder
 		PunctuationDensity:    punctuationDensity,
-		PassiveVoiceRatio:     0.2,  // Placeholder
+		PassiveVoiceRatio:     0.2, // Placeholder
 	}
 }
