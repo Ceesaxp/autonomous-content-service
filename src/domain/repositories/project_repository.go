@@ -39,4 +39,10 @@ type ProjectRepository interface {
 
 	// Delete removes a project from the repository
 	Delete(ctx context.Context, id uuid.UUID) error
+
+	// GetByID retrieves a project by ID (alias for FindByID)
+	GetByID(ctx context.Context, id uuid.UUID) (*entities.Project, error)
+
+	// GetByClientID retrieves all projects for a client (simplified version of FindByClientID)
+	GetByClientID(ctx context.Context, clientID uuid.UUID) ([]*entities.Project, error)
 }

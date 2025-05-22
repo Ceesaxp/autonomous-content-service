@@ -8,7 +8,7 @@ import (
 )
 
 // SetupRoutes configures all API routes for the service
-func SetupRoutes(router *mux.Router, contentHandler *handlers.ContentHandler, projectHandler *handlers.ProjectHandler, onboardingHandler *handlers.OnboardingHandler) {
+func SetupRoutes(router *mux.Router, contentHandler *handlers.ContentHandler, projectHandler *handlers.ProjectHandler, onboardingHandler *handlers.OnboardingHandler, dashboardHandler *handlers.DashboardHandlers) {
 	// Create web handler
 	webHandler := handlers.NewWebHandler(projectHandler, contentHandler)
 
@@ -36,6 +36,42 @@ func SetupRoutes(router *mux.Router, contentHandler *handlers.ContentHandler, pr
 	apiV1.HandleFunc("/portfolio", webHandler.GetPortfolio).Methods("GET")
 	apiV1.HandleFunc("/pricing", webHandler.GetPricing).Methods("GET")
 	apiV1.HandleFunc("/status", webHandler.GetSystemStatus).Methods("GET")
+
+	// Dashboard endpoints
+	if dashboardHandler != nil {
+		// Dashboard summary
+		apiV1.HandleFunc("/dashboard/summary/{clientId}", dashboardHandler.GetDashboardSummary).Methods("GET")
+		
+		// Projects
+		apiV1.HandleFunc("/dashboard/projects/{clientId}", dashboardHandler.GetProjectsOverview).Methods("GET")
+		apiV1.HandleFunc("/dashboard/projects/details/{projectId}", dashboardHandler.GetProjectDetails).Methods("GET")
+		apiV1.HandleFunc("/dashboard/projects/{projectId}/status", dashboardHandler.UpdateProjectStatus).Methods("PUT")
+		
+		// Content approvals
+		apiV1.HandleFunc("/dashboard/approvals/{clientId}", dashboardHandler.GetContentApprovals).Methods("GET")
+		apiV1.HandleFunc("/dashboard/approvals/{approvalId}/approve", dashboardHandler.ApproveContent).Methods("PUT")
+		apiV1.HandleFunc("/dashboard/approvals/{approvalId}/reject", dashboardHandler.RejectContent).Methods("PUT")
+		apiV1.HandleFunc("/dashboard/approvals/{approvalId}/revision", dashboardHandler.RequestContentRevision).Methods("PUT")
+		
+		// Messages
+		apiV1.HandleFunc("/dashboard/messages/{clientId}", dashboardHandler.GetMessageThreads).Methods("GET")
+		apiV1.HandleFunc("/dashboard/messages/threads", dashboardHandler.CreateMessageThread).Methods("POST")
+		apiV1.HandleFunc("/dashboard/messages/{threadId}/send", dashboardHandler.SendMessage).Methods("POST")
+		apiV1.HandleFunc("/dashboard/messages/{threadId}/messages", dashboardHandler.GetThreadMessages).Methods("GET")
+		apiV1.HandleFunc("/dashboard/messages/{threadId}/read", dashboardHandler.MarkMessagesAsRead).Methods("PUT")
+		
+		// Notifications
+		apiV1.HandleFunc("/dashboard/notifications/{clientId}", dashboardHandler.GetNotifications).Methods("GET")
+		apiV1.HandleFunc("/dashboard/notifications/{notificationId}/read", dashboardHandler.MarkNotificationAsRead).Methods("PUT")
+		
+		// Analytics
+		apiV1.HandleFunc("/dashboard/analytics/{clientId}", dashboardHandler.GetClientAnalytics).Methods("GET")
+		apiV1.HandleFunc("/dashboard/reports/{clientId}", dashboardHandler.GenerateReport).Methods("POST")
+		
+		// Billing
+		apiV1.HandleFunc("/dashboard/billing/{clientId}", dashboardHandler.GetBillingHistory).Methods("GET")
+		apiV1.HandleFunc("/dashboard/billing/{clientId}/outstanding", dashboardHandler.GetOutstandingInvoices).Methods("GET")
+	}
 
 	// Onboarding endpoints
 	if onboardingHandler != nil {

@@ -167,7 +167,7 @@ type PaymentNotification struct {
 	PaymentID        string                 `json:"payment_id" db:"payment_id"`
 	InvoiceID        *string                `json:"invoice_id" db:"invoice_id"`
 	ClientID         string                 `json:"client_id" db:"client_id"`
-	NotificationType NotificationType       `json:"notification_type" db:"notification_type"`
+	NotificationType PaymentNotificationType       `json:"notification_type" db:"notification_type"`
 	Channel          NotificationChannel    `json:"channel" db:"channel"`
 	Recipient        string                 `json:"recipient" db:"recipient"`
 	Subject          string                 `json:"subject" db:"subject"`
@@ -184,17 +184,17 @@ type PaymentNotification struct {
 	UpdatedAt        time.Time              `json:"updated_at" db:"updated_at"`
 }
 
-// NotificationType represents different types of payment notifications
-type NotificationType string
+// PaymentNotificationType represents different types of payment notifications
+type PaymentNotificationType string
 
 const (
-	NotificationTypePaymentReceived  NotificationType = "payment_received"
-	NotificationTypePaymentFailed    NotificationType = "payment_failed"
-	NotificationTypeInvoiceSent      NotificationType = "invoice_sent"
-	NotificationTypeInvoiceOverdue   NotificationType = "invoice_overdue"
-	NotificationTypeRefundProcessed  NotificationType = "refund_processed"
-	NotificationTypeFraudDetected    NotificationType = "fraud_detected"
-	NotificationTypePaymentConfirmed NotificationType = "payment_confirmed"
+	PaymentNotificationPaymentReceived  PaymentNotificationType = "payment_received"
+	PaymentNotificationPaymentFailed    PaymentNotificationType = "payment_failed"
+	PaymentNotificationInvoiceSent      PaymentNotificationType = "invoice_sent"
+	PaymentNotificationInvoiceOverdue   PaymentNotificationType = "invoice_overdue"
+	PaymentNotificationRefundProcessed  PaymentNotificationType = "refund_processed"
+	PaymentNotificationFraudDetected    PaymentNotificationType = "fraud_detected"
+	PaymentNotificationPaymentConfirmed PaymentNotificationType = "payment_confirmed"
 )
 
 // NotificationChannel represents delivery methods for notifications

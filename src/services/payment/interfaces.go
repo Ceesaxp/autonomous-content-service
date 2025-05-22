@@ -204,7 +204,7 @@ type NotificationRequest struct {
 	PaymentID        *string                      `json:"payment_id"`
 	InvoiceID        *string                      `json:"invoice_id"`
 	ClientID         string                       `json:"client_id"`
-	NotificationType entities.NotificationType    `json:"notification_type"`
+	NotificationType entities.PaymentNotificationType    `json:"notification_type"`
 	Channel          entities.NotificationChannel `json:"channel"`
 	Recipient        string                       `json:"recipient"`
 	Subject          string                       `json:"subject"`

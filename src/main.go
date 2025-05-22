@@ -118,9 +118,12 @@ func main() {
 	router := mux.NewRouter()
 	router.Use(loggingMiddleware)
 
+	// Dashboard handler can be nil for now since we don't have a complete dashboard service implementation
+	var dashboardHandler *handlers.DashboardHandlers = nil
+
 	// Set up API routes
 	apiRouter := router.PathPrefix("/api/v1").Subrouter()
-	api.SetupRoutes(apiRouter, contentHandler, projectHandler, nil) // nil for onboarding handler until we initialize it
+	api.SetupRoutes(apiRouter, contentHandler, projectHandler, nil, dashboardHandler) // nil for onboarding handler until we initialize it
 
 	// Set up server
 	server := &http.Server{

@@ -141,6 +141,15 @@ func (m *MockProjectRepository) FindAll(ctx context.Context, page int, pageSize 
 	return args.Get(0).([]*entities.Project), args.Int(1), args.Error(2)
 }
 
+func (m *MockProjectRepository) GetByID(ctx context.Context, id uuid.UUID) (*entities.Project, error) {
+	return m.FindByID(ctx, id)
+}
+
+func (m *MockProjectRepository) GetByClientID(ctx context.Context, clientID uuid.UUID) ([]*entities.Project, error) {
+	projects, _, err := m.FindByClientID(ctx, clientID, 0, 100)
+	return projects, err
+}
+
 type MockEventRepository struct {
 	mock.Mock
 }

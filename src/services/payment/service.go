@@ -141,7 +141,7 @@ func (s *ServiceImpl) ProcessPayment(ctx context.Context, request *PaymentReques
 		}
 
 		// Send failure notification
-		s.sendPaymentNotification(ctx, payment, entities.NotificationTypePaymentFailed)
+		s.sendPaymentNotification(ctx, payment, entities.PaymentNotificationPaymentFailed)
 
 		return payment, fmt.Errorf("payment processing failed: %w", err)
 	}
@@ -176,7 +176,7 @@ func (s *ServiceImpl) ProcessPayment(ctx context.Context, request *PaymentReques
 		}
 
 		// Send confirmation notification
-		if err := s.sendPaymentNotification(ctx, payment, entities.NotificationTypePaymentConfirmed); err != nil {
+		if err := s.sendPaymentNotification(ctx, payment, entities.PaymentNotificationPaymentConfirmed); err != nil {
 			// Log error but don't fail the payment
 			fmt.Printf("Failed to send confirmation notification: %v\n", err)
 		}
@@ -388,7 +388,7 @@ func (s *ServiceImpl) SendInvoice(ctx context.Context, id string) error {
 		ID:               uuid.New().String(),
 		InvoiceID:        &invoice.ID,
 		ClientID:         invoice.ClientID,
-		NotificationType: entities.NotificationTypeInvoiceSent,
+		NotificationType: entities.PaymentNotificationInvoiceSent,
 		Channel:          entities.NotificationChannelEmail,
 		Recipient:        "client@example.com", // TODO: Get from client
 		Subject:          emailRequest.Subject,
@@ -662,20 +662,20 @@ func (s *ServiceImpl) handleInvoicePayment(ctx context.Context, invoiceID string
 	return s.MarkInvoicePaid(ctx, invoiceID, payment)
 }
 
-func (s *ServiceImpl) sendPaymentNotification(ctx context.Context, payment *entities.Payment, notificationType entities.NotificationType) error {
+func (s *ServiceImpl) sendPaymentNotification(ctx context.Context, payment *entities.Payment, notificationType entities.PaymentNotificationType) error {
 	var subject, content string
 
 	switch notificationType {
-	case entities.NotificationTypePaymentReceived:
+	case entities.PaymentNotificationPaymentReceived:
 		subject = "Payment Received"
 		content = fmt.Sprintf("Your payment of %s %.2f has been received.", payment.Currency, float64(payment.Amount)/100)
-	case entities.NotificationTypePaymentFailed:
+	case entities.PaymentNotificationPaymentFailed:
 		subject = "Payment Failed"
 		content = fmt.Sprintf("Your payment of %s %.2f has failed.", payment.Currency, float64(payment.Amount)/100)
 		if payment.FailureReason != nil {
 			content += fmt.Sprintf(" Reason: %s", *payment.FailureReason)
 		}
-	case entities.NotificationTypePaymentConfirmed:
+	case entities.PaymentNotificationPaymentConfirmed:
 		subject = "Payment Confirmed"
 		content = fmt.Sprintf("Your payment of %s %.2f has been confirmed.", payment.Currency, float64(payment.NetAmount)/100)
 	}
@@ -697,7 +697,7 @@ func (s *ServiceImpl) sendFraudNotification(ctx context.Context, payment *entiti
 	request := &NotificationRequest{
 		PaymentID:        &payment.ID,
 		ClientID:         payment.ClientID,
-		NotificationType: entities.NotificationTypeFraudDetected,
+		NotificationType: entities.PaymentNotificationFraudDetected,
 		Channel:          entities.NotificationChannelEmail,
 		Recipient:        "security@company.com", // Internal notification
 		Subject:          "Fraudulent Payment Detected",
@@ -711,7 +711,7 @@ func (s *ServiceImpl) sendRefundNotification(ctx context.Context, refund *entiti
 	request := &NotificationRequest{
 		PaymentID:        &payment.ID,
 		ClientID:         payment.ClientID,
-		NotificationType: entities.NotificationTypeRefundProcessed,
+		NotificationType: entities.PaymentNotificationRefundProcessed,
 		Channel:          entities.NotificationChannelEmail,
 		Recipient:        "client@example.com", // TODO: Get from client
 		Subject:          "Refund Processed",

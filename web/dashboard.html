@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Management Dashboard - Autonomous Content Service</title>
+    <link rel="stylesheet" href="assets/css/dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+</head>
+<body>
+    <div id="app" class="dashboard-app">
+        <!-- Loading Screen -->
+        <div id="loadingScreen" class="loading-screen">
+            <div class="loading-spinner"></div>
+            <p>Loading your dashboard...</p>
+        </div>
+
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h2>Dashboard</h2>
+                <button id="sidebarToggle" class="sidebar-toggle" aria-label="Toggle sidebar">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+            
+            <ul class="sidebar-nav">
+                <li><a href="#overview" class="nav-link active" data-view="overview">
+                    <span class="nav-icon">📊</span>
+                    Overview
+                </a></li>
+                <li><a href="#projects" class="nav-link" data-view="projects">
+                    <span class="nav-icon">📋</span>
+                    Projects
+                    <span id="activeProjectsBadge" class="badge">0</span>
+                </a></li>
+                <li><a href="#content" class="nav-link" data-view="content">
+                    <span class="nav-icon">📝</span>
+                    Content
+                    <span id="pendingApprovalsBadge" class="badge">0</span>
+                </a></li>
+                <li><a href="#messages" class="nav-link" data-view="messages">
+                    <span class="nav-icon">💬</span>
+                    Messages
+                    <span id="unreadMessagesBadge" class="badge">0</span>
+                </a></li>
+                <li><a href="#billing" class="nav-link" data-view="billing">
+                    <span class="nav-icon">💳</span>
+                    Billing
+                </a></li>
+                <li><a href="#analytics" class="nav-link" data-view="analytics">
+                    <span class="nav-icon">📈</span>
+                    Analytics
+                </a></li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">👤</div>
+                    <div class="user-details">
+                        <span id="userName" class="user-name">Client Name</span>
+                        <span class="user-status">Premium Plan</span>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main id="mainContent" class="main-content">
+            <!-- Header -->
+            <header class="content-header">
+                <div class="header-left">
+                    <h1 id="pageTitle">Dashboard Overview</h1>
+                    <p id="pageSubtitle">Welcome back! Here's what's happening with your projects.</p>
+                </div>
+                <div class="header-right">
+                    <div class="notifications-wrapper">
+                        <button id="notificationsBtn" class="notifications-btn" aria-label="View notifications">
+                            🔔
+                            <span id="notificationsBadge" class="notification-badge">0</span>
+                        </button>
+                        <div id="notificationsDropdown" class="notifications-dropdown">
+                            <div class="notifications-header">
+                                <h3>Notifications</h3>
+                                <button id="markAllReadBtn" class="mark-all-read">Mark all read</button>
+                            </div>
+                            <div id="notificationsList" class="notifications-list">
+                                <!-- Notifications will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                    <button id="refreshBtn" class="refresh-btn" aria-label="Refresh data">🔄</button>
+                </div>
+            </header>
+
+            <!-- Overview View -->
+            <div id="overviewView" class="view active">
+                <div class="overview-grid">
+                    <!-- Stats Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">📋</div>
+                            <div class="stat-content">
+                                <h3 id="activeProjectsCount">0</h3>
+                                <p>Active Projects</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">✅</div>
+                            <div class="stat-content">
+                                <h3 id="completedProjectsCount">0</h3>
+                                <p>Completed Projects</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⏳</div>
+                            <div class="stat-content">
+                                <h3 id="pendingApprovalsCount">0</h3>
+                                <p>Pending Approvals</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💰</div>
+                            <div class="stat-content">
+                                <h3 id="outstandingBalance">$0</h3>
+                                <p>Outstanding Balance</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="recent-activity">
+                        <h3>Recent Activity</h3>
+                        <div id="recentActivityList" class="activity-list">
+                            <!-- Recent activity items will be loaded here -->
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Deadlines -->
+                    <div class="upcoming-deadlines">
+                        <h3>Upcoming Deadlines</h3>
+                        <div id="upcomingDeadlinesList" class="deadlines-list">
+                            <!-- Upcoming deadlines will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Projects View -->
+            <div id="projectsView" class="view">
+                <div class="view-header">
+                    <div class="view-actions">
+                        <div class="search-box">
+                            <input type="text" id="projectsSearch" placeholder="Search projects..." class="search-input">
+                        </div>
+                        <select id="projectsFilter" class="filter-select">
+                            <option value="">All Projects</option>
+                            <option value="InProgress">In Progress</option>
+                            <option value="Review">Under Review</option>
+                            <option value="Planning">Planning</option>
+                            <option value="Completed">Completed</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="projectsList" class="projects-list">
+                    <!-- Projects will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Content View -->
+            <div id="contentView" class="view">
+                <div class="view-header">
+                    <div class="view-actions">
+                        <select id="contentFilter" class="filter-select">
+                            <option value="">All Content</option>
+                            <option value="Pending">Pending Approval</option>
+                            <option value="Approved">Approved</option>
+                            <option value="Revision">Needs Revision</option>
+                            <option value="Rejected">Rejected</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="contentApprovalsList" class="content-approvals-list">
+                    <!-- Content approvals will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Messages View -->
+            <div id="messagesView" class="view">
+                <div class="messages-layout">
+                    <div class="message-threads">
+                        <div class="threads-header">
+                            <h3>Conversations</h3>
+                            <button id="newThreadBtn" class="new-thread-btn">+ New</button>
+                        </div>
+                        <div id="messageThreadsList" class="threads-list">
+                            <!-- Message threads will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="message-conversation">
+                        <div id="conversationHeader" class="conversation-header">
+                            <h3>Select a conversation</h3>
+                        </div>
+                        <div id="conversationMessages" class="conversation-messages">
+                            <div class="no-conversation">
+                                <p>Select a conversation to start messaging</p>
+                            </div>
+                        </div>
+                        <div id="messageInput" class="message-input" style="display: none;">
+                            <div class="input-group">
+                                <textarea id="messageText" placeholder="Type your message..." rows="3"></textarea>
+                                <button id="sendMessageBtn" class="send-btn">Send</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Billing View -->
+            <div id="billingView" class="view">
+                <div class="billing-summary">
+                    <div class="billing-stats">
+                        <div class="billing-stat">
+                            <h3 id="totalSpent">$0</h3>
+                            <p>Total Spent</p>
+                        </div>
+                        <div class="billing-stat">
+                            <h3 id="outstandingAmount">$0</h3>
+                            <p>Outstanding</p>
+                        </div>
+                        <div class="billing-stat">
+                            <h3 id="nextPayment">-</h3>
+                            <p>Next Payment</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="billing-content">
+                    <div class="outstanding-invoices">
+                        <h3>Outstanding Invoices</h3>
+                        <div id="outstandingInvoicesList" class="invoices-list">
+                            <!-- Outstanding invoices will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="billing-history">
+                        <h3>Billing History</h3>
+                        <div id="billingHistoryList" class="billing-history-list">
+                            <!-- Billing history will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics View -->
+            <div id="analyticsView" class="view">
+                <div class="analytics-controls">
+                    <div class="date-range">
+                        <label for="analyticsFromDate">From:</label>
+                        <input type="date" id="analyticsFromDate" class="date-input">
+                        <label for="analyticsToDate">To:</label>
+                        <input type="date" id="analyticsToDate" class="date-input">
+                        <button id="updateAnalyticsBtn" class="update-btn">Update</button>
+                    </div>
+                    <div class="report-actions">
+                        <select id="reportType" class="report-select">
+                            <option value="ProjectSummary">Project Summary</option>
+                            <option value="ContentDelivery">Content Delivery</option>
+                            <option value="FinancialSummary">Financial Summary</option>
+                            <option value="PerformanceKPI">Performance KPI</option>
+                        </select>
+                        <button id="generateReportBtn" class="generate-report-btn">Generate Report</button>
+                    </div>
+                </div>
+                <div class="analytics-grid">
+                    <div class="analytics-chart">
+                        <h3>Project Progress</h3>
+                        <canvas id="projectProgressChart" width="400" height="200"></canvas>
+                    </div>
+                    <div class="analytics-chart">
+                        <h3>Content Delivery</h3>
+                        <canvas id="contentDeliveryChart" width="400" height="200"></canvas>
+                    </div>
+                    <div class="performance-metrics">
+                        <h3>Performance Metrics</h3>
+                        <div id="performanceMetricsList" class="metrics-list">
+                            <!-- Performance metrics will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="monthly-activity">
+                        <h3>Monthly Activity</h3>
+                        <div id="monthlyActivityList" class="activity-chart">
+                            <!-- Monthly activity chart will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div id="projectDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Project Details</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Project details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="contentApprovalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Content Approval</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Content approval details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <div id="newThreadModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Start New Conversation</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="newThreadForm">
+                    <div class="form-group">
+                        <label for="threadProjectSelect">Project</label>
+                        <select id="threadProjectSelect" required>
+                            <option value="">Select a project</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="threadSubject">Subject</label>
+                        <input type="text" id="threadSubject" required placeholder="What would you like to discuss?">
+                    </div>
+                    <div class="form-group">
+                        <label for="threadMessage">Initial Message</label>
+                        <textarea id="threadMessage" rows="4" required placeholder="Type your message..."></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+                        <button type="submit" class="btn btn-primary">Start Conversation</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/dashboard/core.js" type="module"></script>
+    <script src="assets/js/dashboard/api.js" type="module"></script>
+    <script src="assets/js/dashboard/notifications.js" type="module"></script>
+    <script src="assets/js/dashboard/projects.js" type="module"></script>
+    <script src="assets/js/dashboard/content.js" type="module"></script>
+    <script src="assets/js/dashboard/messages.js" type="module"></script>
+    <script src="assets/js/dashboard/billing.js" type="module"></script>
+    <script src="assets/js/dashboard/analytics.js" type="module"></script>
+    <script src="assets/js/dashboard/app.js" type="module"></script>
+</body>
+</html>

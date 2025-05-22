@@ -161,6 +161,17 @@ func (r *PostgresProjectRepository) Delete(ctx context.Context, id uuid.UUID) er
 	return nil
 }
 
+func (r *PostgresProjectRepository) GetByID(ctx context.Context, id uuid.UUID) (*entities.Project, error) {
+	// Delegate to FindByID for now
+	return r.FindByID(ctx, id)
+}
+
+func (r *PostgresProjectRepository) GetByClientID(ctx context.Context, clientID uuid.UUID) ([]*entities.Project, error) {
+	// Delegate to FindByClientID for now
+	projects, _, err := r.FindByClientID(ctx, clientID, 0, 100) // Get first 100 projects
+	return projects, err
+}
+
 // PostgresContentRepository implements the ContentRepository interface
 type PostgresContentRepository struct {
 	db *sql.DB
