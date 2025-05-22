@@ -36,35 +36,39 @@ type Money struct {
 
 // Project represents a content creation project
 type Project struct {
-	ProjectID   uuid.UUID     `json:"projectId"`
-	ClientID    uuid.UUID     `json:"clientId"`
-	Title       string        `json:"title"`
-	Description string        `json:"description"`
-	ContentType ContentType   `json:"contentType"`
-	Deadline    time.Time     `json:"deadline"`
-	Budget      Money         `json:"budget"`
-	Priority    Priority      `json:"priority"`
-	Status      ProjectStatus `json:"status"`
-	CreatedAt   time.Time     `json:"createdAt"`
-	UpdatedAt   time.Time     `json:"updatedAt"`
-	Contents    []*Content    `json:"contents,omitempty"`
+	ProjectID    uuid.UUID              `json:"projectId"`
+	ClientID     uuid.UUID              `json:"clientId"`
+	Title        string                 `json:"title"`
+	Description  string                 `json:"description"`
+	ContentType  ContentType            `json:"contentType"`
+	Deadline     time.Time              `json:"deadline"`
+	Budget       Money                  `json:"budget"`
+	Priority     Priority               `json:"priority"`
+	Status       ProjectStatus          `json:"status"`
+	Requirements []string               `json:"requirements,omitempty"`
+	Metadata     map[string]interface{} `json:"metadata,omitempty"`
+	CreatedAt    time.Time              `json:"createdAt"`
+	UpdatedAt    time.Time              `json:"updatedAt"`
+	Contents     []*Content             `json:"contents,omitempty"`
 }
 
 // NewProject creates a new project with the given properties
 func NewProject(clientID uuid.UUID, title, description string, contentType ContentType, deadline time.Time, budget Money) (*Project, error) {
 	project := &Project{
-		ProjectID:   uuid.New(),
-		ClientID:    clientID,
-		Title:       title,
-		Description: description,
-		ContentType: contentType,
-		Deadline:    deadline,
-		Budget:      budget,
-		Priority:    PriorityMedium, // Default priority
-		Status:      ProjectStatusDraft,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
-		Contents:    []*Content{},
+		ProjectID:    uuid.New(),
+		ClientID:     clientID,
+		Title:        title,
+		Description:  description,
+		ContentType:  contentType,
+		Deadline:     deadline,
+		Budget:       budget,
+		Priority:     PriorityMedium, // Default priority
+		Status:       ProjectStatusDraft,
+		Requirements: []string{},
+		Metadata:     make(map[string]interface{}),
+		CreatedAt:    time.Now(),
+		UpdatedAt:    time.Now(),
+		Contents:     []*Content{},
 	}
 
 	if err := project.Validate(); err != nil {

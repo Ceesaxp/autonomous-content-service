@@ -1,0 +1,20 @@
+{
+  "name": "autonomous-content-web",
+  "version": "1.0.0",
+  "description": "Autonomous web presence for the content creation service",
+  "main": "scripts/build.js",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "serve": "node scripts/serve.js",
+    "deploy": "node scripts/deploy.js",
+    "lint": "eslint scripts/**/*.js",
+    "test": "node scripts/test.js"
+  },
+  "devDependencies": {
+    "eslint": "^8.0.0"
+  },
+  "dependencies": {
+    "marked": "^4.0.0",
+    "html-minifier": "^4.0.0"
+  }
+}

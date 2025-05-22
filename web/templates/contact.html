@@ -1,0 +1,229 @@
+{{ content }}
+
+<section class="page-hero">
+    <div class="container">
+        <h1>Start Your Content Project</h1>
+        <p>Get a quote for your autonomous content creation needs</p>
+    </div>
+</section>
+
+<section class="contact-form-section">
+    <div class="container">
+        <div class="contact-grid">
+            <div class="contact-form">
+                <h2>Project Request Form</h2>
+                <form id="project-form" class="project-form">
+                    <div class="form-step active" data-step="1">
+                        <h3>Tell us about your project</h3>
+                        
+                        <div class="form-group">
+                            <label for="project-type">Project Type *</label>
+                            <select id="project-type" required>
+                                <option value="">Select project type</option>
+                                {{#each services}}
+                                <option value="{{ name }}">{{ name }}</option>
+                                {{/each}}
+                                <option value="other">Other (please specify)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="project-description">Project Description *</label>
+                            <textarea id="project-description" rows="4" placeholder="Describe your content needs, target audience, and key objectives..." required></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="word-count">Estimated Word Count *</label>
+                            <select id="word-count" required>
+                                <option value="">Select word count</option>
+                                <option value="100-500">100-500 words</option>
+                                <option value="500-1000">500-1,000 words</option>
+                                <option value="1000-2000">1,000-2,000 words</option>
+                                <option value="2000-5000">2,000-5,000 words</option>
+                                <option value="5000+">5,000+ words</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="deadline">Preferred Deadline *</label>
+                            <select id="deadline" required>
+                                <option value="">Select timeline</option>
+                                <option value="rush">Rush (6-12 hours) +50%</option>
+                                <option value="express">Express (12-24 hours) +25%</option>
+                                <option value="standard">Standard (24-48 hours)</option>
+                                <option value="flexible">Flexible (3-7 days)</option>
+                            </select>
+                        </div>
+
+                        <button type="button" class="btn-primary" onclick="nextStep()">Next Step</button>
+                    </div>
+
+                    <div class="form-step" data-step="2">
+                        <h3>Content Specifications</h3>
+                        
+                        <div class="form-group">
+                            <label for="tone">Content Tone</label>
+                            <select id="tone">
+                                <option value="professional">Professional</option>
+                                <option value="casual">Casual & Friendly</option>
+                                <option value="technical">Technical</option>
+                                <option value="persuasive">Persuasive</option>
+                                <option value="educational">Educational</option>
+                                <option value="creative">Creative</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="target-audience">Target Audience</label>
+                            <input type="text" id="target-audience" placeholder="e.g., B2B executives, tech enthusiasts, general consumers">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="keywords">SEO Keywords (optional)</label>
+                            <input type="text" id="keywords" placeholder="Enter comma-separated keywords">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="references">Reference Materials</label>
+                            <textarea id="references" rows="3" placeholder="Links to competitor content, style guides, or examples"></textarea>
+                        </div>
+
+                        <div class="form-navigation">
+                            <button type="button" class="btn-secondary" onclick="prevStep()">Previous</button>
+                            <button type="button" class="btn-primary" onclick="nextStep()">Next Step</button>
+                        </div>
+                    </div>
+
+                    <div class="form-step" data-step="3">
+                        <h3>Contact Information</h3>
+                        
+                        <div class="form-group">
+                            <label for="client-name">Full Name *</label>
+                            <input type="text" id="client-name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="client-email">Email Address *</label>
+                            <input type="email" id="client-email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="company">Company/Organization</label>
+                            <input type="text" id="company">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="budget">Budget Range (optional)</label>
+                            <select id="budget">
+                                <option value="">Select budget range</option>
+                                <option value="under-100">Under $100</option>
+                                <option value="100-500">$100 - $500</option>
+                                <option value="500-1000">$500 - $1,000</option>
+                                <option value="1000-5000">$1,000 - $5,000</option>
+                                <option value="5000+">$5,000+</option>
+                            </select>
+                        </div>
+
+                        <div class="form-navigation">
+                            <button type="button" class="btn-secondary" onclick="prevStep()">Previous</button>
+                            <button type="submit" class="btn-primary">Submit Request</button>
+                        </div>
+                    </div>
+
+                    <div class="form-step" data-step="4">
+                        <div class="form-success">
+                            <h3>✅ Request Submitted!</h3>
+                            <p>Thank you for your project request. Our autonomous system is processing your requirements and will send you a detailed quote within the next hour.</p>
+                            <div class="next-steps">
+                                <h4>What happens next?</h4>
+                                <ol>
+                                    <li>Our AI analyzes your project requirements</li>
+                                    <li>You'll receive a detailed quote via email</li>
+                                    <li>Upon approval, content creation begins immediately</li>
+                                    <li>You'll receive updates through our client portal</li>
+                                </ol>
+                            </div>
+                            <button type="button" class="btn-primary" onclick="openClientPortal()">Access Client Portal</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="form-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <div class="progress-steps">
+                        <span class="step active">1</span>
+                        <span class="step">2</span>
+                        <span class="step">3</span>
+                        <span class="step">✓</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-info">
+                <div class="contact-card">
+                    <h3>Quick Contact</h3>
+                    <div class="contact-details">
+                        <div class="contact-item">
+                            <strong>Email:</strong>
+                            <a href="mailto:{{ contact.email }}">{{ contact.email }}</a>
+                        </div>
+                        <div class="contact-item">
+                            <strong>Phone:</strong>
+                            <a href="tel:{{ contact.phone }}">{{ contact.phone }}</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pricing-preview">
+                    <h3>Estimated Pricing</h3>
+                    <div id="price-estimate" class="price-display">
+                        <div class="price-amount">Starting at $50</div>
+                        <div class="price-note">Final price depends on project specifications</div>
+                    </div>
+                </div>
+
+                <div class="service-guarantee">
+                    <h3>Our Guarantee</h3>
+                    <ul>
+                        <li>✓ 100% original content</li>
+                        <li>✓ SEO optimized</li>
+                        <li>✓ Unlimited revisions</li>
+                        <li>✓ 24-hour turnaround</li>
+                        <li>✓ Money-back guarantee</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="faq-section">
+    <div class="container">
+        <h2>Frequently Asked Questions</h2>
+        <div class="faq-grid">
+            <div class="faq-item">
+                <h4>How fast can you deliver content?</h4>
+                <p>Our autonomous system can deliver most content within 24 hours. Rush orders (6-12 hours) are available for urgent needs.</p>
+            </div>
+            <div class="faq-item">
+                <h4>What if I need revisions?</h4>
+                <p>We offer unlimited revisions to ensure your complete satisfaction. Our AI learns from feedback to improve future content.</p>
+            </div>
+            <div class="faq-item">
+                <h4>Is the content plagiarism-free?</h4>
+                <p>Yes, all content is 100% original. Our system includes built-in plagiarism detection and creates unique content every time.</p>
+            </div>
+            <div class="faq-item">
+                <h4>How do you ensure quality?</h4>
+                <p>Our multi-pass AI review system checks for grammar, style, SEO optimization, and factual accuracy before delivery.</p>
+            </div>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,178 @@
+{{ content }}
+
+<section class="page-hero">
+    <div class="container">
+        <h1>Our Portfolio</h1>
+        <p>Examples of autonomous content creation in action</p>
+    </div>
+</section>
+
+<section class="portfolio-filters">
+    <div class="container">
+        <div class="filter-tabs">
+            <button class="filter-tab active" data-filter="all">All</button>
+            <button class="filter-tab" data-filter="blog">Blog Posts</button>
+            <button class="filter-tab" data-filter="marketing">Marketing Copy</button>
+            <button class="filter-tab" data-filter="technical">Technical Docs</button>
+            <button class="filter-tab" data-filter="social">Social Media</button>
+        </div>
+    </div>
+</section>
+
+<section class="portfolio-grid">
+    <div class="container">
+        <div id="portfolio-items" class="portfolio-items">
+            <!-- Portfolio items will be loaded dynamically -->
+            <div class="portfolio-item" data-category="blog">
+                <div class="portfolio-card">
+                    <h3>AI in Healthcare: Revolutionary Changes</h3>
+                    <p class="portfolio-meta">Blog Post • 1,200 words • Technology</p>
+                    <p class="portfolio-excerpt">
+                        Comprehensive analysis of AI's impact on healthcare delivery, 
+                        featuring case studies and future predictions...
+                    </p>
+                    <div class="portfolio-metrics">
+                        <span>📈 +300% engagement</span>
+                        <span>🔍 95% SEO score</span>
+                    </div>
+                    <button class="btn-outline" onclick="viewPortfolioItem('ai-healthcare')">View Sample</button>
+                </div>
+            </div>
+
+            <div class="portfolio-item" data-category="marketing">
+                <div class="portfolio-card">
+                    <h3>SaaS Landing Page Copy</h3>
+                    <p class="portfolio-meta">Marketing Copy • 800 words • B2B SaaS</p>
+                    <p class="portfolio-excerpt">
+                        Conversion-optimized landing page copy that increased 
+                        sign-ups by 45% for a project management tool...
+                    </p>
+                    <div class="portfolio-metrics">
+                        <span>💰 +45% conversions</span>
+                        <span>⚡ A/B tested</span>
+                    </div>
+                    <button class="btn-outline" onclick="viewPortfolioItem('saas-landing')">View Sample</button>
+                </div>
+            </div>
+
+            <div class="portfolio-item" data-category="technical">
+                <div class="portfolio-card">
+                    <h3>API Integration Guide</h3>
+                    <p class="portfolio-meta">Technical Documentation • 2,000 words • Developer Guide</p>
+                    <p class="portfolio-excerpt">
+                        Step-by-step API integration documentation with code examples 
+                        and troubleshooting tips...
+                    </p>
+                    <div class="portfolio-metrics">
+                        <span>👥 500+ developers helped</span>
+                        <span>📚 Comprehensive</span>
+                    </div>
+                    <button class="btn-outline" onclick="viewPortfolioItem('api-guide')">View Sample</button>
+                </div>
+            </div>
+
+            <div class="portfolio-item" data-category="blog">
+                <div class="portfolio-card">
+                    <h3>Sustainable Business Practices</h3>
+                    <p class="portfolio-meta">Blog Post • 1,500 words • Business</p>
+                    <p class="portfolio-excerpt">
+                        Deep dive into sustainable business practices that drive 
+                        both profit and positive environmental impact...
+                    </p>
+                    <div class="portfolio-metrics">
+                        <span>🌱 Trending topic</span>
+                        <span>📊 High authority score</span>
+                    </div>
+                    <button class="btn-outline" onclick="viewPortfolioItem('sustainable-business')">View Sample</button>
+                </div>
+            </div>
+
+            <div class="portfolio-item" data-category="marketing">
+                <div class="portfolio-card">
+                    <h3>Email Campaign Series</h3>
+                    <p class="portfolio-meta">Email Marketing • 5-part series • E-commerce</p>
+                    <p class="portfolio-excerpt">
+                        High-converting email sequence for product launches, 
+                        resulting in 65% open rates...
+                    </p>
+                    <div class="portfolio-metrics">
+                        <span>📧 65% open rate</span>
+                        <span>💎 Premium conversion</span>
+                    </div>
+                    <button class="btn-outline" onclick="viewPortfolioItem('email-series')">View Sample</button>
+                </div>
+            </div>
+
+            <div class="portfolio-item" data-category="social">
+                <div class="portfolio-card">
+                    <h3>Social Media Campaign</h3>
+                    <p class="portfolio-meta">Social Media • 30-day campaign • Lifestyle Brand</p>
+                    <p class="portfolio-excerpt">
+                        Engaging social media content that built community 
+                        and increased follower engagement by 200%...
+                    </p>
+                    <div class="portfolio-metrics">
+                        <span>📱 +200% engagement</span>
+                        <span>👥 Viral potential</span>
+                    </div>
+                    <button class="btn-outline" onclick="viewPortfolioItem('social-campaign')">View Sample</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="portfolio-stats">
+    <div class="container">
+        <h2>Portfolio Performance</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">1,000+</div>
+                <div class="stat-label">Content Pieces</div>
+                <div class="stat-description">Created across all industries</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">95%</div>
+                <div class="stat-label">Client Satisfaction</div>
+                <div class="stat-description">Based on project reviews</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">24hrs</div>
+                <div class="stat-label">Average Delivery</div>
+                <div class="stat-description">From request to completion</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">300%</div>
+                <div class="stat-label">ROI Improvement</div>
+                <div class="stat-description">Average client content ROI</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="portfolio-cta">
+    <div class="container">
+        <h2>Want to See Your Content Here?</h2>
+        <p>Join our growing portfolio of successful content projects</p>
+        <div class="cta-actions">
+            <a href="contact.html" class="btn-primary">Start Your Project</a>
+            <a href="services.html" class="btn-secondary">Explore Services</a>
+        </div>
+    </div>
+</section>
+
+<!-- Portfolio Item Modal -->
+<div id="portfolio-modal" class="portfolio-modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modal-title">Portfolio Item</h3>
+            <button onclick="closePortfolioModal()">×</button>
+        </div>
+        <div class="modal-body" id="modal-body">
+            <!-- Content loaded dynamically -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn-primary" onclick="requestSimilarContent()">Request Similar Content</button>
+        </div>
+    </div>
+</div>

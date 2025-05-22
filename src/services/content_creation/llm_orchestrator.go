@@ -11,10 +11,10 @@ import (
 
 // LLMOrchestrator manages the LLM interactions and context
 type LLMOrchestrator struct {
-	LLMClient         LLMClient
-	ContextManager    ContextManager
-	TemplateManager   *PromptTemplateManager
-	MetricsCollector  *MetricsCollector
+	LLMClient        LLMClient
+	ContextManager   ContextManager
+	TemplateManager  *PromptTemplateManager
+	MetricsCollector *MetricsCollector
 }
 
 // NewLLMOrchestrator creates a new LLM orchestrator
@@ -40,19 +40,19 @@ func (o *LLMOrchestrator) GenerateContent(
 	data PromptData,
 ) (string, error) {
 	startTime := time.Now()
-	
+
 	// Get or initialize context
 	err := o.ContextManager.SwitchContext(ctx, projectID)
 	if err != nil {
 		return "", fmt.Errorf("failed to switch context: %w", err)
 	}
-	
+
 	// Generate the prompt using the template
 	prompt, err := o.TemplateManager.GeneratePrompt(contentType, stage, data)
 	if err != nil {
 		return "", fmt.Errorf("failed to generate prompt: %w", err)
 	}
-	
+
 	// Add the prompt to the context
 	promptEntry := ContextEntry{
 		Role:      "user",
@@ -68,25 +68,25 @@ func (o *LLMOrchestrator) GenerateContent(
 	if err != nil {
 		return "", fmt.Errorf("failed to add prompt to context: %w", err)
 	}
-	
+
 	// Get the full context window
 	contextWindow, err := o.ContextManager.GetContext(ctx, projectID)
 	if err != nil {
 		return "", fmt.Errorf("failed to get context: %w", err)
 	}
-	
+
 	// Prepare the context for the LLM
 	var messages []string
 	for _, entry := range contextWindow.Entries {
 		messages = append(messages, entry.Content)
 	}
-	
+
 	// Generate the content
 	response, err := o.LLMClient.Generate(ctx, messages)
 	if err != nil {
 		return "", fmt.Errorf("LLM generation failed: %w", err)
 	}
-	
+
 	// Add the response to the context
 	responseEntry := ContextEntry{
 		Role:      "assistant",
@@ -103,7 +103,7 @@ func (o *LLMOrchestrator) GenerateContent(
 	if err != nil {
 		return "", fmt.Errorf("failed to add response to context: %w", err)
 	}
-	
+
 	// Collect metrics
 	o.MetricsCollector.RecordGeneration(
 		contentType,
@@ -112,7 +112,7 @@ func (o *LLMOrchestrator) GenerateContent(
 		estimateTokens(prompt),
 		estimateTokens(response),
 	)
-	
+
 	return response, nil
 }
 
@@ -125,28 +125,28 @@ func (o *LLMOrchestrator) InjectClientContext(
 	// Create a domain knowledge map from the client profile
 	knowledge := map[string]interface{}{
 		"industry":       clientProfile.Industry,
-		"brandVoice":     clientProfile.BrandVoice,
+		"brandVoice":     clientProfile.BrandGuidelines, // was: BrandVoice
 		"targetAudience": clientProfile.TargetAudience,
 		"contentGoals":   clientProfile.ContentGoals,
 	}
-	
+
 	// Add style preferences
 	for k, v := range clientProfile.StylePreferences {
 		knowledge["style_"+k] = v
 	}
-	
+
 	// Inject the knowledge
 	return o.ContextManager.InjectDomainKnowledge(ctx, projectID, knowledge)
 }
 
 // MetricsCollector collects metrics about LLM usage
 type MetricsCollector struct {
-	Generations               int
-	TotalLatency              time.Duration
-	TotalPromptTokens         int
-	TotalResponseTokens       int
-	GenerationsByContentType  map[entities.ContentType]int
-	GenerationsByStage        map[string]int
+	Generations              int
+	TotalLatency             time.Duration
+	TotalPromptTokens        int
+	TotalResponseTokens      int
+	GenerationsByContentType map[entities.ContentType]int
+	GenerationsByStage       map[string]int
 }
 
 // NewMetricsCollector creates a new metrics collector
@@ -179,7 +179,7 @@ func (m *MetricsCollector) GetMetrics() map[string]interface{} {
 	if m.Generations > 0 {
 		avgLatency = float64(m.TotalLatency) / float64(m.Generations) / float64(time.Millisecond)
 	}
-	
+
 	return map[string]interface{}{
 		"totalGenerations":     m.Generations,
 		"averageLatencyMs":     avgLatency,

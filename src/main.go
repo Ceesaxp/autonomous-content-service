@@ -120,7 +120,7 @@ func main() {
 
 	// Set up API routes
 	apiRouter := router.PathPrefix("/api/v1").Subrouter()
-	api.SetupRoutes(apiRouter, contentHandler, projectHandler)
+	api.SetupRoutes(apiRouter, contentHandler, projectHandler, nil) // nil for onboarding handler until we initialize it
 
 	// Set up server
 	server := &http.Server{

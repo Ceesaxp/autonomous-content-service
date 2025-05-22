@@ -1,0 +1,130 @@
+{{ content }}
+
+<section class="page-hero">
+    <div class="container">
+        <h1>Our Autonomous Services</h1>
+        <p>Professional content creation powered by advanced AI, delivered 24/7</p>
+    </div>
+</section>
+
+<section class="services-detailed">
+    <div class="container">
+        {{#each services}}
+        <div class="service-detail" id="{{ name }}">
+            <div class="service-header">
+                <h2>{{ name }}</h2>
+                <div class="service-price">{{ pricing }}</div>
+            </div>
+            <div class="service-content">
+                <div class="service-description">
+                    <p>{{ description }}</p>
+                    <ul class="service-features">
+                        <li>✓ AI-powered content creation</li>
+                        <li>✓ SEO optimization included</li>
+                        <li>✓ Multi-pass quality review</li>
+                        <li>✓ Fast turnaround times</li>
+                        <li>✓ Revision support</li>
+                        <li>✓ 24/7 availability</li>
+                    </ul>
+                </div>
+                <div class="service-actions">
+                    <a href="contact.html?service={{ name }}" class="btn-primary">Get Quote</a>
+                    <button class="btn-outline" onclick="openPriceCalculator('{{ name }}')">Calculate Price</button>
+                </div>
+            </div>
+        </div>
+        {{/each}}
+    </div>
+</section>
+
+<section class="pricing-calculator" id="pricing-calculator" style="display: none;">
+    <div class="container">
+        <div class="calculator-modal">
+            <div class="calculator-header">
+                <h3>Price Calculator</h3>
+                <button onclick="closePriceCalculator()">×</button>
+            </div>
+            <form id="price-form">
+                <div class="form-group">
+                    <label for="content-type">Content Type</label>
+                    <select id="content-type" required>
+                        <option value="">Select service</option>
+                        {{#each services}}
+                        <option value="{{ name }}">{{ name }}</option>
+                        {{/each}}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="word-count">Word Count</label>
+                    <input type="number" id="word-count" min="100" max="10000" value="500" required>
+                </div>
+                <div class="form-group">
+                    <label for="urgency">Delivery Timeline</label>
+                    <select id="urgency" required>
+                        <option value="standard">Standard (24-48 hours)</option>
+                        <option value="express">Express (12-24 hours) +25%</option>
+                        <option value="rush">Rush (6-12 hours) +50%</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="complexity">Content Complexity</label>
+                    <select id="complexity" required>
+                        <option value="basic">Basic</option>
+                        <option value="intermediate">Intermediate +20%</option>
+                        <option value="advanced">Advanced +40%</option>
+                        <option value="expert">Expert +60%</option>
+                    </select>
+                </div>
+                <div class="price-result">
+                    <div class="estimated-price">
+                        Estimated Price: <span id="calculated-price">$0</span>
+                    </div>
+                    <button type="button" class="btn-primary" onclick="proceedWithQuote()">Get Detailed Quote</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<section class="service-benefits">
+    <div class="container">
+        <h2>Why Choose Autonomous Content Creation?</h2>
+        <div class="benefits-grid">
+            <div class="benefit">
+                <h3>🚀 Speed</h3>
+                <p>Content created in hours, not days</p>
+            </div>
+            <div class="benefit">
+                <h3>🎯 Quality</h3>
+                <p>Multi-pass AI review ensures excellence</p>
+            </div>
+            <div class="benefit">
+                <h3>💰 Cost-Effective</h3>
+                <p>Premium quality at competitive prices</p>
+            </div>
+            <div class="benefit">
+                <h3>📈 SEO Optimized</h3>
+                <p>Built-in SEO best practices</p>
+            </div>
+            <div class="benefit">
+                <h3>🔄 Scalable</h3>
+                <p>Handle any volume of content needs</p>
+            </div>
+            <div class="benefit">
+                <h3>🤖 24/7 Operation</h3>
+                <p>Always available, never sleeps</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="service-cta">
+    <div class="container">
+        <h2>Ready to Get Started?</h2>
+        <p>Let our autonomous system create exceptional content for your business</p>
+        <div class="cta-actions">
+            <a href="contact.html" class="btn-primary">Start Your Project</a>
+            <a href="portfolio.html" class="btn-secondary">View Examples</a>
+        </div>
+    </div>
+</section>

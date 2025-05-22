@@ -1,0 +1,116 @@
+{{ content }}
+
+<section class="hero">
+    <div class="hero-container">
+        <div class="hero-content">
+            <h1>Autonomous Content Creation</h1>
+            <p class="hero-subtitle">AI-powered content that drives results, delivered autonomously</p>
+            <p class="hero-description">
+                Our autonomous system creates high-quality, SEO-optimized content 24/7 
+                without human intervention. Get professional content at scale.
+            </p>
+            <div class="hero-actions">
+                <button class="btn-primary" data-start-onboarding>Get Started</button>
+                <a href="portfolio.html" class="btn-secondary">View Portfolio</a>
+            </div>
+        </div>
+        <div class="hero-stats">
+            <div class="stat">
+                <div class="stat-number">1000+</div>
+                <div class="stat-label">Content Pieces Created</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Autonomous Operation</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">95%</div>
+                <div class="stat-label">Client Satisfaction</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="services-preview">
+    <div class="container">
+        <h2>Our Autonomous Services</h2>
+        <div class="services-grid">
+            {{#each services}}
+            <div class="service-card">
+                <h3>{{ name }}</h3>
+                <p>{{ description }}</p>
+                <div class="service-pricing">{{ pricing }}</div>
+                <a href="contact.html?service={{ name }}" class="btn-outline">Get Quote</a>
+            </div>
+            {{/each}}
+        </div>
+        <div class="services-cta">
+            <a href="services.html" class="btn-primary">View All Services</a>
+        </div>
+    </div>
+</section>
+
+<section class="how-it-works">
+    <div class="container">
+        <h2>How Our Autonomous System Works</h2>
+        <div class="process-steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Submit Request</h3>
+                <p>Tell us what content you need through our automated form or chat interface</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>AI Analysis</h3>
+                <p>Our system analyzes requirements and creates an optimized content strategy</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Autonomous Creation</h3>
+                <p>Advanced AI creates, reviews, and refines content automatically</p>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <h3>Quality Assurance</h3>
+                <p>Multi-layer quality checks ensure professional-grade output</p>
+            </div>
+            <div class="step">
+                <div class="step-number">5</div>
+                <h3>Delivery</h3>
+                <p>Receive your content and automatic updates via our client portal</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="testimonials">
+    <div class="container">
+        <h2>What Our Clients Say</h2>
+        <div class="testimonials-grid">
+            {{#each testimonials}}
+            <div class="testimonial-card">
+                <div class="testimonial-content">
+                    <p>"{{ content }}"</p>
+                </div>
+                <div class="testimonial-author">
+                    <strong>{{ author }}</strong>
+                    <span>{{ company }}</span>
+                </div>
+            </div>
+            {{/each}}
+        </div>
+    </div>
+</section>
+
+<section class="cta">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Ready to Experience Autonomous Content Creation?</h2>
+            <p>Join hundreds of businesses leveraging AI for their content needs</p>
+            <div class="cta-actions">
+                <a href="contact.html" class="btn-primary">Start Your Project</a>
+                <a href="#" class="btn-secondary" onclick="openClientPortal()">Client Login</a>
+            </div>
+        </div>
+    </div>
+</section>
