@@ -34,8 +34,8 @@ Implement secure configuration management for development, staging, and producti
 ### Network Architecture
 ```
 Internet → Caddy (443/80) → API (8080) → Database (5432)
-                         → Web (80)    → Redis (6379)
-                         → Hardhat (8545)
+                          → Web (80)    → Redis (6379)
+                          → Hardhat (8545)
 ```
 
 ## Security Considerations

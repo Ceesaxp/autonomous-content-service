@@ -122,8 +122,7 @@ func main() {
 	var dashboardHandler *handlers.DashboardHandlers = nil
 
 	// Set up API routes
-	apiRouter := router.PathPrefix("/api/v1").Subrouter()
-	api.SetupRoutes(apiRouter, contentHandler, projectHandler, nil, dashboardHandler) // nil for onboarding handler until we initialize it
+	api.SetupRoutes(router, contentHandler, projectHandler, nil, dashboardHandler) // nil for onboarding handler until we initialize it
 
 	// Set up server
 	server := &http.Server{

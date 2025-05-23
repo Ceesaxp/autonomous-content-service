@@ -12,6 +12,13 @@ func SetupRoutes(router *mux.Router, contentHandler *handlers.ContentHandler, pr
 	// Create web handler
 	webHandler := handlers.NewWebHandler(projectHandler, contentHandler)
 
+	// Health check endpoint
+	router.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"status":"healthy","service":"autonomous-content-service"}`))
+	}).Methods("GET")
+
 	// API v1 routes
 	apiV1 := router.PathPrefix("/api/v1").Subrouter()
 	

@@ -1,0 +1,39 @@
+version: '3.8'
+
+# Development overrides
+services:
+  api:
+    build:
+      context: ../
+      dockerfile: docker/services/api/Dockerfile
+      target: builder  # Use builder stage for hot reload
+    volumes:
+      - ../src:/build/src:ro
+      - go_mod_cache:/go/pkg/mod
+    environment:
+      CGO_ENABLED: 0
+      GOOS: linux
+      APP_ENV: development
+    command: |
+      sh -c "
+        go install github.com/cosmtrek/air@latest &&
+        air -c /build/.air.toml
+      "
+
+  caddy:
+    environment:
+      CADDY_DEBUG: debug
+    volumes:
+      - ../web:/srv/web:ro
+      - ./services/caddy/Caddyfile.dev:/etc/caddy/Caddyfile:ro
+
+  postgres:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"
+
+volumes:
+  go_mod_cache:

@@ -64,8 +64,8 @@ contract TreasuryCore is ITreasury, MultiSigWallet, ReentrancyGuard, Pausable, A
     mapping(address => AssetConfig) public assetConfigs;
     address[] public managedAssets;
     
-    mapping(uint256 => FinancialTransaction) public transactions;
-    uint256 public transactionCounter;
+    mapping(uint256 => FinancialTransaction) public financialTransactions;
+    uint256 public financialTransactionCounter;
     
     mapping(TransactionCategory => uint256) public categoryTotals;
     mapping(address => mapping(TransactionCategory => uint256)) public tokenCategoryTotals;
@@ -300,20 +300,20 @@ contract TreasuryCore is ITreasury, MultiSigWallet, ReentrancyGuard, Pausable, A
         TransactionCategory category,
         string memory description
     ) internal {
-        transactionCounter = transactionCounter.add(1);
+        financialTransactionCounter = financialTransactionCounter.add(1);
         
-        transactions[transactionCounter] = FinancialTransaction({
-            id: transactionCounter,
+        financialTransactions[financialTransactionCounter] = FinancialTransaction({
+            id: financialTransactionCounter,
             token: token,
             amount: amount,
             category: category,
             description: description,
             timestamp: block.timestamp,
             initiator: msg.sender,
-            referenceHash: keccak256(abi.encodePacked(transactionCounter, token, amount, category, block.timestamp))
+            referenceHash: keccak256(abi.encodePacked(financialTransactionCounter, token, amount, category, block.timestamp))
         });
         
-        emit TransactionRecorded(transactionCounter, category, amount);
+        emit TransactionRecorded(financialTransactionCounter, category, amount);
     }
 
     function _transferFunds(address token, address recipient, uint256 amount) internal {
@@ -360,11 +360,11 @@ contract TreasuryCore is ITreasury, MultiSigWallet, ReentrancyGuard, Pausable, A
 
     // View functions for financial reporting
     function getTransactionsByCategory(TransactionCategory category) external view returns (uint256[] memory) {
-        uint256[] memory txIds = new uint256[](transactionCounter);
+        uint256[] memory txIds = new uint256[](financialTransactionCounter);
         uint256 count = 0;
         
-        for (uint256 i = 1; i <= transactionCounter; i++) {
-            if (transactions[i].category == category) {
+        for (uint256 i = 1; i <= financialTransactionCounter; i++) {
+            if (financialTransactions[i].category == category) {
                 txIds[count] = i;
                 count++;
             }

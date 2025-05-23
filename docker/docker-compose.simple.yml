@@ -1,0 +1,129 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: contentservice-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-contentservice}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+      POSTGRES_DB: ${DB_NAME:-contentservice}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../src/infrastructure/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-contentservice}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: contentservice-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Go API Service
+  api:
+    build:
+      context: ../
+      dockerfile: docker/services/api/Dockerfile
+    container_name: contentservice-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      # Application
+      APP_ENV: ${APP_ENV:-development}
+      PORT: 8080
+      JWT_SECRET: ${JWT_SECRET:-changeme}
+      
+      # Database
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: ${DB_USER:-contentservice}
+      DB_PASSWORD: ${DB_PASSWORD:-changeme}
+      DB_NAME: ${DB_NAME:-contentservice}
+      
+      # Redis
+      REDIS_URL: redis://redis:6379
+      
+      # LLM
+      LLM_API_KEY: ${LLM_API_KEY:-dummy-key-for-testing}
+      LLM_MODEL: ${LLM_MODEL:-gpt-4}
+      LLM_MAX_TOKENS: ${LLM_MAX_TOKENS:-2048}
+      
+      # Blockchain (disabled for now)
+      HARDHAT_NETWORK_URL: ""
+      TREASURY_CONTRACT_ADDRESS: ""
+      
+      # External Services
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-dummy-key}
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Web Frontend & Reverse Proxy
+  caddy:
+    build:
+      context: ./services/caddy
+      dockerfile: Dockerfile
+    container_name: contentservice-caddy
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ../web:/srv/web:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+      API_URL: http://api:8080
+    networks:
+      - internal
+      - external
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  internal:
+    driver: bridge
+  external:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  caddy_data:
+  caddy_config:
