@@ -234,7 +234,7 @@ REDIS_URL=redis://redis:6379
 1. **.env.example** - Environment variable template
 2. **development.env** - Development configuration
 3. **production.env** - Production configuration
-4. **nginx.conf** - Web server configuration
+4. **Caddyfile** - Caddy server configuration
 
 ## Implementation Timeline
 
