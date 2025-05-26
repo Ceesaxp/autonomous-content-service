@@ -450,8 +450,12 @@ func (r *PostgresMetricsRepository) GetLatestMetric(ctx context.Context, compone
 		return nil, err
 	}
 	
-	json.Unmarshal(contextJSON, &metric.Context)
-	json.Unmarshal(tagsJSON, &metric.Tags)
+	if err := json.Unmarshal(contextJSON, &metric.Context); err != nil {
+		metric.Context = make(map[string]interface{}) // Use empty map on error
+	}
+	if err := json.Unmarshal(tagsJSON, &metric.Tags); err != nil {
+		metric.Tags = []string{} // Use empty slice on error
+	}
 	
 	return &metric, nil
 }
