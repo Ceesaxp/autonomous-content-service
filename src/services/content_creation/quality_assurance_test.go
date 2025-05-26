@@ -555,9 +555,7 @@ func TestQualityAssuranceSystem_Integration(t *testing.T) {
 		t.Error("Multi-pass review should produce results")
 	}
 	
-	if len(result.FactCheckResults.FactualErrors) < 0 {
-		t.Error("Fact check should run without errors")
-	}
+	// Fact check results are already validated by non-nil check
 	
 	if result.PlagiarismResults.OriginalityScore == 0 {
 		t.Error("Plagiarism check should produce score")

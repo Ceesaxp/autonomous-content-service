@@ -436,7 +436,7 @@ func (h *ProjectHandler) ListProjects(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Invalid client ID", http.StatusBadRequest)
 			return
 		}
-		projects, total, err = h.ProjectRepository.FindByClientID(r.Context(), clientID, offset, limit)
+		projects, total, _ = h.ProjectRepository.FindByClientID(r.Context(), clientID, offset, limit)
 	} else if statusStr != "" {
 		status := entities.ProjectStatus(statusStr)
 		projects, total, err = h.ProjectRepository.FindByStatus(r.Context(), status, offset, limit)

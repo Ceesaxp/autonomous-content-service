@@ -115,7 +115,10 @@ func (p *ContentPipeline) CreateContent(ctx context.Context, projectID uuid.UUID
 		// Update content status to indicate error
 		content.UpdateStatus(entities.ContentStatusPlanning)
 		content.UpdateMetadata("error", err.Error())
-		p.contentRepo.Update(ctx, content)
+		if updateErr := p.contentRepo.Update(ctx, content); updateErr != nil {
+			// Log the error but don't override the original error
+			p.recordEvent(ctx, content.ContentID, content.ProjectID, StageResearch, "error", time.Since(startTime), fmt.Sprintf("Failed to update content: %v", updateErr))
+		}
 
 		// Record event
 		p.recordEvent(ctx, content.ContentID, content.ProjectID, StageResearch, "failed", time.Since(startTime), fmt.Sprintf("Pipeline failed: %v", err))
@@ -133,7 +136,9 @@ func (p *ContentPipeline) CreateContent(ctx context.Context, projectID uuid.UUID
 func (p *ContentPipeline) executePipeline(ctx context.Context, content *entities.Content) error {
 	// Research stage
 	content.UpdateStatus(entities.ContentStatusResearching)
-	p.contentRepo.Update(ctx, content)
+	if err := p.contentRepo.Update(ctx, content); err != nil {
+		return fmt.Errorf("failed to update content status to researching: %w", err)
+	}
 
 	researchResult, err := p.executeStage(ctx, content, StageResearch)
 	if err != nil {
@@ -142,7 +147,9 @@ func (p *ContentPipeline) executePipeline(ctx context.Context, content *entities
 
 	// Store research data in content metadata
 	content.UpdateMetadata("research", researchResult.Metadata)
-	p.contentRepo.Update(ctx, content)
+	if err := p.contentRepo.Update(ctx, content); err != nil {
+		return fmt.Errorf("failed to update content with research metadata: %w", err)
+	}
 
 	// Outlining stage
 	outlineResult, err := p.executeStage(ctx, content, StageOutlining)
@@ -152,11 +159,15 @@ func (p *ContentPipeline) executePipeline(ctx context.Context, content *entities
 
 	// Store outline in content metadata and update content
 	content.UpdateMetadata("outline", outlineResult.Content)
-	p.contentRepo.Update(ctx, content)
+	if err := p.contentRepo.Update(ctx, content); err != nil {
+		return fmt.Errorf("failed to update content with outline: %w", err)
+	}
 
 	// Drafting stage
 	content.UpdateStatus(entities.ContentStatusDrafting)
-	p.contentRepo.Update(ctx, content)
+	if err := p.contentRepo.Update(ctx, content); err != nil {
+		return fmt.Errorf("failed to update content status to drafting: %w", err)
+	}
 
 	draftResult, err := p.executeStage(ctx, content, StageDrafting)
 	if err != nil {
@@ -168,11 +179,15 @@ func (p *ContentPipeline) executePipeline(ctx context.Context, content *entities
 	if err != nil {
 		return fmt.Errorf("failed to update content with draft: %w", err)
 	}
-	p.contentRepo.Update(ctx, content)
+	if err := p.contentRepo.Update(ctx, content); err != nil {
+		return fmt.Errorf("failed to update content with draft: %w", err)
+	}
 
 	// Editing stage
 	content.UpdateStatus(entities.ContentStatusEditing)
-	p.contentRepo.Update(ctx, content)
+	if err := p.contentRepo.Update(ctx, content); err != nil {
+		return fmt.Errorf("failed to update content status to editing: %w", err)
+	}
 
 	editResult, err := p.executeStage(ctx, content, StageEditing)
 	if err != nil {
@@ -184,7 +199,9 @@ func (p *ContentPipeline) executePipeline(ctx context.Context, content *entities
 	if err != nil {
 		return fmt.Errorf("failed to update content with edited version: %w", err)
 	}
-	p.contentRepo.Update(ctx, content)
+	if err := p.contentRepo.Update(ctx, content); err != nil {
+		return fmt.Errorf("failed to update content with edited version: %w", err)
+	}
 
 	// Quality check
 	qualityInput := QualityCheckInput{
@@ -210,7 +227,10 @@ func (p *ContentPipeline) executePipeline(ctx context.Context, content *entities
 		// Add suggestions to metadata
 		content.UpdateMetadata("qualitySuggestions", qualityOutput.SuggestionsByCategory)
 		content.UpdateMetadata("keywords", qualityOutput.Keywords)
-		p.contentRepo.Update(ctx, content)
+		if err := p.contentRepo.Update(ctx, content); err != nil {
+			// Log error but don't fail the pipeline
+			fmt.Printf("Warning: Failed to update content with quality results: %v\n", err)
+		}
 	}
 
 	// Finalization stage
@@ -227,7 +247,9 @@ func (p *ContentPipeline) executePipeline(ctx context.Context, content *entities
 
 	// Update content status to review
 	content.UpdateStatus(entities.ContentStatusReview)
-	p.contentRepo.Update(ctx, content)
+	if err := p.contentRepo.Update(ctx, content); err != nil {
+		return fmt.Errorf("failed to update content status to review: %w", err)
+	}
 
 	return nil
 }

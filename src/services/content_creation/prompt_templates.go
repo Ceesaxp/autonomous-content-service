@@ -50,23 +50,23 @@ func NewPromptTemplateManager() *PromptTemplateManager {
 // registerDefaultTemplates registers the default templates for different content types
 func (m *PromptTemplateManager) registerDefaultTemplates() {
 	// Blog post templates
-	m.RegisterTemplate(entities.ContentTypeBlogPost, "research", blogPostResearchTemplate)
-	m.RegisterTemplate(entities.ContentTypeBlogPost, "outline", blogPostOutlineTemplate)
-	m.RegisterTemplate(entities.ContentTypeBlogPost, "draft", blogPostDraftTemplate)
-	m.RegisterTemplate(entities.ContentTypeBlogPost, "edit", blogPostEditTemplate)
-	m.RegisterTemplate(entities.ContentTypeBlogPost, "finalize", blogPostFinalizeTemplate)
+	_ = m.RegisterTemplate(entities.ContentTypeBlogPost, "research", blogPostResearchTemplate)
+	_ = m.RegisterTemplate(entities.ContentTypeBlogPost, "outline", blogPostOutlineTemplate)
+	_ = m.RegisterTemplate(entities.ContentTypeBlogPost, "draft", blogPostDraftTemplate)
+	_ = m.RegisterTemplate(entities.ContentTypeBlogPost, "edit", blogPostEditTemplate)
+	_ = m.RegisterTemplate(entities.ContentTypeBlogPost, "finalize", blogPostFinalizeTemplate)
 	
 	// Social post templates
-	m.RegisterTemplate(entities.ContentTypeSocialPost, "research", socialPostResearchTemplate)
-	m.RegisterTemplate(entities.ContentTypeSocialPost, "draft", socialPostDraftTemplate)
-	m.RegisterTemplate(entities.ContentTypeSocialPost, "edit", socialPostEditTemplate)
+	_ = m.RegisterTemplate(entities.ContentTypeSocialPost, "research", socialPostResearchTemplate)
+	_ = m.RegisterTemplate(entities.ContentTypeSocialPost, "draft", socialPostDraftTemplate)
+	_ = m.RegisterTemplate(entities.ContentTypeSocialPost, "edit", socialPostEditTemplate)
 	
 	// Technical article templates
-	m.RegisterTemplate(entities.ContentTypeTechnicalArticle, "research", technicalArticleResearchTemplate)
-	m.RegisterTemplate(entities.ContentTypeTechnicalArticle, "outline", technicalArticleOutlineTemplate)
-	m.RegisterTemplate(entities.ContentTypeTechnicalArticle, "draft", technicalArticleDraftTemplate)
-	m.RegisterTemplate(entities.ContentTypeTechnicalArticle, "edit", technicalArticleEditTemplate)
-	m.RegisterTemplate(entities.ContentTypeTechnicalArticle, "finalize", technicalArticleFinalizeTemplate)
+	_ = m.RegisterTemplate(entities.ContentTypeTechnicalArticle, "research", technicalArticleResearchTemplate)
+	_ = m.RegisterTemplate(entities.ContentTypeTechnicalArticle, "outline", technicalArticleOutlineTemplate)
+	_ = m.RegisterTemplate(entities.ContentTypeTechnicalArticle, "draft", technicalArticleDraftTemplate)
+	_ = m.RegisterTemplate(entities.ContentTypeTechnicalArticle, "edit", technicalArticleEditTemplate)
+	_ = m.RegisterTemplate(entities.ContentTypeTechnicalArticle, "finalize", technicalArticleFinalizeTemplate)
 	
 	// Add other content types as needed...
 }

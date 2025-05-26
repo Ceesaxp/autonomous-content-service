@@ -18,6 +18,7 @@ type ContentHandler struct {
 	ProjectRepository  repositories.ProjectRepository
 	FeedbackRepository repositories.FeedbackRepository
 	ContentPipeline    *content_creation.ContentPipeline
+	logger             *log.Logger
 }
 
 // NewContentHandler creates a new content handler
@@ -27,6 +28,7 @@ func NewContentHandler(contentRepo repositories.ContentRepository, projectRepo r
 		ProjectRepository:  projectRepo,
 		FeedbackRepository: feedbackRepo,
 		ContentPipeline:    contentPipeline,
+		logger:             log.New(log.Writer(), "[ContentHandler] ", log.LstdFlags),
 	}
 }
 
@@ -123,7 +125,10 @@ func (h *ContentHandler) CreateContent(w http.ResponseWriter, r *http.Request) {
 		for k, v := range req.Metadata {
 			content.UpdateMetadata(k, v)
 		}
-		h.ContentRepository.Update(r.Context(), content)
+		if err := h.ContentRepository.Update(r.Context(), content); err != nil {
+			http.Error(w, "Failed to update content metadata", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	// Prepare response
@@ -154,7 +159,10 @@ func (h *ContentHandler) CreateContent(w http.ResponseWriter, r *http.Request) {
 	// Return response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(res)
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetContent handles requests to retrieve content details
@@ -201,7 +209,10 @@ func (h *ContentHandler) GetContent(w http.ResponseWriter, r *http.Request) {
 
 	// Return response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(res)
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // UpdateContent handles requests to update content
@@ -285,7 +296,10 @@ func (h *ContentHandler) UpdateContent(w http.ResponseWriter, r *http.Request) {
 
 	// Return response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(res)
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetContentVersions handles requests to retrieve content version history
@@ -328,7 +342,10 @@ func (h *ContentHandler) GetContentVersions(w http.ResponseWriter, r *http.Reque
 
 	// Return response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // ApproveContent handles requests to approve content
@@ -392,5 +409,8 @@ func (h *ContentHandler) ApproveContent(w http.ResponseWriter, r *http.Request) 
 
 	// Return response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(res)
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }

@@ -181,7 +181,7 @@ func parseEngagementAnalysis(response string) (float64, []string) {
 		scoreRegex := regexp.MustCompile(`"score"\s*:\s*(\d+(\.\d+)?)`)
 		scoreMatch := scoreRegex.FindStringSubmatch(jsonMatch)
 		if len(scoreMatch) > 1 {
-			fmt.Sscanf(scoreMatch[1], "%f", &score)
+			_, _ = fmt.Sscanf(scoreMatch[1], "%f", &score)
 		}
 
 		// Extract suggestions
@@ -208,7 +208,7 @@ func parseEngagementAnalysis(response string) (float64, []string) {
 				scoreRegex := regexp.MustCompile(`(\d+(\.\d+)?)`)
 				scoreMatch := scoreRegex.FindString(line)
 				if scoreMatch != "" {
-					fmt.Sscanf(scoreMatch, "%f", &score)
+					_, _ = fmt.Sscanf(scoreMatch, "%f", &score)
 				}
 			}
 

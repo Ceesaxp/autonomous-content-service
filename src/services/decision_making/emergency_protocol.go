@@ -200,7 +200,7 @@ func (ep *EmergencyProtocolImpl) ActivateEmergencyMode(ctx context.Context, reas
 // ExecuteEmergencyShutdown performs controlled shutdown of specified scope
 func (ep *EmergencyProtocolImpl) ExecuteEmergencyShutdown(ctx context.Context, scope string) error {
 	// Determine shutdown scope
-	shutdownActions := []string{}
+	var shutdownActions []string
 
 	switch scope {
 	case "full":

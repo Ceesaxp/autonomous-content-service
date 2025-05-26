@@ -3,6 +3,7 @@ package decision_making
 import (
 	"context"
 	"fmt"
+	"log"
 	"math"
 	"sort"
 	"strings"
@@ -608,7 +609,7 @@ func (ef *EthicalFrameworkImpl) formatPrinciples() string {
 
 func (ef *EthicalFrameworkImpl) logEthicalValidation(ctx context.Context, decisionID string, result *EthicalValidationResult) {
 	// Log ethical validation result
-	log := &entities.DecisionLog{
+	logValidation := &entities.DecisionLog{
 		ID:          uuid.New().String(),
 		DecisionID:  decisionID,
 		Timestamp:   time.Now(),
@@ -621,5 +622,8 @@ func (ef *EthicalFrameworkImpl) logEthicalValidation(ctx context.Context, decisi
 			"score":     result.EthicalScore,
 		},
 	}
-	ef.decisionRepo.CreateDecisionLog(ctx, log)
+	if err := ef.decisionRepo.CreateDecisionLog(ctx, logValidation); err != nil {
+		// Log error but don't fail the function
+		log.Printf("Failed to create decision log: %v", err)
+	}
 }

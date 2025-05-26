@@ -327,7 +327,7 @@ Respond with only a decimal number between 0.0 and 1.0.
 	}
 
 	var score float64
-	fmt.Sscanf(scoreMatch, "%f", &score)
+	_, _ = fmt.Sscanf(scoreMatch, "%f", &score)
 	
 	// Ensure score is within valid range
 	if score < 0.0 {

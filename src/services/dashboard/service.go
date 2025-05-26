@@ -3,6 +3,7 @@ package dashboard
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/Ceesaxp/autonomous-content-service/src/domain/entities"
@@ -162,6 +163,7 @@ func (s *DashboardServiceImpl) UpdateProjectStatus(ctx context.Context, projectI
 	message := fmt.Sprintf("Project status changed to %s", status)
 	if err := s.CreateNotification(ctx, project.ClientID, entities.NotificationTypeProjectUpdate, title, message); err != nil {
 		// Log error but don't fail the operation
+		log.Printf("Failed to create project update notification: %v", err)
 	}
 
 	return nil
@@ -194,6 +196,7 @@ func (s *DashboardServiceImpl) ApproveContent(ctx context.Context, approvalID uu
 	message := "Your content has been approved and is ready for delivery"
 	if err := s.CreateNotification(ctx, approval.ClientID, entities.NotificationTypeContentReady, title, message); err != nil {
 		// Log error but don't fail the operation
+		log.Printf("Failed to create content ready notification: %v", err)
 	}
 
 	return nil
@@ -217,6 +220,7 @@ func (s *DashboardServiceImpl) RejectContent(ctx context.Context, approvalID uui
 	message := "Content has been rejected. Please review feedback and request revision."
 	if err := s.CreateNotification(ctx, approval.ClientID, entities.NotificationTypeRevisionRequest, title, message); err != nil {
 		// Log error but don't fail the operation
+		log.Printf("Failed to create revision request notification: %v", err)
 	}
 
 	return nil
@@ -246,6 +250,7 @@ func (s *DashboardServiceImpl) RequestContentRevision(ctx context.Context, appro
 	message := "A revision has been requested for your content"
 	if err := s.CreateNotification(ctx, approval.ClientID, entities.NotificationTypeRevisionRequest, title, message); err != nil {
 		// Log error but don't fail the operation
+		log.Printf("Failed to create revision request notification: %v", err)
 	}
 
 	return nil
@@ -284,7 +289,11 @@ func (s *DashboardServiceImpl) SendMessage(ctx context.Context, threadID uuid.UU
 	if err == nil {
 		now := time.Now()
 		thread.LastMessage = &now
-		s.dashboardRepo.UpdateMessageThread(ctx, thread)
+		if err := s.dashboardRepo.UpdateMessageThread(ctx, thread); err != nil {
+			// Log error but don't fail the message creation
+			// This is a non-critical update
+			log.Printf("Failed to update thread last message time: %v", err)
+		}
 	}
 
 	return message, nil

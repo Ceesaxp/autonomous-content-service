@@ -135,7 +135,7 @@ func (p *ContentPipeline) draftingStage(ctx context.Context, content *entities.C
 	}
 
 	// Get research data
-	researchData, _ := content.Metadata["research"]
+	researchData := content.Metadata["research"]
 
 	// Prepare prompt data for drafting
 	promptData := PromptData{

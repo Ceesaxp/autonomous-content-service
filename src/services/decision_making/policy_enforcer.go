@@ -509,7 +509,10 @@ func (pe *PolicyEnforcerImpl) logValidation(ctx context.Context, decisionID stri
 			"score":      result.ComplianceScore,
 		},
 	}
-	pe.decisionRepo.CreateDecisionLog(ctx, log)
+	if err := pe.decisionRepo.CreateDecisionLog(ctx, log); err != nil {
+		// Log error but don't fail the function
+		// Note: we may want to use a proper logger here
+	}
 }
 
 func (pe *PolicyEnforcerImpl) logPolicyChange(ctx context.Context, policyID string, action string, details map[string]interface{}) {

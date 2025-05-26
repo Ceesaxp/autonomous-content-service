@@ -162,9 +162,7 @@ func (f *FactChecker) CheckFacts(ctx context.Context, request FactCheckRequest) 
 	// 4. Detect contradictions within content
 	contradictions, err := f.detectContradictions(ctx, request.Content)
 	if err == nil {
-		for _, contradiction := range contradictions {
-			result.FactualErrors = append(result.FactualErrors, contradiction)
-		}
+		result.FactualErrors = append(result.FactualErrors, contradictions...)
 	}
 
 	// 5. Calculate metrics

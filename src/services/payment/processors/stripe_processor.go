@@ -10,13 +10,17 @@ import (
 	"github.com/Ceesaxp/autonomous-content-service/src/domain/entities"
 	"github.com/Ceesaxp/autonomous-content-service/src/services/payment"
 	"github.com/stripe/stripe-go/v82"
-	"github.com/stripe/stripe-go/v82/client"
+	"github.com/stripe/stripe-go/v82/paymentintent"
+	"github.com/stripe/stripe-go/v82/charge"
+	"github.com/stripe/stripe-go/v82/refund"
+	"github.com/stripe/stripe-go/v82/customer"
+	"github.com/stripe/stripe-go/v82/paymentmethod"
+	"github.com/stripe/stripe-go/v82/subscription"
 	"github.com/stripe/stripe-go/v82/webhook"
 )
 
 // StripeProcessor implements payment processing for Stripe
 type StripeProcessor struct {
-	client        *client.API
 	webhookSecret string
 	config        *StripeConfig
 }
@@ -35,12 +39,10 @@ type StripeConfig struct {
 
 // NewStripeProcessor creates a new Stripe payment processor
 func NewStripeProcessor(config *StripeConfig) payment.PaymentProcessor {
-	// Initialize Stripe client
-	sc := &client.API{}
-	sc.Init(config.SecretKey, nil)
+	// Set Stripe key globally
+	stripe.Key = config.SecretKey
 
 	return &StripeProcessor{
-		client:        sc,
 		webhookSecret: config.WebhookSecret,
 		config:        config,
 	}
@@ -109,7 +111,7 @@ func (s *StripeProcessor) ProcessPayment(ctx context.Context, request *payment.P
 	}
 
 	// Create the payment intent
-	intent, err := s.client.PaymentIntents.New(params)
+	intent, err := paymentintent.New(params)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create payment intent: %w", err)
 	}
@@ -163,7 +165,7 @@ func (s *StripeProcessor) ProcessPayment(ctx context.Context, request *payment.P
 
 // GetPaymentStatus retrieves payment status from Stripe
 func (s *StripeProcessor) GetPaymentStatus(ctx context.Context, externalID string) (*payment.PaymentStatusResponse, error) {
-	intent, err := s.client.PaymentIntents.Get(externalID, nil)
+	intent, err := paymentintent.Get(externalID, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get payment intent: %w", err)
 	}
@@ -218,13 +220,13 @@ func (s *StripeProcessor) GetPaymentStatus(ctx context.Context, externalID strin
 // ProcessRefund processes a refund through Stripe
 func (s *StripeProcessor) ProcessRefund(ctx context.Context, request *payment.RefundRequest) (*payment.RefundResponse, error) {
 	// First, get the payment intent to find the charge
-	intent, err := s.client.PaymentIntents.Get(request.PaymentID, nil)
+	intent, err := paymentintent.Get(request.PaymentID, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get payment intent: %w", err)
 	}
 
 	// For Stripe v74+, we need to retrieve charges separately
-	chargeIter := s.client.Charges.List(&stripe.ChargeListParams{
+	chargeIter := charge.List(&stripe.ChargeListParams{
 		PaymentIntent: stripe.String(intent.ID),
 	})
 
@@ -263,7 +265,7 @@ func (s *StripeProcessor) ProcessRefund(ctx context.Context, request *payment.Re
 	}
 
 	// Process the refund
-	refund, err := s.client.Refunds.New(params)
+	refundObj, err := refund.New(params)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create refund: %w", err)
 	}
@@ -274,7 +276,7 @@ func (s *StripeProcessor) ProcessRefund(ctx context.Context, request *payment.Re
 
 	// Map Stripe status to our status
 	var status entities.RefundStatus
-	switch refund.Status {
+	switch refundObj.Status {
 	case "succeeded":
 		status = entities.RefundStatusCompleted
 	case "pending":
@@ -286,15 +288,15 @@ func (s *StripeProcessor) ProcessRefund(ctx context.Context, request *payment.Re
 	}
 
 	response := &payment.RefundResponse{
-		RefundID:     refund.ID,
-		ExternalID:   &refund.ID,
+		RefundID:     refundObj.ID,
+		ExternalID:   &refundObj.ID,
 		Status:       status,
 		Amount:       request.Amount,
 		ProcessorFee: processorFee,
 		NetRefund:    netRefund,
 		Message:      "Refund processed with Stripe",
 		Metadata: map[string]interface{}{
-			"stripe_refund_id": refund.ID,
+			"stripe_refund_id": refundObj.ID,
 			"charge_id":        charge.ID,
 		},
 	}
@@ -421,7 +423,7 @@ func (s *StripeProcessor) CreateCustomer(ctx context.Context, email, name string
 		params.Metadata = metadata
 	}
 
-	return s.client.Customers.New(params)
+	return customer.New(params)
 }
 
 // CreatePaymentMethod creates a payment method for reusable payments
@@ -434,7 +436,7 @@ func (s *StripeProcessor) CreatePaymentMethod(ctx context.Context, customerID, c
 		},
 	}
 
-	return s.client.PaymentMethods.New(params)
+	return paymentmethod.New(params)
 }
 
 // CreateSubscription creates a recurring subscription
@@ -452,7 +454,7 @@ func (s *StripeProcessor) CreateSubscription(ctx context.Context, customerID, pr
 		params.Metadata = metadata
 	}
 
-	return s.client.Subscriptions.New(params)
+	return subscription.New(params)
 }
 
 // HandleResponse handles HTTP responses from Stripe API

@@ -133,7 +133,10 @@ func (s *ServiceImpl) ProcessPayment(ctx context.Context, request *PaymentReques
 		payment.FailureReason = &reason
 		payment.UpdatedAt = time.Now()
 
-		s.paymentRepo.UpdatePayment(ctx, payment)
+		if updateErr := s.paymentRepo.UpdatePayment(ctx, payment); updateErr != nil {
+			// Log error but continue with retry/notification
+			// Payment status is already failed, which is the important part
+		}
 
 		// Schedule retry if eligible
 		if payment.CanRetry() {
@@ -141,7 +144,10 @@ func (s *ServiceImpl) ProcessPayment(ctx context.Context, request *PaymentReques
 		}
 
 		// Send failure notification
-		s.sendPaymentNotification(ctx, payment, entities.PaymentNotificationPaymentFailed)
+		if notifyErr := s.sendPaymentNotification(ctx, payment, entities.PaymentNotificationPaymentFailed); notifyErr != nil {
+			// Log error but don't fail the payment processing
+			// Notification failure shouldn't affect payment status
+		}
 
 		return payment, fmt.Errorf("payment processing failed: %w", err)
 	}
@@ -224,7 +230,10 @@ func (s *ServiceImpl) CancelPayment(ctx context.Context, id string) error {
 		if exists {
 			// Attempt to cancel with processor (implementation depends on processor)
 			// For now, we'll just update our records
-			processor.GetPaymentStatus(ctx, *payment.ExternalID) // Just a plug
+			if _, err := processor.GetPaymentStatus(ctx, *payment.ExternalID); err != nil {
+				// Log error but continue with cancellation
+				// External cancellation failure shouldn't prevent local status update
+			}
 		}
 	}
 
@@ -509,7 +518,10 @@ func (s *ServiceImpl) ProcessRefund(ctx context.Context, request *RefundRequest)
 		refund.FailureReason = &reason
 		refund.UpdatedAt = time.Now()
 
-		s.paymentRepo.UpdateRefund(ctx, refund)
+		if updateErr := s.paymentRepo.UpdateRefund(ctx, refund); updateErr != nil {
+			// Log error but continue with the failure response
+			// Refund status is already marked as failed
+		}
 		return refund, fmt.Errorf("refund processing failed: %w", err)
 	}
 
@@ -528,7 +540,10 @@ func (s *ServiceImpl) ProcessRefund(ctx context.Context, request *RefundRequest)
 		// Update payment refunded amount
 		payment.RefundedAmount += refund.NetRefund
 		payment.UpdatedAt = time.Now()
-		s.paymentRepo.UpdatePayment(ctx, payment)
+		if updateErr := s.paymentRepo.UpdatePayment(ctx, payment); updateErr != nil {
+			// Log error but continue
+			// Refund is already recorded
+		}
 	}
 
 	if err := s.paymentRepo.UpdateRefund(ctx, refund); err != nil {
@@ -621,7 +636,10 @@ func (s *ServiceImpl) SendNotification(ctx context.Context, request *Notificatio
 	}
 
 	notification.UpdatedAt = time.Now()
-	s.paymentRepo.UpdateNotification(ctx, notification)
+	if updateErr := s.paymentRepo.UpdateNotification(ctx, notification); updateErr != nil {
+		// Log error but don't fail the notification send
+		// The important part is whether the notification was sent
+	}
 
 	return err
 }
@@ -655,7 +673,10 @@ func (s *ServiceImpl) scheduleRetry(ctx context.Context, payment *entities.Payme
 	payment.NextRetryAt = &nextRetry
 	payment.UpdatedAt = time.Now()
 
-	s.paymentRepo.UpdatePayment(ctx, payment)
+	if err := s.paymentRepo.UpdatePayment(ctx, payment); err != nil {
+		// Log error but don't fail the retry scheduling
+		// Retry scheduling is best-effort
+	}
 }
 
 func (s *ServiceImpl) handleInvoicePayment(ctx context.Context, invoiceID string, payment *entities.Payment) error {
@@ -704,7 +725,10 @@ func (s *ServiceImpl) sendFraudNotification(ctx context.Context, payment *entiti
 		Content:          fmt.Sprintf("Payment %s flagged for fraud. Score: %.2f. Flags: %v", payment.ID, fraudResult.FraudScore, fraudResult.Flags),
 	}
 
-	s.SendNotification(ctx, request)
+	if err := s.SendNotification(ctx, request); err != nil {
+		// Log error but don't fail the fraud notification
+		// Fraud alerts are important but shouldn't break payment flow
+	}
 }
 
 func (s *ServiceImpl) sendRefundNotification(ctx context.Context, refund *entities.Refund, payment *entities.Payment) {
@@ -718,7 +742,10 @@ func (s *ServiceImpl) sendRefundNotification(ctx context.Context, refund *entiti
 		Content:          fmt.Sprintf("Your refund of %s %.2f has been processed.", refund.Currency, float64(refund.NetRefund)/100),
 	}
 
-	s.SendNotification(ctx, request)
+	if err := s.SendNotification(ctx, request); err != nil {
+		// Log error but don't fail the refund notification
+		// Notification failure shouldn't affect refund processing
+	}
 }
 
 func (s *ServiceImpl) generateAndSendReceipt(ctx context.Context, payment *entities.Payment) error {

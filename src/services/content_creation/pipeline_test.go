@@ -482,7 +482,8 @@ func TestContentPipeline_StageExecution(t *testing.T) {
 	})
 
 	t.Run("Editing Stage", func(t *testing.T) {
-		content.UpdateContent("Draft content to edit", "test")
+		err := content.UpdateContent("Draft content to edit", "test")
+		assert.NoError(t, err)
 
 		mockContextManager.On("AddEntry", mock.Anything, content.ProjectID, mock.Anything).Return(nil).Once()
 		mockLLMClient.On("Generate", mock.Anything, mock.Anything).Return("Edited content", nil).Once()
@@ -496,7 +497,8 @@ func TestContentPipeline_StageExecution(t *testing.T) {
 	})
 
 	t.Run("Finalization Stage", func(t *testing.T) {
-		content.UpdateContent("Content to finalize", "test")
+		err := content.UpdateContent("Content to finalize", "test")
+		assert.NoError(t, err)
 
 		mockContextManager.On("AddEntry", mock.Anything, content.ProjectID, mock.Anything).Return(nil).Once()
 		mockLLMClient.On("Generate", mock.Anything, mock.Anything).Return("Final content", nil).Once()

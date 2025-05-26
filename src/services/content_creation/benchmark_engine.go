@@ -13,7 +13,6 @@ import (
 // BenchmarkEngine handles benchmark comparison against industry standards
 type BenchmarkEngine struct {
 	benchmarkDatabase *BenchmarkDatabase
-	llmClient         LLMClient
 	datasetManager    *DatasetManager
 }
 

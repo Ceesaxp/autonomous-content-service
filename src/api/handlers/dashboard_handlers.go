@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -15,12 +16,14 @@ import (
 // DashboardHandlers handles dashboard-related HTTP requests
 type DashboardHandlers struct {
 	dashboardService dashboard.DashboardService
+	logger           *log.Logger
 }
 
 // NewDashboardHandlers creates a new dashboard handlers instance
 func NewDashboardHandlers(dashboardService dashboard.DashboardService) *DashboardHandlers {
 	return &DashboardHandlers{
 		dashboardService: dashboardService,
+		logger:           log.New(log.Writer(), "[DashboardHandler] ", log.LstdFlags),
 	}
 }
 
@@ -40,7 +43,10 @@ func (h *DashboardHandlers) GetDashboardSummary(w http.ResponseWriter, r *http.R
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(summary)
+	if err := json.NewEncoder(w).Encode(summary); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetProjectsOverview handles GET /api/v1/dashboard/projects/{clientId}
@@ -59,7 +65,10 @@ func (h *DashboardHandlers) GetProjectsOverview(w http.ResponseWriter, r *http.R
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(projects)
+	if err := json.NewEncoder(w).Encode(projects); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetProjectDetails handles GET /api/v1/dashboard/projects/details/{projectId}
