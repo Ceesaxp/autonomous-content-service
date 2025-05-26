@@ -120,9 +120,12 @@ func main() {
 
 	// Dashboard handler can be nil for now since we don't have a complete dashboard service implementation
 	var dashboardHandler *handlers.DashboardHandlers = nil
+	
+	// Self-improvement handler can be nil for now since we don't have a complete implementation
+	var selfImprovementHandler *handlers.SelfImprovementHandler = nil
 
 	// Set up API routes
-	api.SetupRoutes(router, contentHandler, projectHandler, nil, dashboardHandler) // nil for onboarding handler until we initialize it
+	api.SetupRoutes(router, contentHandler, projectHandler, nil, dashboardHandler, selfImprovementHandler) // nil for onboarding handler until we initialize it
 
 	// Set up server
 	server := &http.Server{

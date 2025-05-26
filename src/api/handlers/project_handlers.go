@@ -175,7 +175,7 @@ func (h *ProjectHandler) CreateProject(w http.ResponseWriter, r *http.Request) {
 	// Set default priority if not provided
 	priority := req.Priority
 	if priority == "" {
-		priority = entities.PriorityMedium
+		priority = entities.ProjectPriorityMedium
 	}
 
 	// Create project

@@ -12,6 +12,8 @@ The Autonomous Content Creation Service is a digital-native business that functi
 - `/implementation` - Implementation plans and prompts
 - `/src` - Source code for all system components
 - `/tests` - Test suite for system validation
+- `/contracts` - Smart contracts treasury system
+- `/web` - Web front-end for client onboarding and project managemewnt
 
 ## Implementation Phases
 

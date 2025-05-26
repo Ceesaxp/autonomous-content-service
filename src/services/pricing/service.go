@@ -528,10 +528,10 @@ func (s *PricingServiceImpl) AnalyzePricingExperiment(ctx context.Context, exper
 
 	// Convert ExperimentReportResult to entities.ExperimentResults
 	return &entities.ExperimentResults{
-		WinningVariant:          "", // Will be determined from the report
-		ConfidenceLevel:         0.0, // Will be calculated from the report
+		Winner:                  "",    // Will be determined from the report
+		ConfidenceLevel:         0.0,   // Will be calculated from the report
 		StatisticalSignificance: false, // Will be determined from the report
-		EffectSize:              0.0, // Will be calculated from the report
+		EffectSize:              0.0,   // Will be calculated from the report
 		Recommendation:          report.Summary,
 		MetricImprovements:      make(map[string]float64),
 		AnalysisData:            report.Results,
