@@ -322,7 +322,7 @@ Provide a clear, concise justification that explains how this decision aligns wi
 // IdentifyEthicalConcerns analyzes a scenario for potential ethical issues
 func (ef *EthicalFrameworkImpl) IdentifyEthicalConcerns(ctx context.Context, scenario string) ([]EthicalConcern, error) {
 	// Use LLM to identify concerns
-	prompt := fmt.Sprintf(`Analyze this scenario for ethical concerns:
+	_ = fmt.Sprintf(`Analyze this scenario for ethical concerns:
 
 %s
 
@@ -425,7 +425,7 @@ func (ef *EthicalFrameworkImpl) violatesRedLine(action string, context map[strin
 
 func (ef *EthicalFrameworkImpl) decisionViolatesRedLine(decision *entities.Decision, redLine string) bool {
 	// Check decision content against red line
-	redLineLower := strings.ToLower(redLine)
+	_ = strings.ToLower(redLine)
 
 	// Check title and description
 	titleLower := strings.ToLower(decision.Title)

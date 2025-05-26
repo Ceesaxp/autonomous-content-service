@@ -23,9 +23,9 @@ const (
 type Priority string
 
 const (
-	PriorityHigh   Priority = "High"
-	PriorityMedium Priority = "Medium"
-	PriorityLow    Priority = "Low"
+	ProjectPriorityHigh   Priority = "High"
+	ProjectPriorityMedium Priority = "Medium"
+	ProjectPriorityLow    Priority = "Low"
 )
 
 // Money represents a monetary amount with currency
@@ -62,7 +62,7 @@ func NewProject(clientID uuid.UUID, title, description string, contentType Conte
 		ContentType:  contentType,
 		Deadline:     deadline,
 		Budget:       budget,
-		Priority:     PriorityMedium, // Default priority
+		Priority:     ProjectPriorityMedium, // Default priority
 		Status:       ProjectStatusDraft,
 		Requirements: []string{},
 		Metadata:     make(map[string]interface{}),

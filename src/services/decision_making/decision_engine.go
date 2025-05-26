@@ -75,10 +75,10 @@ func (de *DecisionEngineImpl) InitiateDecision(ctx context.Context, request Deci
 	// Emit event
 	event := &events.DecisionInitiated{
 		BaseEvent: events.BaseEvent{
-			ID:        uuid.New().String(),
-			Type:      "decision.initiated",
+			EventID:   uuid.New(),
+			EventType: "decision.initiated",
 			Timestamp: time.Now(),
-			Version:   1,
+			Data:      map[string]interface{}{},
 		},
 		DecisionID:   decision.ID,
 		DecisionType: string(decision.Type),
@@ -86,7 +86,7 @@ func (de *DecisionEngineImpl) InitiateDecision(ctx context.Context, request Deci
 		Context:      decision.Context,
 		Requester:    "system",
 	}
-	if err := de.eventRepo.CreateEvent(ctx, event); err != nil {
+	if err := de.eventRepo.Save(ctx, event); err != nil {
 		return nil, fmt.Errorf("failed to create event: %w", err)
 	}
 
@@ -150,10 +150,10 @@ func (de *DecisionEngineImpl) AnalyzeOptions(ctx context.Context, decision *enti
 
 	event := &events.DecisionAnalyzed{
 		BaseEvent: events.BaseEvent{
-			ID:        uuid.New().String(),
-			Type:      "decision.analyzed",
+			EventID:   uuid.New(),
+			EventType: "decision.analyzed",
 			Timestamp: time.Now(),
-			Version:   1,
+			Data:      map[string]interface{}{},
 		},
 		DecisionID:       decision.ID,
 		OptionsEvaluated: len(decision.Options),
@@ -161,7 +161,7 @@ func (de *DecisionEngineImpl) AnalyzeOptions(ctx context.Context, decision *enti
 		ConfidenceScore:  decision.ConfidenceScore,
 		AnalysisDuration: analysisTime,
 	}
-	return de.eventRepo.CreateEvent(ctx, event)
+	return de.eventRepo.Save(ctx, event)
 }
 
 // MakeDecision selects the best option and finalizes the decision
@@ -245,10 +245,10 @@ func (de *DecisionEngineImpl) MakeDecision(ctx context.Context, decisionID strin
 	// Emit event
 	event := &events.DecisionMade{
 		BaseEvent: events.BaseEvent{
-			ID:        uuid.New().String(),
-			Type:      "decision.made",
+			EventID:   uuid.New(),
+			EventType: "decision.made",
 			Timestamp: time.Now(),
-			Version:   1,
+			Data:      map[string]interface{}{},
 		},
 		DecisionID:       decision.ID,
 		SelectedOptionID: selectedOption.ID,
@@ -256,7 +256,7 @@ func (de *DecisionEngineImpl) MakeDecision(ctx context.Context, decisionID strin
 		ConfidenceScore:  decision.ConfidenceScore,
 		AutoApproved:     autoApproved,
 	}
-	if err := de.eventRepo.CreateEvent(ctx, event); err != nil {
+	if err := de.eventRepo.Save(ctx, event); err != nil {
 		return nil, fmt.Errorf("failed to create event: %w", err)
 	}
 
@@ -326,10 +326,10 @@ func (de *DecisionEngineImpl) ExecuteDecision(ctx context.Context, decisionID st
 	executionTime := time.Since(startTime).Milliseconds()
 	event := &events.DecisionExecuted{
 		BaseEvent: events.BaseEvent{
-			ID:        uuid.New().String(),
-			Type:      "decision.executed",
+			EventID:   uuid.New(),
+			EventType: "decision.executed",
 			Timestamp: time.Now(),
-			Version:   1,
+			Data:      map[string]interface{}{},
 		},
 		DecisionID:    decision.ID,
 		Success:       result.Success,
@@ -337,7 +337,7 @@ func (de *DecisionEngineImpl) ExecuteDecision(ctx context.Context, decisionID st
 		Results:       result.Metrics,
 		SideEffects:   result.SideEffects,
 	}
-	if err := de.eventRepo.CreateEvent(ctx, event); err != nil {
+	if err := de.eventRepo.Save(ctx, event); err != nil {
 		return nil, fmt.Errorf("failed to create event: %w", err)
 	}
 
@@ -398,17 +398,17 @@ func (de *DecisionEngineImpl) RevertDecision(ctx context.Context, decisionID str
 	// Emit event
 	event := &events.DecisionReverted{
 		BaseEvent: events.BaseEvent{
-			ID:        uuid.New().String(),
-			Type:      "decision.reverted",
+			EventID:   uuid.New(),
+			EventType: "decision.reverted",
 			Timestamp: time.Now(),
-			Version:   1,
+			Data:      map[string]interface{}{},
 		},
 		DecisionID:    decisionID,
 		RevertReason:  reason,
 		RevertSuccess: revertSuccess,
 		Impact:        impact,
 	}
-	if err := de.eventRepo.CreateEvent(ctx, event); err != nil {
+	if err := de.eventRepo.Save(ctx, event); err != nil {
 		return fmt.Errorf("failed to create event: %w", err)
 	}
 
@@ -445,10 +445,10 @@ func (de *DecisionEngineImpl) OverrideDecision(ctx context.Context, decisionID s
 
 	event := &events.DecisionOverridden{
 		BaseEvent: events.BaseEvent{
-			ID:        uuid.New().String(),
-			Type:      "decision.overridden",
+			EventID:   uuid.New(),
+			EventType: "decision.overridden",
 			Timestamp: time.Now(),
-			Version:   1,
+			Data:      map[string]interface{}{},
 		},
 		DecisionID:       decisionID,
 		OriginalOptionID: originalOptionID,
@@ -456,7 +456,7 @@ func (de *DecisionEngineImpl) OverrideDecision(ctx context.Context, decisionID s
 		OverrideReason:   override.Reason,
 		AuthorizedBy:     override.AuthorizedBy,
 	}
-	return de.eventRepo.CreateEvent(ctx, event)
+	return de.eventRepo.Save(ctx, event)
 }
 
 // EscalateDecision moves a decision to a higher priority or authority level
@@ -530,10 +530,10 @@ func (de *DecisionEngineImpl) AssessDecisionQuality(ctx context.Context, decisio
 	// Emit event
 	event := &events.DecisionQualityAssessed{
 		BaseEvent: events.BaseEvent{
-			ID:        uuid.New().String(),
-			Type:      "decision.quality_assessed",
+			EventID:   uuid.New(),
+			EventType: "decision.quality_assessed",
 			Timestamp: time.Now(),
-			Version:   1,
+			Data:      map[string]interface{}{},
 		},
 		DecisionID:       decisionID,
 		QualityScore:     qualityScore,
@@ -542,7 +542,7 @@ func (de *DecisionEngineImpl) AssessDecisionQuality(ctx context.Context, decisio
 		LessonsLearned:   lessons,
 		ImprovementAreas: improvements,
 	}
-	if err := de.eventRepo.CreateEvent(ctx, event); err != nil {
+	if err := de.eventRepo.Save(ctx, event); err != nil {
 		return nil, fmt.Errorf("failed to create event: %w", err)
 	}
 
@@ -732,10 +732,10 @@ func (de *DecisionEngineImpl) handlePolicyViolations(ctx context.Context, decisi
 	for _, violation := range result.Violations {
 		event := &events.PolicyViolationDetected{
 			BaseEvent: events.BaseEvent{
-				ID:        uuid.New().String(),
-				Type:      "policy.violation_detected",
+				EventID:   uuid.New(),
+				EventType: "policy.violation_detected",
 				Timestamp: time.Now(),
-				Version:   1,
+				Data:      map[string]interface{}{},
 			},
 			DecisionID:  decision.ID,
 			PolicyID:    violation.PolicyID,
@@ -744,7 +744,7 @@ func (de *DecisionEngineImpl) handlePolicyViolations(ctx context.Context, decisi
 			Description: violation.Description,
 			Violations:  []string{violation.Description},
 		}
-		if err := de.eventRepo.CreateEvent(ctx, event); err != nil {
+		if err := de.eventRepo.Save(ctx, event); err != nil {
 			return err
 		}
 	}
@@ -755,10 +755,10 @@ func (de *DecisionEngineImpl) handleEthicalConcerns(ctx context.Context, decisio
 	for _, concern := range result.Concerns {
 		event := &events.EthicalConcernRaised{
 			BaseEvent: events.BaseEvent{
-				ID:        uuid.New().String(),
-				Type:      "ethical.concern_raised",
+				EventID:   uuid.New(),
+				EventType: "ethical.concern_raised",
 				Timestamp: time.Now(),
-				Version:   1,
+				Data:      map[string]interface{}{},
 			},
 			DecisionID:   decision.ID,
 			GuidelineID:  concern.GuidelineID,
@@ -766,7 +766,7 @@ func (de *DecisionEngineImpl) handleEthicalConcerns(ctx context.Context, decisio
 			Description:  concern.Concern,
 			RedLines:     result.RedLineViolations,
 		}
-		if err := de.eventRepo.CreateEvent(ctx, event); err != nil {
+		if err := de.eventRepo.Save(ctx, event); err != nil {
 			return err
 		}
 	}

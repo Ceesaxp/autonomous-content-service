@@ -155,10 +155,10 @@ func (ep *EmergencyProtocolImpl) ActivateEmergencyMode(ctx context.Context, reas
 	// Log emergency activation
 	event := &events.EmergencyProtocolActivated{
 		BaseEvent: events.BaseEvent{
-			ID:        uuid.New().String(),
-			Type:      "emergency.protocol_activated",
+			EventID:   uuid.New(),
+			EventType: "emergency.protocol_activated",
 			Timestamp: time.Now(),
-			Version:   1,
+			Data:      map[string]interface{}{},
 		},
 		TriggerType:   "manual",
 		Severity:      "high",
@@ -175,7 +175,7 @@ func (ep *EmergencyProtocolImpl) ActivateEmergencyMode(ctx context.Context, reas
 		},
 	}
 
-	if err := ep.eventRepo.CreateEvent(ctx, event); err != nil {
+	if err := ep.eventRepo.Save(ctx, event); err != nil {
 		return fmt.Errorf("failed to log emergency activation: %w", err)
 	}
 
@@ -237,10 +237,10 @@ func (ep *EmergencyProtocolImpl) ExecuteEmergencyShutdown(ctx context.Context, s
 	// Log shutdown
 	event := &events.EmergencyProtocolActivated{
 		BaseEvent: events.BaseEvent{
-			ID:        uuid.New().String(),
-			Type:      "emergency.shutdown_executed",
+			EventID:   uuid.New(),
+			EventType: "emergency.shutdown_executed",
 			Timestamp: time.Now(),
-			Version:   1,
+			Data:      map[string]interface{}{},
 		},
 		TriggerType:   "emergency_shutdown",
 		Severity:      "critical",
@@ -252,7 +252,7 @@ func (ep *EmergencyProtocolImpl) ExecuteEmergencyShutdown(ctx context.Context, s
 		},
 	}
 
-	return ep.eventRepo.CreateEvent(ctx, event)
+	return ep.eventRepo.Save(ctx, event)
 }
 
 // InitiateRecovery starts the recovery process after an emergency
