@@ -87,7 +87,10 @@ func (h *DashboardHandlers) GetProjectDetails(w http.ResponseWriter, r *http.Req
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(details)
+	if err := json.NewEncoder(w).Encode(details); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // UpdateProjectStatus handles PUT /api/v1/dashboard/projects/{projectId}/status
@@ -133,7 +136,10 @@ func (h *DashboardHandlers) GetContentApprovals(w http.ResponseWriter, r *http.R
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(approvals)
+	if err := json.NewEncoder(w).Encode(approvals); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // ApproveContent handles PUT /api/v1/dashboard/approvals/{approvalId}/approve
@@ -231,7 +237,10 @@ func (h *DashboardHandlers) GetMessageThreads(w http.ResponseWriter, r *http.Req
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(threads)
+	if err := json.NewEncoder(w).Encode(threads); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // CreateMessageThread handles POST /api/v1/dashboard/messages/threads
@@ -255,7 +264,10 @@ func (h *DashboardHandlers) CreateMessageThread(w http.ResponseWriter, r *http.R
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(thread)
+	if err := json.NewEncoder(w).Encode(thread); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // SendMessage handles POST /api/v1/dashboard/messages/{threadId}/send
@@ -285,7 +297,10 @@ func (h *DashboardHandlers) SendMessage(w http.ResponseWriter, r *http.Request) 
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(message)
+	if err := json.NewEncoder(w).Encode(message); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetThreadMessages handles GET /api/v1/dashboard/messages/{threadId}/messages
@@ -305,7 +320,10 @@ func (h *DashboardHandlers) GetThreadMessages(w http.ResponseWriter, r *http.Req
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(messages)
+	if err := json.NewEncoder(w).Encode(messages); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // MarkMessagesAsRead handles PUT /api/v1/dashboard/messages/{threadId}/read
@@ -342,7 +360,10 @@ func (h *DashboardHandlers) GetNotifications(w http.ResponseWriter, r *http.Requ
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(notifications)
+	if err := json.NewEncoder(w).Encode(notifications); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // MarkNotificationAsRead handles PUT /api/v1/dashboard/notifications/{notificationId}/read
@@ -397,7 +418,10 @@ func (h *DashboardHandlers) GetClientAnalytics(w http.ResponseWriter, r *http.Re
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(analytics)
+	if err := json.NewEncoder(w).Encode(analytics); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GenerateReport handles POST /api/v1/dashboard/reports/{clientId}
@@ -426,7 +450,10 @@ func (h *DashboardHandlers) GenerateReport(w http.ResponseWriter, r *http.Reques
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(report)
+	if err := json.NewEncoder(w).Encode(report); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetBillingHistory handles GET /api/v1/dashboard/billing/{clientId}
@@ -446,7 +473,10 @@ func (h *DashboardHandlers) GetBillingHistory(w http.ResponseWriter, r *http.Req
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(history)
+	if err := json.NewEncoder(w).Encode(history); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetOutstandingInvoices handles GET /api/v1/dashboard/billing/{clientId}/outstanding
@@ -465,7 +495,10 @@ func (h *DashboardHandlers) GetOutstandingInvoices(w http.ResponseWriter, r *htt
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(invoices)
+	if err := json.NewEncoder(w).Encode(invoices); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // Helper function to get pagination parameters

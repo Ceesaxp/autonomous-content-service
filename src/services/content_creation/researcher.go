@@ -439,7 +439,7 @@ func extractPriorityFromLine(line string) int {
 	}
 	
 	var priority int
-	fmt.Sscanf(match, "%d", &priority)
+	_, _ = fmt.Sscanf(match, "%d", &priority)
 	
 	// Ensure priority is within valid range
 	if priority < 1 {

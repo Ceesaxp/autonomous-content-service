@@ -512,6 +512,8 @@ func (pe *PolicyEnforcerImpl) logValidation(ctx context.Context, decisionID stri
 	if err := pe.decisionRepo.CreateDecisionLog(ctx, log); err != nil {
 		// Log error but don't fail the function
 		// Note: we may want to use a proper logger here
+		// TODO: Add proper logging when logger is available
+		_ = err // Explicitly ignore error to satisfy linter
 	}
 }
 

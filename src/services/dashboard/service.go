@@ -243,6 +243,7 @@ func (s *DashboardServiceImpl) RequestContentRevision(ctx context.Context, appro
 	revisionRequest := entities.NewRevisionRequest(approval.ContentID, approval.ProjectID, approval.ClientID, "Client requested revision", feedback)
 	if err := s.dashboardRepo.CreateRevisionRequest(ctx, revisionRequest); err != nil {
 		// Log error but don't fail the operation
+		log.Printf("Failed to create revision request: %v", err)
 	}
 
 	// Create notification
@@ -319,6 +320,7 @@ func (s *DashboardServiceImpl) MarkMessagesAsRead(ctx context.Context, threadID 
 		if !message.IsRead {
 			if err := s.dashboardRepo.MarkMessageAsRead(ctx, message.MessageID); err != nil {
 				// Log error but continue
+				log.Printf("Failed to mark message as read: %v", err)
 			}
 		}
 	}
@@ -483,6 +485,7 @@ func (s *DashboardServiceImpl) CreateInvoice(ctx context.Context, projectID, cli
 	message := fmt.Sprintf("Invoice %s for %s %.2f is now available", invoiceNumber, amount.Currency, amount.Amount)
 	if err := s.CreateNotification(ctx, clientID, entities.NotificationTypePaymentDue, title, message); err != nil {
 		// Log error but don't fail the operation
+		log.Printf("Failed to create payment due notification: %v", err)
 	}
 
 	return billing, nil

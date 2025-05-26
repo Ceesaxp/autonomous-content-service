@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -17,6 +18,7 @@ type ProjectHandler struct {
 	ProjectRepository repositories.ProjectRepository
 	ContentRepository repositories.ContentRepository
 	ClientRepository  repositories.ClientRepository
+	logger            *log.Logger
 }
 
 // NewProjectHandler creates a new project handler
@@ -25,6 +27,7 @@ func NewProjectHandler(projectRepo repositories.ProjectRepository, contentRepo r
 		ProjectRepository: projectRepo,
 		ContentRepository: contentRepo,
 		ClientRepository:  clientRepo,
+		logger:            log.New(log.Writer(), "[ProjectHandler] ", log.LstdFlags),
 	}
 }
 
@@ -217,7 +220,10 @@ func (h *ProjectHandler) CreateProject(w http.ResponseWriter, r *http.Request) {
 	// Return response
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(res)
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetProject handles requests to retrieve project details
@@ -279,7 +285,10 @@ func (h *ProjectHandler) GetProject(w http.ResponseWriter, r *http.Request) {
 
 	// Return response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(res)
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // UpdateProject handles requests to update a project
@@ -393,7 +402,10 @@ func (h *ProjectHandler) UpdateProject(w http.ResponseWriter, r *http.Request) {
 
 	// Return response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(res)
+	if err := json.NewEncoder(w).Encode(res); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // ListProjects handles requests to list projects with filtering
@@ -477,7 +489,10 @@ func (h *ProjectHandler) ListProjects(w http.ResponseWriter, r *http.Request) {
 
 	// Return response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // CancelProject handles requests to cancel a project

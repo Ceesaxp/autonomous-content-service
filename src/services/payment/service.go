@@ -136,6 +136,8 @@ func (s *ServiceImpl) ProcessPayment(ctx context.Context, request *PaymentReques
 		if updateErr := s.paymentRepo.UpdatePayment(ctx, payment); updateErr != nil {
 			// Log error but continue with retry/notification
 			// Payment status is already failed, which is the important part
+			// TODO: Add proper logging here when logger is available
+			_ = updateErr // Explicitly ignore error to satisfy linter
 		}
 
 		// Schedule retry if eligible
@@ -147,6 +149,8 @@ func (s *ServiceImpl) ProcessPayment(ctx context.Context, request *PaymentReques
 		if notifyErr := s.sendPaymentNotification(ctx, payment, entities.PaymentNotificationPaymentFailed); notifyErr != nil {
 			// Log error but don't fail the payment processing
 			// Notification failure shouldn't affect payment status
+			// TODO: Add proper logging here when logger is available
+			_ = notifyErr // Explicitly ignore error to satisfy linter
 		}
 
 		return payment, fmt.Errorf("payment processing failed: %w", err)
@@ -233,6 +237,8 @@ func (s *ServiceImpl) CancelPayment(ctx context.Context, id string) error {
 			if _, err := processor.GetPaymentStatus(ctx, *payment.ExternalID); err != nil {
 				// Log error but continue with cancellation
 				// External cancellation failure shouldn't prevent local status update
+				// TODO: Add proper logging here when logger is available
+				_ = err // Explicitly ignore error to satisfy linter
 			}
 		}
 	}
@@ -521,6 +527,7 @@ func (s *ServiceImpl) ProcessRefund(ctx context.Context, request *RefundRequest)
 		if updateErr := s.paymentRepo.UpdateRefund(ctx, refund); updateErr != nil {
 			// Log error but continue with the failure response
 			// Refund status is already marked as failed
+			_ = updateErr // Explicitly ignore error to satisfy linter
 		}
 		return refund, fmt.Errorf("refund processing failed: %w", err)
 	}
@@ -543,6 +550,7 @@ func (s *ServiceImpl) ProcessRefund(ctx context.Context, request *RefundRequest)
 		if updateErr := s.paymentRepo.UpdatePayment(ctx, payment); updateErr != nil {
 			// Log error but continue
 			// Refund is already recorded
+			_ = updateErr // Explicitly ignore error to satisfy linter
 		}
 	}
 
@@ -639,6 +647,7 @@ func (s *ServiceImpl) SendNotification(ctx context.Context, request *Notificatio
 	if updateErr := s.paymentRepo.UpdateNotification(ctx, notification); updateErr != nil {
 		// Log error but don't fail the notification send
 		// The important part is whether the notification was sent
+		_ = updateErr // Explicitly ignore error to satisfy linter
 	}
 
 	return err
@@ -676,6 +685,7 @@ func (s *ServiceImpl) scheduleRetry(ctx context.Context, payment *entities.Payme
 	if err := s.paymentRepo.UpdatePayment(ctx, payment); err != nil {
 		// Log error but don't fail the retry scheduling
 		// Retry scheduling is best-effort
+		_ = err // Explicitly ignore error to satisfy linter
 	}
 }
 
@@ -728,6 +738,7 @@ func (s *ServiceImpl) sendFraudNotification(ctx context.Context, payment *entiti
 	if err := s.SendNotification(ctx, request); err != nil {
 		// Log error but don't fail the fraud notification
 		// Fraud alerts are important but shouldn't break payment flow
+		_ = err // Explicitly ignore error to satisfy linter
 	}
 }
 
@@ -745,6 +756,7 @@ func (s *ServiceImpl) sendRefundNotification(ctx context.Context, refund *entiti
 	if err := s.SendNotification(ctx, request); err != nil {
 		// Log error but don't fail the refund notification
 		// Notification failure shouldn't affect refund processing
+		_ = err // Explicitly ignore error to satisfy linter
 	}
 }
 

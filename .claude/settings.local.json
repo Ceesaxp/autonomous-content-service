@@ -4,7 +4,14 @@
       "Bash(git add:*)",
       "Bash(mkdir:*)",
       "Bash(docker-compose ps:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Edit",
+      "Bash(git commit:*)",
+      "Bash(npm run lint)",
+      "Bash(go vet)",
+      "Bash(go test)",
+      "Bash(golangci-lint run)",
+      "Bash(golangci-lint run:*)"
     ],
     "deny": []
   }

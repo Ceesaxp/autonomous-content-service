@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -16,12 +17,14 @@ import (
 // OnboardingHandler handles HTTP requests for client onboarding
 type OnboardingHandler struct {
 	onboardingService onboarding.OnboardingService
+	logger            *log.Logger
 }
 
 // NewOnboardingHandler creates a new onboarding handler
 func NewOnboardingHandler(service onboarding.OnboardingService) *OnboardingHandler {
 	return &OnboardingHandler{
 		onboardingService: service,
+		logger:            log.New(log.Writer(), "[OnboardingHandler] ", log.LstdFlags),
 	}
 }
 
@@ -94,7 +97,10 @@ func (h *OnboardingHandler) StartOnboarding(w http.ResponseWriter, r *http.Reque
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // ProcessMessage handles client messages in the onboarding conversation
@@ -119,7 +125,10 @@ func (h *OnboardingHandler) ProcessMessage(w http.ResponseWriter, r *http.Reques
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // SubmitResponses handles structured responses to onboarding questions
@@ -178,7 +187,10 @@ func (h *OnboardingHandler) SubmitResponses(w http.ResponseWriter, r *http.Reque
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetSession retrieves an onboarding session
@@ -197,7 +209,10 @@ func (h *OnboardingHandler) GetSession(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(session)
+	if err := json.NewEncoder(w).Encode(session); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetQuestions retrieves questions for the current stage
@@ -216,7 +231,10 @@ func (h *OnboardingHandler) GetQuestions(w http.ResponseWriter, r *http.Request)
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(questions)
+	if err := json.NewEncoder(w).Encode(questions); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // CompleteOnboarding finalizes the onboarding process
@@ -246,7 +264,10 @@ func (h *OnboardingHandler) CompleteOnboarding(w http.ResponseWriter, r *http.Re
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetOnboardingProgress returns the progress of an onboarding session
@@ -298,7 +319,10 @@ func (h *OnboardingHandler) GetOnboardingProgress(w http.ResponseWriter, r *http
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetOnboardingAnalytics returns analytics for onboarding sessions
@@ -347,7 +371,10 @@ func (h *OnboardingHandler) GetOnboardingAnalytics(w http.ResponseWriter, r *htt
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(analytics)
+	if err := json.NewEncoder(w).Encode(analytics); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // Health check endpoint for onboarding service
@@ -366,5 +393,8 @@ func (h *OnboardingHandler) HealthCheck(w http.ResponseWriter, r *http.Request) 
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(health)
+	if err := json.NewEncoder(w).Encode(health); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }

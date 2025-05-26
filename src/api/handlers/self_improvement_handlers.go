@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -13,12 +14,14 @@ import (
 // SelfImprovementHandler handles self-improvement API endpoints
 type SelfImprovementHandler struct {
 	service self_improvement.SelfImprovementService
+	logger  *log.Logger
 }
 
 // NewSelfImprovementHandler creates a new self-improvement handler
 func NewSelfImprovementHandler(service self_improvement.SelfImprovementService) *SelfImprovementHandler {
 	return &SelfImprovementHandler{
 		service: service,
+		logger:  log.New(log.Writer(), "[SelfImprovementHandler] ", log.LstdFlags),
 	}
 }
 
@@ -71,7 +74,10 @@ func (h *SelfImprovementHandler) CollectMetrics(w http.ResponseWriter, r *http.R
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{"status": "success", "message": "Metrics collected successfully"})
+	if err := json.NewEncoder(w).Encode(map[string]string{"status": "success", "message": "Metrics collected successfully"}); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 func (h *SelfImprovementHandler) AnalyzePerformance(w http.ResponseWriter, r *http.Request) {
@@ -91,7 +97,10 @@ func (h *SelfImprovementHandler) AnalyzePerformance(w http.ResponseWriter, r *ht
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(analysis)
+	if err := json.NewEncoder(w).Encode(analysis); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 func (h *SelfImprovementHandler) DetectAnomalies(w http.ResponseWriter, r *http.Request) {
@@ -104,10 +113,13 @@ func (h *SelfImprovementHandler) DetectAnomalies(w http.ResponseWriter, r *http.
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"anomalies": anomalies,
 		"count":     len(anomalies),
-	})
+	}); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // Learning and knowledge management endpoints

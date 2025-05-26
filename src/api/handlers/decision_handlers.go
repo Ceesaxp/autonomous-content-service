@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 
@@ -14,12 +15,14 @@ import (
 // DecisionHandlers handles HTTP requests for decision-making operations
 type DecisionHandlers struct {
 	decisionService *decision_making.Service
+	logger          *log.Logger
 }
 
 // NewDecisionHandlers creates a new decision handlers instance
 func NewDecisionHandlers(decisionService *decision_making.Service) *DecisionHandlers {
 	return &DecisionHandlers{
 		decisionService: decisionService,
+		logger:          log.New(log.Writer(), "[DecisionHandler] ", log.LstdFlags),
 	}
 }
 
@@ -51,7 +54,10 @@ func (h *DecisionHandlers) CreateDecision(w http.ResponseWriter, r *http.Request
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(decision)
+	if err := json.NewEncoder(w).Encode(decision); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetDecision handles GET /api/v1/decisions/{id}
@@ -66,7 +72,10 @@ func (h *DecisionHandlers) GetDecision(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(decision)
+	if err := json.NewEncoder(w).Encode(decision); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // ListDecisions handles GET /api/v1/decisions
@@ -96,7 +105,10 @@ func (h *DecisionHandlers) ListDecisions(w http.ResponseWriter, r *http.Request)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(decisions)
+	if err := json.NewEncoder(w).Encode(decisions); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // ExecuteDecision handles POST /api/v1/decisions/{id}/execute
@@ -111,7 +123,10 @@ func (h *DecisionHandlers) ExecuteDecision(w http.ResponseWriter, r *http.Reques
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(result)
+	if err := json.NewEncoder(w).Encode(result); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // OverrideDecision handles POST /api/v1/decisions/{id}/override
@@ -141,9 +156,12 @@ func (h *DecisionHandlers) OverrideDecision(w http.ResponseWriter, r *http.Reque
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
+	if err := json.NewEncoder(w).Encode(map[string]string{
 		"message": "Decision overridden successfully",
-	})
+	}); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // AssessDecisionQuality handles GET /api/v1/decisions/{id}/quality
@@ -158,7 +176,10 @@ func (h *DecisionHandlers) AssessDecisionQuality(w http.ResponseWriter, r *http.
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(report)
+	if err := json.NewEncoder(w).Encode(report); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetDecisionLogs handles GET /api/v1/decisions/{id}/logs
@@ -173,7 +194,10 @@ func (h *DecisionHandlers) GetDecisionLogs(w http.ResponseWriter, r *http.Reques
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(logs)
+	if err := json.NewEncoder(w).Encode(logs); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetDecisionMetrics handles GET /api/v1/decisions/metrics
@@ -190,7 +214,10 @@ func (h *DecisionHandlers) GetDecisionMetrics(w http.ResponseWriter, r *http.Req
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(metrics)
+	if err := json.NewEncoder(w).Encode(metrics); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // CreatePolicy handles POST /api/v1/policies
@@ -208,7 +235,10 @@ func (h *DecisionHandlers) CreatePolicy(w http.ResponseWriter, r *http.Request) 
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(policy)
+	if err := json.NewEncoder(w).Encode(policy); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetPolicies handles GET /api/v1/policies
@@ -220,7 +250,10 @@ func (h *DecisionHandlers) GetPolicies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(policies)
+	if err := json.NewEncoder(w).Encode(policies); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // CreateEthicalGuideline handles POST /api/v1/ethical-guidelines
@@ -238,7 +271,10 @@ func (h *DecisionHandlers) CreateEthicalGuideline(w http.ResponseWriter, r *http
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(guideline)
+	if err := json.NewEncoder(w).Encode(guideline); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetEthicalGuidelines handles GET /api/v1/ethical-guidelines
@@ -250,7 +286,10 @@ func (h *DecisionHandlers) GetEthicalGuidelines(w http.ResponseWriter, r *http.R
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(guidelines)
+	if err := json.NewEncoder(w).Encode(guidelines); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetSystemHealth handles GET /api/v1/system/health
@@ -262,7 +301,10 @@ func (h *DecisionHandlers) GetSystemHealth(w http.ResponseWriter, r *http.Reques
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(health)
+	if err := json.NewEncoder(w).Encode(health); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // ActivateEmergencyMode handles POST /api/v1/system/emergency
@@ -288,10 +330,13 @@ func (h *DecisionHandlers) ActivateEmergencyMode(w http.ResponseWriter, r *http.
 	}
 
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
+	if err := json.NewEncoder(w).Encode(map[string]string{
 		"message": "Emergency mode activated",
 		"reason":  request.Reason,
-	})
+	}); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // GetAuditTrail handles GET /api/v1/audit
@@ -330,7 +375,10 @@ func (h *DecisionHandlers) GetAuditTrail(w http.ResponseWriter, r *http.Request)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(logs)
+	if err := json.NewEncoder(w).Encode(logs); err != nil {
+		// Log error but response headers are already sent
+		h.logger.Printf("Failed to encode response: %v", err)
+	}
 }
 
 // RegisterRoutes registers all decision-related routes
