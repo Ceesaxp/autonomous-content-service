@@ -77,32 +77,40 @@ services:
       APP_ENV: ${APP_ENV:-development}
       PORT: 8080
       JWT_SECRET: ${JWT_SECRET:-changeme}
-      
+
       # Database
       DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: ${DB_USER:-contentservice}
       DB_PASSWORD: ${DB_PASSWORD:-changeme}
       DB_NAME: ${DB_NAME:-contentservice}
-      
+
       # Redis
       REDIS_URL: redis://redis:6379
-      
+
       # LLM
       LLM_API_KEY: ${LLM_API_KEY}
       LLM_MODEL: ${LLM_MODEL:-gpt-4}
       LLM_MAX_TOKENS: ${LLM_MAX_TOKENS:-2048}
-      
+
       # Blockchain
       HARDHAT_NETWORK_URL: http://hardhat:8545
       TREASURY_CONTRACT_ADDRESS: ${TREASURY_CONTRACT_ADDRESS}
-      
+
       # External Services
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
     networks:
       - internal
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8080/health",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -119,20 +127,28 @@ services:
       api:
         condition: service_healthy
     ports:
-      - "80:80"
-      - "443:443"
+      - "8088:8088"
+      - "8443:8443"
     volumes:
       - ../web:/srv/web:ro
       - caddy_data:/data
       - caddy_config:/config
     environment:
-      DOMAIN: ${DOMAIN:-localhost}
       API_URL: http://api:8080
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@trillian.local}
     networks:
       - internal
       - external
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/health"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost/health",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
