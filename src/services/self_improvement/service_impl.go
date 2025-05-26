@@ -227,7 +227,9 @@ func (s *Service) ApplyExperimentResults(ctx context.Context, experimentID strin
 	for _, step := range evaluation.Implementation.Steps {
 		if err := s.executeImplementationStep(ctx, step); err != nil {
 			// Rollback if something fails
-			s.rollbackImplementation(ctx, evaluation.Implementation.Rollback)
+			if err := s.rollbackImplementation(ctx, evaluation.Implementation.Rollback); err != nil {
+				return fmt.Errorf("rollback failed: %w", err)
+			}
 			return fmt.Errorf("applying step %s: %w", step.Description, err)
 		}
 	}

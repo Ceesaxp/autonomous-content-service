@@ -327,11 +327,21 @@ func (r *PostgresLearningRepository) scanArtifact(scanner interface {
 	}
 	
 	// Unmarshal JSON fields
-	json.Unmarshal(evidenceJSON, &artifact.Evidence)
-	json.Unmarshal(tagsJSON, &artifact.Tags)
-	json.Unmarshal(relatedJSON, &artifact.RelatedArtifacts)
-	json.Unmarshal(prereqJSON, &artifact.Prerequisites)
-	json.Unmarshal(metadataJSON, &artifact.Metadata)
+	if err := json.Unmarshal(evidenceJSON, &artifact.Evidence); err != nil {
+		return nil, fmt.Errorf("unmarshaling evidence: %w", err)
+	}
+	if err := json.Unmarshal(tagsJSON, &artifact.Tags); err != nil {
+		return nil, fmt.Errorf("unmarshaling tags: %w", err)
+	}
+	if err := json.Unmarshal(relatedJSON, &artifact.RelatedArtifacts); err != nil {
+		return nil, fmt.Errorf("unmarshaling related artifacts: %w", err)
+	}
+	if err := json.Unmarshal(prereqJSON, &artifact.Prerequisites); err != nil {
+		return nil, fmt.Errorf("unmarshaling prerequisites: %w", err)
+	}
+	if err := json.Unmarshal(metadataJSON, &artifact.Metadata); err != nil {
+		return nil, fmt.Errorf("unmarshaling metadata: %w", err)
+	}
 	
 	return &artifact, nil
 }
@@ -406,8 +416,12 @@ func (r *PostgresMetricsRepository) GetMetrics(ctx context.Context, component, m
 			return nil, err
 		}
 		
-		json.Unmarshal(contextJSON, &metric.Context)
-		json.Unmarshal(tagsJSON, &metric.Tags)
+		if err := json.Unmarshal(contextJSON, &metric.Context); err != nil {
+			metric.Context = make(map[string]interface{}) // Use empty map on error
+		}
+		if err := json.Unmarshal(tagsJSON, &metric.Tags); err != nil {
+			metric.Tags = []string{} // Use empty slice on error
+		}
 		
 		metrics = append(metrics, &metric)
 	}
@@ -570,8 +584,12 @@ func (r *PostgresMetricsRepository) GetMetricAnomalies(ctx context.Context, comp
 			return nil, err
 		}
 		
-		json.Unmarshal(contextJSON, &metric.Context)
-		json.Unmarshal(tagsJSON, &metric.Tags)
+		if err := json.Unmarshal(contextJSON, &metric.Context); err != nil {
+			metric.Context = make(map[string]interface{}) // Use empty map on error
+		}
+		if err := json.Unmarshal(tagsJSON, &metric.Tags); err != nil {
+			metric.Tags = []string{} // Use empty slice on error
+		}
 		
 		metrics = append(metrics, &metric)
 	}

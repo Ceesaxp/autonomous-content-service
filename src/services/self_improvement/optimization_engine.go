@@ -523,9 +523,7 @@ func (oe *optimizationEngine) generatePromptSuggestions(analysis *PromptAnalysis
 	}
 	
 	// Based on opportunities
-	for _, opportunity := range analysis.Opportunities {
-		analysis.SuggestedChanges = append(analysis.SuggestedChanges, opportunity)
-	}
+	analysis.SuggestedChanges = append(analysis.SuggestedChanges, analysis.Opportunities...)
 	
 	// Performance-based suggestions
 	if quality, ok := analysis.Performance["quality_score"]; ok && quality < 80 {
@@ -536,6 +534,7 @@ func (oe *optimizationEngine) generatePromptSuggestions(analysis *PromptAnalysis
 
 func (oe *optimizationEngine) createPromptVariant(original string, variantNum int) string {
 	variant := original
+	_ = variant // Used below in simplifications
 	
 	switch variantNum % 5 {
 	case 1: // Add more structure
@@ -609,7 +608,16 @@ func (oe *optimizationEngine) simplifyLanguage(prompt string) string {
 	simplified := prompt
 	for complex, simple := range replacements {
 		simplified = strings.ReplaceAll(simplified, complex, simple)
-		simplified = strings.ReplaceAll(simplified, strings.Title(complex), strings.Title(simple))
+		// Simple capitalization for both strings
+		complexCap := complex
+		if len(complex) > 0 {
+			complexCap = strings.ToUpper(complex[:1]) + complex[1:]
+		}
+		simpleCap := simple
+		if len(simple) > 0 {
+			simpleCap = strings.ToUpper(simple[:1]) + simple[1:]
+		}
+		simplified = strings.ReplaceAll(simplified, complexCap, simpleCap)
 	}
 	
 	return simplified

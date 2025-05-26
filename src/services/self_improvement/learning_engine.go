@@ -912,7 +912,13 @@ func (le *learningEngine) generateClusterName(cluster Cluster, graph *KnowledgeG
 		}
 	}
 	
-	return fmt.Sprintf("%s Knowledge Cluster", strings.Title(dominantCategory))
+	// Simple capitalization without using deprecated strings.Title
+	if len(dominantCategory) > 0 {
+		return fmt.Sprintf("%s%s Knowledge Cluster", 
+			strings.ToUpper(dominantCategory[:1]), 
+			dominantCategory[1:])
+	}
+	return "Knowledge Cluster"
 }
 
 func (le *learningEngine) generateClusterDescription(cluster Cluster, graph *KnowledgeGraph) string {
