@@ -25,8 +25,10 @@
    - Resource allocation system
 
 5. **Governance Structure**
-   - Decision protocols
-   - Rules enforcement
+   - Decision protocols (See [Decision Protocol Documentation](./DecisionProtocol.md))
+   - Rules enforcement through policy engine
+   - Ethical guidelines and bias detection
+   - Emergency response and recovery mechanisms
    - Upgrade mechanisms
    - Risk management
 
