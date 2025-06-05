@@ -136,6 +136,7 @@ services:
     environment:
       API_URL: http://api:8080
       ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@trillian.local}
+      DOMAIN: ${DOMAIN:-trillian.local}
     networks:
       - internal
       - external

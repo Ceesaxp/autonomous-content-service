@@ -6,8 +6,8 @@
     https_port 8443
 }
 
-# Main site configuration - only serve on trillian.local domain
-trillian.local:8443 {
+# Main site configuration
+{$DOMAIN:trillian.local}:8443 {
     # Enable compression
     encode gzip zstd
 
