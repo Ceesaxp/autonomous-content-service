@@ -3,6 +3,9 @@
 -- Create necessary extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- Include legal and compliance schema
+\i legal_schema.sql
+
 -- Create enums for entity statuses
 
 -- Client status enum
