@@ -155,20 +155,20 @@ type MemberFilter struct {
 
 // AllocationFilter represents filtering options for allocations
 type AllocationFilter struct {
-	ProposalID   *uuid.UUID                  `json:"proposal_id,omitempty"`
-	RecipientID  *uuid.UUID                  `json:"recipient_id,omitempty"`
-	Status       *entities.AllocationStatus  `json:"status,omitempty"`
-	Category     *string                     `json:"category,omitempty"`
-	MinAmount    *entities.Money             `json:"min_amount,omitempty"`
-	MaxAmount    *entities.Money             `json:"max_amount,omitempty"`
-	Currency     *string                     `json:"currency,omitempty"`
-	ApprovedAfter *time.Time                 `json:"approved_after,omitempty"`
-	ApprovedBefore *time.Time                `json:"approved_before,omitempty"`
-	SearchText   string                      `json:"search_text,omitempty"`
-	Limit        int                         `json:"limit,omitempty"`
-	Offset       int                         `json:"offset,omitempty"`
-	SortBy       string                      `json:"sort_by,omitempty"`
-	SortOrder    string                      `json:"sort_order,omitempty"`
+	ProposalID     *uuid.UUID                 `json:"proposal_id,omitempty"`
+	RecipientID    *uuid.UUID                 `json:"recipient_id,omitempty"`
+	Status         *entities.AllocationStatus `json:"status,omitempty"`
+	Category       *string                    `json:"category,omitempty"`
+	MinAmount      *entities.Money            `json:"min_amount,omitempty"`
+	MaxAmount      *entities.Money            `json:"max_amount,omitempty"`
+	Currency       *string                    `json:"currency,omitempty"`
+	ApprovedAfter  *time.Time                 `json:"approved_after,omitempty"`
+	ApprovedBefore *time.Time                 `json:"approved_before,omitempty"`
+	SearchText     string                     `json:"search_text,omitempty"`
+	Limit          int                        `json:"limit,omitempty"`
+	Offset         int                        `json:"offset,omitempty"`
+	SortBy         string                     `json:"sort_by,omitempty"`
+	SortOrder      string                     `json:"sort_order,omitempty"`
 }
 
 // EventFilter represents filtering options for events
@@ -190,76 +190,76 @@ type TimeRange struct {
 
 // GovernanceMetrics represents governance system metrics
 type GovernanceMetrics struct {
-	TotalMembers        int                 `json:"total_members"`
-	ActiveMembers       int                 `json:"active_members"`
-	TotalProposals      int                 `json:"total_proposals"`
-	ActiveProposals     int                 `json:"active_proposals"`
-	PassedProposals     int                 `json:"passed_proposals"`
-	RejectedProposals   int                 `json:"rejected_proposals"`
-	TotalVotes          int                 `json:"total_votes"`
-	TotalVotingPower    *entities.Money     `json:"total_voting_power"`
-	ParticipationRate   float64             `json:"participation_rate"`
-	AverageQuorum       float64             `json:"average_quorum"`
-	TreasuryBalance     *entities.Money     `json:"treasury_balance"`
-	TotalAllocations    *entities.Money     `json:"total_allocations"`
-	PendingAllocations  *entities.Money     `json:"pending_allocations"`
-	CompletedAllocations *entities.Money    `json:"completed_allocations"`
-	ProposalSuccessRate float64             `json:"proposal_success_rate"`
-	AverageVotingPeriod time.Duration       `json:"average_voting_period"`
-	UpdatedAt           time.Time           `json:"updated_at"`
+	TotalMembers         int             `json:"total_members"`
+	ActiveMembers        int             `json:"active_members"`
+	TotalProposals       int             `json:"total_proposals"`
+	ActiveProposals      int             `json:"active_proposals"`
+	PassedProposals      int             `json:"passed_proposals"`
+	RejectedProposals    int             `json:"rejected_proposals"`
+	TotalVotes           int             `json:"total_votes"`
+	TotalVotingPower     *entities.Money `json:"total_voting_power"`
+	ParticipationRate    float64         `json:"participation_rate"`
+	AverageQuorum        float64         `json:"average_quorum"`
+	TreasuryBalance      *entities.Money `json:"treasury_balance"`
+	TotalAllocations     *entities.Money `json:"total_allocations"`
+	PendingAllocations   *entities.Money `json:"pending_allocations"`
+	CompletedAllocations *entities.Money `json:"completed_allocations"`
+	ProposalSuccessRate  float64         `json:"proposal_success_rate"`
+	AverageVotingPeriod  time.Duration   `json:"average_voting_period"`
+	UpdatedAt            time.Time       `json:"updated_at"`
 }
 
 // MemberParticipationStats represents participation statistics for a member
 type MemberParticipationStats struct {
-	MemberID             uuid.UUID       `json:"member_id"`
-	ProposalsSubmitted   int             `json:"proposals_submitted"`
-	ProposalSuccessRate  float64         `json:"proposal_success_rate"`
-	VotesParticipated    int             `json:"votes_participated"`
-	VotingParticipationRate float64      `json:"voting_participation_rate"`
-	TotalVotingPower     *entities.Money `json:"total_voting_power"`
-	VotesFor             int             `json:"votes_for"`
-	VotesAgainst         int             `json:"votes_against"`
-	VotesAbstain         int             `json:"votes_abstain"`
-	DelegationsReceived  int             `json:"delegations_received"`
-	DelegationsMade      int             `json:"delegations_made"`
-	LastActivity         time.Time       `json:"last_activity"`
-	ContributionScore    float64         `json:"contribution_score"`
-	Period               TimeRange       `json:"period"`
+	MemberID                uuid.UUID       `json:"member_id"`
+	ProposalsSubmitted      int             `json:"proposals_submitted"`
+	ProposalSuccessRate     float64         `json:"proposal_success_rate"`
+	VotesParticipated       int             `json:"votes_participated"`
+	VotingParticipationRate float64         `json:"voting_participation_rate"`
+	TotalVotingPower        *entities.Money `json:"total_voting_power"`
+	VotesFor                int             `json:"votes_for"`
+	VotesAgainst            int             `json:"votes_against"`
+	VotesAbstain            int             `json:"votes_abstain"`
+	DelegationsReceived     int             `json:"delegations_received"`
+	DelegationsMade         int             `json:"delegations_made"`
+	LastActivity            time.Time       `json:"last_activity"`
+	ContributionScore       float64         `json:"contribution_score"`
+	Period                  TimeRange       `json:"period"`
 }
 
 // VotingPowerDistribution represents the distribution of voting power
 type VotingPowerDistribution struct {
-	TotalSupply          *entities.Money `json:"total_supply"`
-	CirculatingSupply    *entities.Money `json:"circulating_supply"`
-	StakedSupply         *entities.Money `json:"staked_supply"`
-	DelegatedSupply      *entities.Money `json:"delegated_supply"`
-	TopHolders           []MemberVotingPower `json:"top_holders"`
-	ConcentrationRatio   float64         `json:"concentration_ratio"` // Percentage held by top 10 holders
-	HHI                  float64         `json:"hhi"` // Herfindahl-Hirschman Index
-	GiniCoefficient      float64         `json:"gini_coefficient"`
-	MedianHolding        *entities.Money `json:"median_holding"`
-	UpdatedAt            time.Time       `json:"updated_at"`
+	TotalSupply        *entities.Money     `json:"total_supply"`
+	CirculatingSupply  *entities.Money     `json:"circulating_supply"`
+	StakedSupply       *entities.Money     `json:"staked_supply"`
+	DelegatedSupply    *entities.Money     `json:"delegated_supply"`
+	TopHolders         []MemberVotingPower `json:"top_holders"`
+	ConcentrationRatio float64             `json:"concentration_ratio"` // Percentage held by top 10 holders
+	HHI                float64             `json:"hhi"`                 // Herfindahl-Hirschman Index
+	GiniCoefficient    float64             `json:"gini_coefficient"`
+	MedianHolding      *entities.Money     `json:"median_holding"`
+	UpdatedAt          time.Time           `json:"updated_at"`
 }
 
 // MemberVotingPower represents a member's voting power
 type MemberVotingPower struct {
-	MemberID     uuid.UUID       `json:"member_id"`
-	Address      string          `json:"address"`
-	VotingPower  *entities.Money `json:"voting_power"`
-	Percentage   float64         `json:"percentage"`
+	MemberID    uuid.UUID       `json:"member_id"`
+	Address     string          `json:"address"`
+	VotingPower *entities.Money `json:"voting_power"`
+	Percentage  float64         `json:"percentage"`
 }
 
 // TreasuryAllocationSummary represents summary of treasury allocations
 type TreasuryAllocationSummary struct {
-	TotalAllocated       *entities.Money                `json:"total_allocated"`
-	TotalDisbursed       *entities.Money                `json:"total_disbursed"`
-	TotalPending         *entities.Money                `json:"total_pending"`
-	AllocationsByCategory map[string]*entities.Money    `json:"allocations_by_category"`
-	AllocationsByStatus  map[string]*entities.Money     `json:"allocations_by_status"`
-	AverageAllocationSize *entities.Money               `json:"average_allocation_size"`
-	TotalRecipients      int                            `json:"total_recipients"`
-	CompletionRate       float64                        `json:"completion_rate"`
-	AverageCompletion    time.Duration                  `json:"average_completion"`
-	Period               TimeRange                      `json:"period"`
-	UpdatedAt            time.Time                      `json:"updated_at"`
+	TotalAllocated        *entities.Money            `json:"total_allocated"`
+	TotalDisbursed        *entities.Money            `json:"total_disbursed"`
+	TotalPending          *entities.Money            `json:"total_pending"`
+	AllocationsByCategory map[string]*entities.Money `json:"allocations_by_category"`
+	AllocationsByStatus   map[string]*entities.Money `json:"allocations_by_status"`
+	AverageAllocationSize *entities.Money            `json:"average_allocation_size"`
+	TotalRecipients       int                        `json:"total_recipients"`
+	CompletionRate        float64                    `json:"completion_rate"`
+	AverageCompletion     time.Duration              `json:"average_completion"`
+	Period                TimeRange                  `json:"period"`
+	UpdatedAt             time.Time                  `json:"updated_at"`
 }
