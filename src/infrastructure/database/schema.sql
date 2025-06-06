@@ -500,3 +500,6 @@ CREATE INDEX idx_service_dependencies_service ON service_dependencies(service_na
 CREATE INDEX idx_service_dependencies_critical ON service_dependencies(critical);
 CREATE INDEX idx_service_dependencies_status ON service_dependencies(status);
 CREATE INDEX idx_service_dependencies_last_check ON service_dependencies(last_check);
+
+-- Include governance schema  
+\i governance_schema.sql
