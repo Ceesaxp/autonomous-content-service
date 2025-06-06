@@ -1,0 +1,135 @@
+{
+  "dao": {
+    "name": "Autonomous Content Agency DAO",
+    "mission": "To autonomously manage and execute content creation and delivery for clients using decentralized governance and automated smart contracts."
+  },
+  "tokens": {
+    "AGENCY": {
+      "type": "fungible",
+      "roles": ["governance", "utility", "payments"],
+      "supply": "fixed",
+      "token_supply_model": "capped_inflationary_burn",
+      "distribution": {
+        "founders_treasury": 0.2,
+        "community_incentives": 0.3,
+        "ecosystem_partners": 0.15,
+        "supplier_rewards": 0.2,
+        "investors": 0.15
+      },
+      "vesting_schedules": true,
+      "staking_models": {
+        "enabled": true,
+        "slashing_conditions": true,
+        "rewards": "proportional_to_contribution"
+      },
+      "incentives": {
+        "clients_pay_in": ["AGENCY", "stablecoin"],
+        "suppliers_paid_in": ["AGENCY", "stablecoin"],
+        "bonus_triggers": ["client_satisfaction", "on_time_delivery"]
+      }
+    },
+    "REPUTE": {
+      "type": "non_transferable",
+      "roles": ["reputation", "voting_weight"],
+      "allocation": "performance_based",
+      "decay": true,
+      "slashing": true
+    }
+  },
+  "governance": {
+    "roles": {
+      "tokenholders": {
+        "permissions": ["strategic_votes", "budget_approval"]
+      },
+      "reputation_holders": {
+        "permissions": ["operational_votes", "content_approval"]
+      },
+      "executors": {
+        "type": "oracles_or_multisig",
+        "upgradeable": true,
+        "multisig_wallets": ["Gnosis Safe"]
+      }
+    },
+    "voting_mechanisms": {
+      "strategic": "quadratic",
+      "budget": "weighted",
+      "priority": "conviction",
+      "off_chain_discussion_url_template": "https://gov.daoagency.org/discussion/{proposal_id}",
+      "delegate_votes": true,
+      "vote_result_callbacks": ["trigger_contracts", "inform_oracles"]
+    },
+    "proposals": [
+      "client_engagement_policy",
+      "supplier_onboarding",
+      "budget_allocation",
+      "treasury_investments",
+      "protocol_upgrades",
+      "emergency_shutdown"
+    ],
+    "contract_upgrade_policy": "timelock + majority quorum",
+    "rollback_modules": true,
+    "pause_threshold": "guardian quorum or DAO vote"
+  },
+  "operations": {
+    "autonomous": true,
+    "contract_functions": [
+      "create_project_escrow",
+      "manage_milestones",
+      "release_payments",
+      "mint_licensing_nft",
+      "reputation_adjustment"
+    ],
+    "marketplace": {
+      "clients": "submit_content_briefs",
+      "suppliers": "submit_bids",
+      "dao": "selects_winner_and_escrows",
+      "payment": "on_validation"
+    },
+    "oracle_triggers": true,
+    "off_chain_event_bridge": true,
+    "automated_vote_outcomes": ["payments", "token_minting", "role_assignment"]
+  },
+  "compliance": {
+    "legal_entity": "DAO_LLC_or_UNA",
+    "jurisdiction": "opt-in",
+    "ip_protection": true,
+    "kyc_modules": ["clients", "suppliers"],
+    "tax_reporting": "pluggable_module"
+  },
+  "risk_management": {
+    "slashing_policy": "yes",
+    "insurance_fund": true,
+    "pause_mechanism": {
+      "trigger": ["multisig", "dao_vote"]
+    },
+    "emergency_withdrawal_rules": true
+  },
+  "permissions": {
+    "acl_roles": ["curator", "executor", "auditor"],
+    "role_change_proposals": true,
+    "audit_logs": {
+      "on_chain": true,
+      "backup": "IPFS"
+    }
+  },
+  "transparency": {
+    "governance_dashboard": true,
+    "real_time_alerts": true,
+    "data_export": ["json", "csv"],
+    "audit_endpoint": {
+      "type": "ipfs",
+      "proof": "merkle"
+    }
+  },
+  "metrics": {
+    "delivery_sla": "monitored",
+    "client_satisfaction": "scored",
+    "revenue": "on_chain_tracked",
+    "reputation_velocity": "calculated"
+  },
+  "bootstrap_strategy": {
+    "phase": "semi_autonomous",
+    "curation_council": "temporary",
+    "grants_partnerships": "enabled"
+  }
+}

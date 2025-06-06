@@ -1,92 +1,104 @@
 # 🧠 1. Core Principles
- - Autonomy: The DAO can operate end-to-end without human intervention in daily decisions, while retaining human-in-the-loop capability for strategic votes.
- - Transparency: All actions (contracts, votes, spending) are logged on-chain.
- - Alignment: Stakeholders (contributors, clients, investors) are aligned via token incentives and reputation scores.
+- **Autonomy**: The DAO operates end-to-end without human intervention in daily decisions, while retaining human-in-the-loop capability for strategic oversight.
+- **Transparency**: All actions (contracts, votes, spending) are logged on-chain and mirrored in public dashboards.
+- **Alignment**: Stakeholders (contributors, clients, investors) are aligned through token incentives, reputation systems, and role-based accountability.
 
 # 🏛️ 2. Governance Framework
 
 ## A. Roles & Voting Rights
- - Tokenholders: Vote on major strategic changes, protocol upgrades, treasury allocation.
- - Reputation-holders: Non-transferrable scores that influence voting power on operational matters (e.g. content approval, supplier selection).
- - Oracles/Executors: Smart contract agents or multisigs executing proposals; can be upgraded via vote.
+- **Tokenholders**: Vote on strategic changes, treasury decisions, protocol upgrades.
+- **Reputation-holders**: Earn non-transferable scores; influence operational decisions such as supplier evaluation, content quality, and marketplace integrity.
+- **Oracles/Executors**: Execute results of approved proposals; include smart contracts, oracle relays, and multisig wallets (e.g. Gnosis Safe).
 
 ## B. Voting Mechanisms
- - Quadratic Voting for community decisions.
- - Weighted Voting for budget allocation (token + reputation).
- - Conviction Voting for proposal urgency/prioritization.
+- **Quadratic Voting** for community proposals.
+- **Weighted Voting** (tokens + reputation) for budget and resource allocation.
+- **Conviction Voting** to prioritize proposals over time.
+- **Delegated Voting** to allow participation via trusted agents.
+- **Off-chain Discussion** enabled via governance forums.
+- **Post-vote Execution Triggers** automatically implement on-chain results (e.g. fund disbursement).
 
 ## C. Proposal Types
- - Client engagement parameters
- - Supplier onboarding/offboarding
- - Budget allocations (marketing, R&D)
- - Protocol upgrades
- - Treasury investments
- - Emergency shutdowns (guardian council override?)
+- Client engagement policies
+- Supplier onboarding/offboarding
+- Budget allocations (e.g., marketing, R&D)
+- Treasury investments
+- Protocol upgrades
+- Contract or parameter upgrades
+- Emergency shutdowns and rollback triggers
 
 # 💰 3. Tokenomics
 
 ## A. Token Types
- - $AGENCY: Utility + governance token
- - $REPUTE: Soulbound reputation score per contributor or contractor
+- **$AGENCY**: Fungible utility + governance token. Used for voting, staking, and payments.
+- **$REPUTE**: Non-transferable soulbound reputation token based on work quality and delivery.
 
-## B. Initial Supply Distribution
+## B. Initial Token Distribution
 
 | Purpose                  | % of Total Supply |
 |:-------------------------|------------------:|
 | Founding Team & Treasury |               20% |
 | Community Incentives     |               30% |
-| Ecosystem Partnerships   |               15% |           
-| Supplier Incentives      |               20% |             
-| Investors                |               15% |    
+| Ecosystem Partnerships   |               15% |
+| Supplier Incentives      |               20% |
+| Investors                |               15% |
 
-## C. Incentives
- - Clients pay in $AGENCY or stablecoins (converted partly into $AGENCY)
- - Suppliers are paid in a mix of $AGENCY and stablecoins
- - Contributors earn $REPUTE for good work (with decay and slashing conditions)
- - Bonus emissions tied to DAO KPIs (e.g., client satisfaction, delivery time)
-
+## C. Token Mechanics
+- Vesting schedules apply to founders, partners, and contributors.
+- Staking and slashing models for suppliers and validators.
+- Inflationary and deflationary levers (e.g., burn on treasury outflows).
+- Clients may pay in $AGENCY or stablecoins; partial conversion into $AGENCY.
+- Bonus emissions linked to KPIs (e.g., delivery SLA, satisfaction index).
 
 # ⚙️ 4. Operational Logic
 
-## A. Autonomous Processes
- - Smart contracts manage:
- - Escrow and milestone-based payments
- - Content licensing and attribution via NFTs
- - Budget allocation and accounting
- - Hiring/vetting via staking and reputation
+## A. Autonomous Execution
+- Smart contracts handle:
+    - Escrow and milestone-based payments
+    - Budget accounting and role-based disbursements
+    - Licensing via NFT-minted content
+    - Role/reputation adjustment after project review
+    - Vote execution (triggered by oracles or consensus)
 
-## B. Marketplace Layer
- - Clients post content briefs
- - DAO members or suppliers submit bids
- - Winning bids get escrowed contract from DAO
- - DAO pays out upon validation (via oracles or AI)
-
+## B. Marketplace Workflow
+- Clients submit project briefs
+- Contributors and agencies bid for work
+- DAO escrows funds upon approval
+- Oracle/AI validates completion, releases payment
+- Disputes trigger resolution module or guardian intervention
 
 # 🧾 5. Legal & Compliance
- - Wrap DAO into a UNA (Unincorporated Nonprofit Association) or Marshall Islands DAO LLC
- - Include jurisdiction fallback for IP enforcement
- - Compliant oracles for identity (KYC on clients/suppliers)
- - Tax module for jurisdictional reporting, if relevant
-
+- DAO registered under Marshall Islands DAO LLC or UNA framework
+- Jurisdictional fallback for IP enforcement and arbitration
+- KYC modules (opt-in, tied to treasury risk thresholds)
+- Tax module integration for revenue transparency and reporting
 
 # 🔒 6. Risk Management
- - Slashing: Suppliers and contributors lose tokens/reputation on failure or fraud
- - Insurance Fund: Auto-funded reserve to compensate clients in rare failures
- - Pause Mechanism: Triggerable by multisig guardians or via DAO vote
-
+- Slashing of $AGENCY and loss of $REPUTE on failure, fraud, or missed deadlines
+- Insurance Fund auto-funded from revenue to cover client loss events
+- Emergency Pause Mechanism triggered by multisig council or majority DAO vote
+- Rollback and upgrade contingency built into proposal contracts
+- Emergency Withdrawal Policy for treasury-controlled wallets
 
 # 📈 7. Metrics & KPIs
 
-| Metric                    | Used For                         |
-|:--------------------------|:---------------------------------|
-| Project Delivery SLA      | Contributor incentives           |
-| Client Satisfaction Index | DAO performance benchmarks       |
-| On-chain Revenue Flow     | Token emission calibration       |
+| Metric                    | Purpose                          |
+|:--------------------------|:----------------------------------|
+| Project Delivery SLA      | Contributor performance rewards  |
+| Client Satisfaction Index | DAO reputation and growth driver |
+| On-chain Revenue Flow     | Token emission and pricing model |
 | Reputation Velocity       | Anti-sybil and quality assurance |
 
+Real-time dashboards provide governance visibility, alerts, and voting trends.
 
 # 🧪 8. Bootstrapping Strategy
- - Begin semi-autonomous (human-curated proposals, oracle-verified outputs)
- - Gradually transition into more autonomous DAO
- - Initial curation council with sunset clause
- - Use grants or ecosystem partnerships to attract early users/suppliers
+- Initial phase is **semi-autonomous**, with multisig guardians and manual arbitration.
+- Reputation system and automation enabled gradually with audit trails.
+- Curation Council appointed to curate proposals and suppliers for 3–6 months.
+- Grants and ecosystem partnerships support early supplier onboarding and client pipeline development.
+
+# 📊 9. Transparency & Auditing
+- All transactions and votes logged on-chain with Merkle proof backup.
+- Public dashboards and export APIs (CSV, JSON).
+- Real-time alerts on governance actions, budget changes, and proposal status.
+- Role-based audit logs on critical operations and treasury events.
