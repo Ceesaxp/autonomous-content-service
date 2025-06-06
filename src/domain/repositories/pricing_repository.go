@@ -239,11 +239,6 @@ type ExperimentFilter struct {
 }
 
 // Supporting types
-type TimeRange struct {
-	Start time.Time `json:"start"`
-	End   time.Time `json:"end"`
-}
-
 type PriceRange struct {
 	Min float64 `json:"min"`
 	Max float64 `json:"max"`

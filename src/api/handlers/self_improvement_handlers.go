@@ -136,10 +136,13 @@ func (h *SelfImprovementHandler) LearnFromProject(w http.ResponseWriter, r *http
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"artifacts": artifacts,
 		"count":     len(artifacts),
-	})
+	}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *SelfImprovementHandler) LearnFromFeedback(w http.ResponseWriter, r *http.Request) {
@@ -154,7 +157,10 @@ func (h *SelfImprovementHandler) LearnFromFeedback(w http.ResponseWriter, r *htt
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(artifact)
+	if err := json.NewEncoder(w).Encode(artifact); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *SelfImprovementHandler) LearnFromError(w http.ResponseWriter, r *http.Request) {
@@ -173,7 +179,10 @@ func (h *SelfImprovementHandler) LearnFromError(w http.ResponseWriter, r *http.R
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(artifact)
+	if err := json.NewEncoder(w).Encode(artifact); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *SelfImprovementHandler) SynthesizeLearnings(w http.ResponseWriter, r *http.Request) {
@@ -199,10 +208,13 @@ func (h *SelfImprovementHandler) SynthesizeLearnings(w http.ResponseWriter, r *h
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"synthesized_artifacts": artifacts,
 		"count":                 len(artifacts),
-	})
+	}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Capability management endpoints
@@ -217,10 +229,13 @@ func (h *SelfImprovementHandler) IdentifyCapabilityGaps(w http.ResponseWriter, r
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"gaps":  gaps,
 		"count": len(gaps),
-	})
+	}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *SelfImprovementHandler) AcquireCapability(w http.ResponseWriter, r *http.Request) {
@@ -234,10 +249,13 @@ func (h *SelfImprovementHandler) AcquireCapability(w http.ResponseWriter, r *htt
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{
+	if err := json.NewEncoder(w).Encode(map[string]string{
 		"status":  "success",
 		"message": "Capability acquisition initiated",
-	})
+	}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *SelfImprovementHandler) PrioritizeGaps(w http.ResponseWriter, r *http.Request) {
@@ -266,10 +284,13 @@ func (h *SelfImprovementHandler) PrioritizeGaps(w http.ResponseWriter, r *http.R
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"prioritized_gaps": prioritizedGaps,
 		"count":            len(prioritizedGaps),
-	})
+	}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Experimentation endpoints
@@ -299,7 +320,10 @@ func (h *SelfImprovementHandler) ProposeExperiment(w http.ResponseWriter, r *htt
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(experiment)
+	if err := json.NewEncoder(w).Encode(experiment); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *SelfImprovementHandler) RunExperiment(w http.ResponseWriter, r *http.Request) {
@@ -313,10 +337,13 @@ func (h *SelfImprovementHandler) RunExperiment(w http.ResponseWriter, r *http.Re
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{
+	if err := json.NewEncoder(w).Encode(map[string]string{
 		"status":  "success",
 		"message": "Experiment started successfully",
-	})
+	}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *SelfImprovementHandler) EvaluateExperiment(w http.ResponseWriter, r *http.Request) {
@@ -331,7 +358,10 @@ func (h *SelfImprovementHandler) EvaluateExperiment(w http.ResponseWriter, r *ht
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(evaluation)
+	if err := json.NewEncoder(w).Encode(evaluation); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *SelfImprovementHandler) ApplyExperimentResults(w http.ResponseWriter, r *http.Request) {
@@ -345,10 +375,13 @@ func (h *SelfImprovementHandler) ApplyExperimentResults(w http.ResponseWriter, r
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{
+	if err := json.NewEncoder(w).Encode(map[string]string{
 		"status":  "success",
 		"message": "Experiment results applied successfully",
-	})
+	}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Optimization endpoints
@@ -365,10 +398,13 @@ func (h *SelfImprovementHandler) OptimizePrompts(w http.ResponseWriter, r *http.
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"optimizations": optimizations,
 		"count":         len(optimizations),
-	})
+	}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *SelfImprovementHandler) SelectOptimalLLM(w http.ResponseWriter, r *http.Request) {
@@ -396,11 +432,14 @@ func (h *SelfImprovementHandler) SelectOptimalLLM(w http.ResponseWriter, r *http
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"selected_llm": selectedLLM,
 		"task":         request.Task,
 		"requirements": request.Requirements,
-	})
+	}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *SelfImprovementHandler) OptimizeWorkflow(w http.ResponseWriter, r *http.Request) {
@@ -415,7 +454,10 @@ func (h *SelfImprovementHandler) OptimizeWorkflow(w http.ResponseWriter, r *http
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(optimization)
+	if err := json.NewEncoder(w).Encode(optimization); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // ROI and prioritization endpoints
@@ -436,10 +478,13 @@ func (h *SelfImprovementHandler) CalculateImprovementROI(w http.ResponseWriter, 
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"improvement": improvement,
 		"roi":         roi,
-	})
+	}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *SelfImprovementHandler) PrioritizeImprovements(w http.ResponseWriter, r *http.Request) {
@@ -466,11 +511,14 @@ func (h *SelfImprovementHandler) PrioritizeImprovements(w http.ResponseWriter, r
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"improvements": improvements,
 		"count":        len(improvements),
 		"limit":        limit,
-	})
+	}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Competitive intelligence endpoints
@@ -485,10 +533,13 @@ func (h *SelfImprovementHandler) AnalyzeCompetitors(w http.ResponseWriter, r *ht
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"insights": insights,
 		"count":    len(insights),
-	})
+	}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *SelfImprovementHandler) IdentifyMarketGaps(w http.ResponseWriter, r *http.Request) {
@@ -501,8 +552,11 @@ func (h *SelfImprovementHandler) IdentifyMarketGaps(w http.ResponseWriter, r *ht
 	}
 	
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"opportunities": opportunities,
 		"count":         len(opportunities),
-	})
+	}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }

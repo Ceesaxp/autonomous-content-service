@@ -29,6 +29,14 @@ tags:
     description: Feedback management endpoints
   - name: Transactions
     description: Financial transaction endpoints
+  - name: Risk Management
+    description: Risk assessment and management endpoints
+  - name: Incidents
+    description: Incident management and response endpoints
+  - name: Vulnerabilities
+    description: Security vulnerability management endpoints
+  - name: Backups
+    description: Backup and recovery management endpoints
   - name: System
     description: System capabilities and monitoring endpoints
   - name: Webhooks
@@ -824,6 +832,163 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+
+  # Risk Management Endpoints
+  /risks:
+    get:
+      summary: List risks
+      description: Retrieve a paginated list of risks with optional filtering
+      tags:
+        - Risk Management
+      parameters:
+        - name: category
+          in: query
+          description: Filter by risk category
+          schema:
+            type: string
+            enum: [Content, Financial, Operational, Security, Legal, Reputation]
+        - name: severity
+          in: query
+          description: Filter by risk severity
+          schema:
+            type: string
+            enum: [Critical, High, Medium, Low]
+        - name: status
+          in: query
+          description: Filter by risk status
+          schema:
+            type: string
+            enum: [Identified, Assessing, Mitigating, Monitoring, Resolved, Accepted]
+        - name: offset
+          in: query
+          description: Pagination offset
+          schema:
+            type: integer
+            default: 0
+        - name: limit
+          in: query
+          description: Maximum number of results
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+      responses:
+        '200':
+          description: List of risks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  risks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Risk'
+                  total:
+                    type: integer
+                  offset:
+                    type: integer
+                  limit:
+                    type: integer
+    post:
+      summary: Create a new risk
+      description: Create a new risk entry in the system
+      tags:
+        - Risk Management
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Risk'
+      responses:
+        '201':
+          description: Risk created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Risk'
+
+  /risks/{id}:
+    get:
+      summary: Get risk by ID
+      description: Retrieve a specific risk by its ID
+      tags:
+        - Risk Management
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Risk ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Risk details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Risk'
+        '404':
+          description: Risk not found
+
+  /risks/{id}/assess:
+    post:
+      summary: Assess risk
+      description: Perform risk assessment and update risk scoring
+      tags:
+        - Risk Management
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Risk ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Risk assessment completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Risk'
+
+  /system/health:
+    get:
+      summary: Get system health
+      description: Retrieve overall system health status and component health
+      tags:
+        - System
+      responses:
+        '200':
+          description: System health status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemHealth'
+
+  /vulnerabilities/scan:
+    post:
+      summary: Run vulnerability scan
+      description: Execute a security vulnerability scan across all system components
+      tags:
+        - Vulnerabilities
+      responses:
+        '200':
+          description: Vulnerability scan completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  vulnerabilities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Vulnerability'
+                  scan_completed:
+                    type: boolean
 
 components:
   securitySchemes:
@@ -1686,5 +1851,276 @@ components:
           type: string
           format: date-time
         lastTriggeredAt:
+          type: string
+          format: date-time
+    
+    Risk:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - category
+        - severity
+        - likelihood
+        - impact
+        - status
+        - identifiedAt
+        - lastAssessment
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+          enum: [Content, Financial, Operational, Security, Legal, Reputation]
+        severity:
+          type: string
+          enum: [Critical, High, Medium, Low]
+        likelihood:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Probability of risk occurrence (0.0 to 1.0)
+        impact:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Impact magnitude if risk occurs (0.0 to 1.0)
+        status:
+          type: string
+          enum: [Identified, Assessing, Mitigating, Monitoring, Resolved, Accepted]
+        metadata:
+          type: object
+          description: Additional risk-specific metadata
+        mitigationActions:
+          type: array
+          items:
+            type: string
+        ownerId:
+          type: string
+          format: uuid
+        identifiedAt:
+          type: string
+          format: date-time
+        lastAssessment:
+          type: string
+          format: date-time
+        resolutionDate:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    
+    Incident:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - severity
+        - status
+        - category
+        - source
+        - occurredAt
+        - detectedAt
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        severity:
+          type: string
+          enum: [Critical, High, Medium, Low]
+        status:
+          type: string
+          enum: [Open, InProgress, Resolved, Closed]
+        category:
+          type: string
+          enum: [Content, Financial, Operational, Security, Legal, Reputation]
+        source:
+          type: string
+        assigneeId:
+          type: string
+          format: uuid
+        metadata:
+          type: object
+        actionsTaken:
+          type: array
+          items:
+            $ref: '#/components/schemas/IncidentAction'
+        rootCause:
+          type: string
+        lessonsLearned:
+          type: string
+        resolution:
+          type: string
+        occurredAt:
+          type: string
+          format: date-time
+        detectedAt:
+          type: string
+          format: date-time
+        resolvedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    
+    IncidentAction:
+      type: object
+      required:
+        - id
+        - type
+        - description
+        - status
+        - executedAt
+        - executedBy
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+        result:
+          type: string
+        executedAt:
+          type: string
+          format: date-time
+        executedBy:
+          type: string
+    
+    Vulnerability:
+      type: object
+      required:
+        - id
+        - title
+        - description
+        - severity
+        - status
+        - component
+        - discoveredAt
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        severity:
+          type: string
+          enum: [Critical, High, Medium, Low]
+        status:
+          type: string
+          enum: [Open, InProgress, Fixed, Accepted, FalsePositive]
+        component:
+          type: string
+        cveId:
+          type: string
+        metadata:
+          type: object
+        remediationSteps:
+          type: array
+          items:
+            type: string
+        discoveredAt:
+          type: string
+          format: date-time
+        fixedAt:
+          type: string
+          format: date-time
+        verifiedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    
+    SystemHealth:
+      type: object
+      required:
+        - status
+        - score
+        - components
+        - activeRisks
+        - openIncidents
+        - lastAssessment
+        - recommendations
+      properties:
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        score:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Overall health score (0.0 to 1.0)
+        components:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComponentHealth'
+        activeRisks:
+          type: integer
+        openIncidents:
+          type: integer
+        lastAssessment:
+          type: string
+          format: date-time
+        recommendations:
+          type: array
+          items:
+            type: string
+    
+    ComponentHealth:
+      type: object
+      required:
+        - name
+        - status
+        - responseTime
+        - errorRate
+        - lastCheck
+      properties:
+        name:
+          type: string
+        status:
+          type: string
+          enum: [healthy, degraded, unhealthy]
+        responseTime:
+          type: integer
+          description: Response time in milliseconds
+        errorRate:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Error rate (0.0 to 1.0)
+        lastCheck:
           type: string
           format: date-time

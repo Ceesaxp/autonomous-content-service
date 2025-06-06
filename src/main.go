@@ -15,6 +15,7 @@ import (
 	"github.com/Ceesaxp/autonomous-content-service/src/config"
 	"github.com/Ceesaxp/autonomous-content-service/src/infrastructure/database"
 	"github.com/Ceesaxp/autonomous-content-service/src/services/content_creation"
+	"github.com/Ceesaxp/autonomous-content-service/src/services/risk_management"
 	"github.com/gorilla/mux"
 )
 
@@ -44,6 +45,7 @@ func main() {
 	contentVersionRepo := database.NewContentVersionRepository(db)
 	feedbackRepo := database.NewFeedbackRepository(db)
 	eventRepo := database.NewEventRepository(db)
+	riskRepo := database.NewRiskRepository(db)
 
 	// Initialize services
 	llmClient := content_creation.NewOpenAIClient(
@@ -114,6 +116,17 @@ func main() {
 		clientRepo,
 	)
 
+	// Initialize risk management service (using existing repos for financial analysis)
+	riskService := risk_management.NewRiskManagementService(
+		riskRepo,
+		nil, // payment repo - will implement stub methods for now
+		clientRepo,
+		eventRepo,
+	)
+
+	// Initialize risk handlers
+	riskHandler := handlers.NewRiskHandlers(riskService)
+
 	// Set up router
 	router := mux.NewRouter()
 	router.Use(loggingMiddleware)
@@ -125,7 +138,7 @@ func main() {
 	var selfImprovementHandler *handlers.SelfImprovementHandler = nil
 
 	// Set up API routes
-	api.SetupRoutes(router, contentHandler, projectHandler, nil, dashboardHandler, selfImprovementHandler) // nil for onboarding handler until we initialize it
+	api.SetupRoutes(router, contentHandler, projectHandler, nil, dashboardHandler, selfImprovementHandler, riskHandler) // nil for onboarding handler until we initialize it
 
 	// Set up server
 	server := &http.Server{

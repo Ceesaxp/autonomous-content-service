@@ -302,3 +302,198 @@ CREATE INDEX idx_events_type ON events(event_type);
 CREATE INDEX idx_events_aggregate_id ON events(aggregate_id);
 -- Create index on occurred_at for time-based queries
 CREATE INDEX idx_events_occurred_at ON events(occurred_at);
+
+-- Risk Management Schema
+
+-- Risk category enum
+CREATE TYPE risk_category AS ENUM (
+    'Content',
+    'Financial',
+    'Operational',
+    'Security',
+    'Legal',
+    'Reputation'
+);
+
+-- Risk status enum
+CREATE TYPE risk_status AS ENUM (
+    'Identified',
+    'Assessing',
+    'Mitigating',
+    'Monitoring',
+    'Resolved',
+    'Accepted'
+);
+
+-- Risk severity enum
+CREATE TYPE risk_severity AS ENUM (
+    'Critical',
+    'High',
+    'Medium',
+    'Low'
+);
+
+-- Incident status enum
+CREATE TYPE incident_status AS ENUM (
+    'Open',
+    'InProgress',
+    'Resolved',
+    'Closed'
+);
+
+-- Backup status enum
+CREATE TYPE backup_status AS ENUM (
+    'InProgress',
+    'Completed',
+    'Failed',
+    'Verified'
+);
+
+-- Vulnerability status enum
+CREATE TYPE vulnerability_status AS ENUM (
+    'Open',
+    'InProgress',
+    'Fixed',
+    'Accepted',
+    'FalsePositive'
+);
+
+-- Risks table
+CREATE TABLE risks (
+    risk_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    category risk_category NOT NULL,
+    severity risk_severity NOT NULL,
+    likelihood DECIMAL(3, 2) CHECK (likelihood >= 0 AND likelihood <= 1),
+    impact DECIMAL(3, 2) CHECK (impact >= 0 AND impact <= 1),
+    status risk_status NOT NULL DEFAULT 'Identified',
+    metadata JSONB,
+    mitigation_actions TEXT[],
+    owner_id UUID,
+    identified_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    last_assessment TIMESTAMP NOT NULL DEFAULT NOW(),
+    resolution_date TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_risks_category ON risks(category);
+CREATE INDEX idx_risks_severity ON risks(severity);
+CREATE INDEX idx_risks_status ON risks(status);
+CREATE INDEX idx_risks_identified_at ON risks(identified_at);
+
+-- Incidents table
+CREATE TABLE incidents (
+    incident_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    severity risk_severity NOT NULL,
+    status incident_status NOT NULL DEFAULT 'Open',
+    category risk_category NOT NULL,
+    source VARCHAR(255) NOT NULL,
+    assignee_id UUID,
+    metadata JSONB,
+    actions_taken JSONB,
+    root_cause TEXT,
+    lessons_learned TEXT,
+    resolution TEXT,
+    occurred_at TIMESTAMP NOT NULL,
+    detected_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    resolved_at TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_incidents_severity ON incidents(severity);
+CREATE INDEX idx_incidents_status ON incidents(status);
+CREATE INDEX idx_incidents_category ON incidents(category);
+CREATE INDEX idx_incidents_occurred_at ON incidents(occurred_at);
+CREATE INDEX idx_incidents_detected_at ON incidents(detected_at);
+
+-- Vulnerabilities table
+CREATE TABLE vulnerabilities (
+    vulnerability_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    severity risk_severity NOT NULL,
+    status vulnerability_status NOT NULL DEFAULT 'Open',
+    component VARCHAR(255) NOT NULL,
+    cve_id VARCHAR(50),
+    metadata JSONB,
+    remediation_steps TEXT[],
+    discovered_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    fixed_at TIMESTAMP,
+    verified_at TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_vulnerabilities_severity ON vulnerabilities(severity);
+CREATE INDEX idx_vulnerabilities_status ON vulnerabilities(status);
+CREATE INDEX idx_vulnerabilities_component ON vulnerabilities(component);
+CREATE INDEX idx_vulnerabilities_discovered_at ON vulnerabilities(discovered_at);
+
+-- Backups table
+CREATE TABLE backups (
+    backup_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name VARCHAR(255) NOT NULL,
+    backup_type VARCHAR(50) NOT NULL,
+    size_bytes BIGINT,
+    status backup_status NOT NULL DEFAULT 'InProgress',
+    storage_location VARCHAR(500) NOT NULL,
+    metadata JSONB,
+    checksum VARCHAR(128),
+    retention_until TIMESTAMP,
+    started_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    completed_at TIMESTAMP,
+    verified_at TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_backups_status ON backups(status);
+CREATE INDEX idx_backups_type ON backups(backup_type);
+CREATE INDEX idx_backups_started_at ON backups(started_at);
+CREATE INDEX idx_backups_retention_until ON backups(retention_until);
+
+-- Risk assessments table
+CREATE TABLE risk_assessments (
+    assessment_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    risk_id UUID REFERENCES risks(risk_id) ON DELETE CASCADE,
+    assessment_type VARCHAR(100) NOT NULL,
+    score DECIMAL(5, 2) NOT NULL,
+    factors JSONB,
+    recommendations TEXT[],
+    confidence DECIMAL(3, 2) CHECK (confidence >= 0 AND confidence <= 1),
+    assessor VARCHAR(255) NOT NULL,
+    assessed_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_risk_assessments_risk_id ON risk_assessments(risk_id);
+CREATE INDEX idx_risk_assessments_assessed_at ON risk_assessments(assessed_at);
+
+-- Service dependencies table
+CREATE TABLE service_dependencies (
+    dependency_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    service_name VARCHAR(255) NOT NULL,
+    dependency_name VARCHAR(255) NOT NULL,
+    endpoint_url VARCHAR(500),
+    critical BOOLEAN NOT NULL DEFAULT FALSE,
+    health_check_interval INTEGER DEFAULT 300,
+    timeout_seconds INTEGER DEFAULT 30,
+    last_check TIMESTAMP,
+    status VARCHAR(50) DEFAULT 'Unknown',
+    response_time_ms INTEGER,
+    error_count INTEGER DEFAULT 0,
+    metadata JSONB,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    UNIQUE(service_name, dependency_name)
+);
+
+CREATE INDEX idx_service_dependencies_service ON service_dependencies(service_name);
+CREATE INDEX idx_service_dependencies_critical ON service_dependencies(critical);
+CREATE INDEX idx_service_dependencies_status ON service_dependencies(status);
+CREATE INDEX idx_service_dependencies_last_check ON service_dependencies(last_check);

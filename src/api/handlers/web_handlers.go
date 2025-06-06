@@ -116,7 +116,10 @@ func (h *WebHandler) RequestQuote(w http.ResponseWriter, r *http.Request) {
 	// 4. Create project pipeline entry
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // HandleChat processes chat messages from the website chatbot
@@ -143,7 +146,10 @@ func (h *WebHandler) HandleChat(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(chatResponse)
+	if err := json.NewEncoder(w).Encode(chatResponse); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // TrackAnalytics handles analytics events from the website
@@ -165,7 +171,10 @@ func (h *WebHandler) TrackAnalytics(w http.ResponseWriter, r *http.Request) {
 	// 4. Generate insights and reports
 
 	w.WriteHeader(http.StatusAccepted)
-	json.NewEncoder(w).Encode(map[string]string{"status": "recorded"})
+	if err := json.NewEncoder(w).Encode(map[string]string{"status": "recorded"}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // GetPortfolio returns portfolio items for display
@@ -212,10 +221,13 @@ func (h *WebHandler) GetPortfolio(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	if err := json.NewEncoder(w).Encode(map[string]interface{}{
 		"items": portfolioItems,
 		"total": len(portfolioItems),
-	})
+	}); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // GetPricing returns dynamic pricing information
@@ -238,7 +250,10 @@ func (h *WebHandler) GetPricing(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // GetSystemStatus returns the status of the autonomous system
@@ -260,7 +275,10 @@ func (h *WebHandler) GetSystemStatus(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(status)
+	if err := json.NewEncoder(w).Encode(status); err != nil {
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+		return
+	}
 }
 
 // Helper methods

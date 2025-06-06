@@ -8,7 +8,7 @@ import (
 )
 
 // SetupRoutes configures all API routes for the service
-func SetupRoutes(router *mux.Router, contentHandler *handlers.ContentHandler, projectHandler *handlers.ProjectHandler, onboardingHandler *handlers.OnboardingHandler, dashboardHandler *handlers.DashboardHandlers, selfImprovementHandler *handlers.SelfImprovementHandler) {
+func SetupRoutes(router *mux.Router, contentHandler *handlers.ContentHandler, projectHandler *handlers.ProjectHandler, onboardingHandler *handlers.OnboardingHandler, dashboardHandler *handlers.DashboardHandlers, selfImprovementHandler *handlers.SelfImprovementHandler, riskHandler *handlers.RiskHandlers) {
 	// Create web handler
 	webHandler := handlers.NewWebHandler(projectHandler, contentHandler)
 
@@ -100,6 +100,11 @@ func SetupRoutes(router *mux.Router, contentHandler *handlers.ContentHandler, pr
 	// Self-improvement endpoints
 	if selfImprovementHandler != nil {
 		selfImprovementHandler.RegisterRoutes(router)
+	}
+
+	// Risk management endpoints
+	if riskHandler != nil {
+		riskHandler.RegisterRoutes(router)
 	}
 
 	// CORS middleware for web requests

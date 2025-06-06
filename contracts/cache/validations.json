@@ -1,0 +1,1327 @@
+{
+  "version": "3.4",
+  "log": [
+    {
+      "src/AssetManager.sol:AssetManager": {
+        "src": "src/AssetManager.sol:12",
+        "version": {
+          "withMetadata": "f4dfd492259a9215efc04bbe1cff130be42890f496ac2256ee0ca61e9578f0e2",
+          "withoutMetadata": "dbfda8aeecfc1f9e74ece9087f7c3584172595aaa3849c4c9d17c410619cd4fc",
+          "linkedWithoutMetadata": "dbfda8aeecfc1f9e74ece9087f7c3584172595aaa3849c4c9d17c410619cd4fc"
+        },
+        "inherit": [
+          "src/utils/ReentrancyGuard.sol:ReentrancyGuard",
+          "src/governance/AccessControl.sol:AccessControl"
+        ],
+        "libraries": [
+          "src/interfaces/ITreasury.sol:SafeMath"
+        ],
+        "methods": [
+          "()",
+          "updatePrice(address,uint256,uint256)",
+          "configureAsset(address,uint256,uint256,uint256)",
+          "addYieldStrategy(address,address,uint256,uint256)",
+          "executeRebalance()",
+          "optimizeYield()",
+          "setEmergencyStop(bool)",
+          "getOptimalStrategy(address)",
+          "getPortfolioAllocation()",
+          "updateRebalanceInterval(uint256)",
+          "updateSlippageTolerance(uint256)",
+          "updateDailyLimit(uint256)"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "AssetManager",
+            "src": "src/AssetManager.sol:78"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "rebalanceInterval",
+            "src": "src/AssetManager.sol:52"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "slippageTolerance",
+            "src": "src/AssetManager.sol:54"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "emergencyStop",
+            "src": "src/AssetManager.sol:57"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "maxDailyRebalanceVolume",
+            "src": "src/AssetManager.sol:58"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "dailyRebalanceVolume",
+            "src": "src/AssetManager.sol:59"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "_roles",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)2671_storage)",
+              "contract": "AccessControl",
+              "src": "src/governance/AccessControl.sol:14"
+            },
+            {
+              "label": "_status",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_uint256",
+              "contract": "ReentrancyGuard",
+              "src": "src/utils/ReentrancyGuard.sol:12"
+            },
+            {
+              "label": "priceData",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_mapping(t_address,t_struct(PriceData)29_storage)",
+              "contract": "AssetManager",
+              "src": "src/AssetManager.sol:40"
+            },
+            {
+              "label": "priceOracles",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_mapping(t_address,t_address)",
+              "contract": "AssetManager",
+              "src": "src/AssetManager.sol:41"
+            },
+            {
+              "label": "rebalanceConfigs",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_mapping(t_address,t_struct(RebalanceConfig)49_storage)",
+              "contract": "AssetManager",
+              "src": "src/AssetManager.sol:44"
+            },
+            {
+              "label": "supportedAssets",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_array(t_address)dyn_storage",
+              "contract": "AssetManager",
+              "src": "src/AssetManager.sol:45"
+            },
+            {
+              "label": "yieldStrategies",
+              "offset": 0,
+              "slot": "6",
+              "type": "t_mapping(t_address,t_array(t_struct(YieldStrategy)40_storage)dyn_storage)",
+              "contract": "AssetManager",
+              "src": "src/AssetManager.sol:48"
+            },
+            {
+              "label": "assetAllocations",
+              "offset": 0,
+              "slot": "7",
+              "type": "t_mapping(t_address,t_mapping(t_address,t_uint256))",
+              "contract": "AssetManager",
+              "src": "src/AssetManager.sol:49"
+            },
+            {
+              "label": "rebalanceInterval",
+              "offset": 0,
+              "slot": "8",
+              "type": "t_uint256",
+              "contract": "AssetManager",
+              "src": "src/AssetManager.sol:52"
+            },
+            {
+              "label": "lastRebalance",
+              "offset": 0,
+              "slot": "9",
+              "type": "t_uint256",
+              "contract": "AssetManager",
+              "src": "src/AssetManager.sol:53"
+            },
+            {
+              "label": "slippageTolerance",
+              "offset": 0,
+              "slot": "10",
+              "type": "t_uint256",
+              "contract": "AssetManager",
+              "src": "src/AssetManager.sol:54"
+            },
+            {
+              "label": "emergencyStop",
+              "offset": 0,
+              "slot": "11",
+              "type": "t_bool",
+              "contract": "AssetManager",
+              "src": "src/AssetManager.sol:57"
+            },
+            {
+              "label": "maxDailyRebalanceVolume",
+              "offset": 0,
+              "slot": "12",
+              "type": "t_uint256",
+              "contract": "AssetManager",
+              "src": "src/AssetManager.sol:58"
+            },
+            {
+              "label": "dailyRebalanceVolume",
+              "offset": 0,
+              "slot": "13",
+              "type": "t_uint256",
+              "contract": "AssetManager",
+              "src": "src/AssetManager.sol:59"
+            },
+            {
+              "label": "lastResetTimestamp",
+              "offset": 0,
+              "slot": "14",
+              "type": "t_uint256",
+              "contract": "AssetManager",
+              "src": "src/AssetManager.sol:60"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_array(t_address)dyn_storage": {
+              "label": "address[]",
+              "numberOfBytes": "32"
+            },
+            "t_array(t_struct(YieldStrategy)40_storage)dyn_storage": {
+              "label": "struct AssetManager.YieldStrategy[]",
+              "numberOfBytes": "32"
+            },
+            "t_bool": {
+              "label": "bool",
+              "numberOfBytes": "1"
+            },
+            "t_bytes32": {
+              "label": "bytes32",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_address,t_address)": {
+              "label": "mapping(address => address)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_address,t_array(t_struct(YieldStrategy)40_storage)dyn_storage)": {
+              "label": "mapping(address => struct AssetManager.YieldStrategy[])",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_address,t_bool)": {
+              "label": "mapping(address => bool)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_address,t_mapping(t_address,t_uint256))": {
+              "label": "mapping(address => mapping(address => uint256))",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_address,t_struct(PriceData)29_storage)": {
+              "label": "mapping(address => struct AssetManager.PriceData)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_address,t_struct(RebalanceConfig)49_storage)": {
+              "label": "mapping(address => struct AssetManager.RebalanceConfig)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_address,t_uint256)": {
+              "label": "mapping(address => uint256)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_bytes32,t_struct(RoleData)2671_storage)": {
+              "label": "mapping(bytes32 => struct AccessControl.RoleData)",
+              "numberOfBytes": "32"
+            },
+            "t_struct(PriceData)29_storage": {
+              "label": "struct AssetManager.PriceData",
+              "members": [
+                {
+                  "label": "price",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "timestamp",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "1"
+                },
+                {
+                  "label": "confidence",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "2"
+                }
+              ],
+              "numberOfBytes": "96"
+            },
+            "t_struct(RebalanceConfig)49_storage": {
+              "label": "struct AssetManager.RebalanceConfig",
+              "members": [
+                {
+                  "label": "targetPercentage",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "maxDeviation",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "1"
+                },
+                {
+                  "label": "minRebalanceAmount",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "2"
+                },
+                {
+                  "label": "enabled",
+                  "type": "t_bool",
+                  "offset": 0,
+                  "slot": "3"
+                }
+              ],
+              "numberOfBytes": "128"
+            },
+            "t_struct(RoleData)2671_storage": {
+              "label": "struct AccessControl.RoleData",
+              "members": [
+                {
+                  "label": "members",
+                  "type": "t_mapping(t_address,t_bool)",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "adminRole",
+                  "type": "t_bytes32",
+                  "offset": 0,
+                  "slot": "1"
+                }
+              ],
+              "numberOfBytes": "64"
+            },
+            "t_struct(YieldStrategy)40_storage": {
+              "label": "struct AssetManager.YieldStrategy",
+              "members": [
+                {
+                  "label": "protocol",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "apy",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "1"
+                },
+                {
+                  "label": "tvl",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "2"
+                },
+                {
+                  "label": "riskScore",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "3"
+                },
+                {
+                  "label": "active",
+                  "type": "t_bool",
+                  "offset": 0,
+                  "slot": "4"
+                }
+              ],
+              "numberOfBytes": "160"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.19"
+      },
+      "src/TreasuryCore.sol:TreasuryCore": {
+        "src": "src/TreasuryCore.sol:15",
+        "version": {
+          "withMetadata": "11d76a2ee039a156e5dffee41c323f8811ef989c676719da2063121a7401d733",
+          "withoutMetadata": "8a6b209637e337f6c2caa12778cdf0582efd7bb96ac87ca71f0ed754f695e004",
+          "linkedWithoutMetadata": "8a6b209637e337f6c2caa12778cdf0582efd7bb96ac87ca71f0ed754f695e004"
+        },
+        "inherit": [
+          "src/governance/AccessControl.sol:AccessControl",
+          "src/utils/Pausable.sol:Pausable",
+          "src/utils/ReentrancyGuard.sol:ReentrancyGuard",
+          "src/security/MultiSigWallet.sol:MultiSigWallet",
+          "src/interfaces/ITreasury.sol:ITreasury"
+        ],
+        "libraries": [
+          "src/interfaces/ITreasury.sol:SafeMath"
+        ],
+        "methods": [
+          "(address[],uint256)",
+          "receiveRevenue(address,uint256,string)",
+          "spendOperational(address,uint256,address,string)",
+          "spendUpgrades(address,uint256,address,string)",
+          "executeTimelocked(address,uint256,address,string,uint256)",
+          "rebalancePortfolio()",
+          "emergencyWithdraw(address,uint256,address)",
+          "updateAllocationConfig((uint256,uint256,uint256,uint256))",
+          "configureAsset(address,uint256,uint256,bool)",
+          "getTransactionsByCategory(uint8)",
+          "getFinancialSummary()",
+          "getAssetAllocation()",
+          "pause()",
+          "unpause()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "TreasuryCore",
+            "src": "src/TreasuryCore.sol:96"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "rebalanceInterval",
+            "src": "src/TreasuryCore.sol:75"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "emergencyReserveTarget",
+            "src": "src/TreasuryCore.sol:76"
+          },
+          {
+            "kind": "state-variable-assignment",
+            "name": "timelockThreshold",
+            "src": "src/TreasuryCore.sol:81"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "transactions",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_mapping(t_uint256,t_struct(Transaction)3273_storage)",
+              "contract": "MultiSigWallet",
+              "src": "src/security/MultiSigWallet.sol:22"
+            },
+            {
+              "label": "isOwner",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_mapping(t_address,t_bool)",
+              "contract": "MultiSigWallet",
+              "src": "src/security/MultiSigWallet.sol:23"
+            },
+            {
+              "label": "owners",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_array(t_address)dyn_storage",
+              "contract": "MultiSigWallet",
+              "src": "src/security/MultiSigWallet.sol:24"
+            },
+            {
+              "label": "required",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_uint256",
+              "contract": "MultiSigWallet",
+              "src": "src/security/MultiSigWallet.sol:25"
+            },
+            {
+              "label": "transactionCount",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_uint256",
+              "contract": "MultiSigWallet",
+              "src": "src/security/MultiSigWallet.sol:26"
+            },
+            {
+              "label": "approvalThresholds",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_mapping(t_uint256,t_uint256)",
+              "contract": "MultiSigWallet",
+              "src": "src/security/MultiSigWallet.sol:29"
+            },
+            {
+              "label": "thresholdAmounts",
+              "offset": 0,
+              "slot": "6",
+              "type": "t_array(t_uint256)dyn_storage",
+              "contract": "MultiSigWallet",
+              "src": "src/security/MultiSigWallet.sol:30"
+            },
+            {
+              "label": "_status",
+              "offset": 0,
+              "slot": "7",
+              "type": "t_uint256",
+              "contract": "ReentrancyGuard",
+              "src": "src/utils/ReentrancyGuard.sol:12"
+            },
+            {
+              "label": "_paused",
+              "offset": 0,
+              "slot": "8",
+              "type": "t_bool",
+              "contract": "Pausable",
+              "src": "src/utils/Pausable.sol:12"
+            },
+            {
+              "label": "_roles",
+              "offset": 0,
+              "slot": "9",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)2671_storage)",
+              "contract": "AccessControl",
+              "src": "src/governance/AccessControl.sol:14"
+            },
+            {
+              "label": "allocationConfig",
+              "offset": 0,
+              "slot": "10",
+              "type": "t_struct(AllocationConfig)1023_storage",
+              "contract": "TreasuryCore",
+              "src": "src/TreasuryCore.sol:63"
+            },
+            {
+              "label": "assetConfigs",
+              "offset": 0,
+              "slot": "14",
+              "type": "t_mapping(t_address,t_struct(AssetConfig)1059_storage)",
+              "contract": "TreasuryCore",
+              "src": "src/TreasuryCore.sol:64"
+            },
+            {
+              "label": "managedAssets",
+              "offset": 0,
+              "slot": "15",
+              "type": "t_array(t_address)dyn_storage",
+              "contract": "TreasuryCore",
+              "src": "src/TreasuryCore.sol:65"
+            },
+            {
+              "label": "financialTransactions",
+              "offset": 0,
+              "slot": "16",
+              "type": "t_mapping(t_uint256,t_struct(FinancialTransaction)1048_storage)",
+              "contract": "TreasuryCore",
+              "src": "src/TreasuryCore.sol:67"
+            },
+            {
+              "label": "financialTransactionCounter",
+              "offset": 0,
+              "slot": "17",
+              "type": "t_uint256",
+              "contract": "TreasuryCore",
+              "src": "src/TreasuryCore.sol:68"
+            },
+            {
+              "label": "categoryTotals",
+              "offset": 0,
+              "slot": "18",
+              "type": "t_mapping(t_enum(TransactionCategory)1030,t_uint256)",
+              "contract": "TreasuryCore",
+              "src": "src/TreasuryCore.sol:70"
+            },
+            {
+              "label": "tokenCategoryTotals",
+              "offset": 0,
+              "slot": "19",
+              "type": "t_mapping(t_address,t_mapping(t_enum(TransactionCategory)1030,t_uint256))",
+              "contract": "TreasuryCore",
+              "src": "src/TreasuryCore.sol:71"
+            },
+            {
+              "label": "lastRebalanceTime",
+              "offset": 0,
+              "slot": "20",
+              "type": "t_uint256",
+              "contract": "TreasuryCore",
+              "src": "src/TreasuryCore.sol:74"
+            },
+            {
+              "label": "rebalanceInterval",
+              "offset": 0,
+              "slot": "21",
+              "type": "t_uint256",
+              "contract": "TreasuryCore",
+              "src": "src/TreasuryCore.sol:75"
+            },
+            {
+              "label": "emergencyReserveTarget",
+              "offset": 0,
+              "slot": "22",
+              "type": "t_uint256",
+              "contract": "TreasuryCore",
+              "src": "src/TreasuryCore.sol:76"
+            },
+            {
+              "label": "timelocks",
+              "offset": 0,
+              "slot": "23",
+              "type": "t_mapping(t_bytes32,t_uint256)",
+              "contract": "TreasuryCore",
+              "src": "src/TreasuryCore.sol:79"
+            },
+            {
+              "label": "timelockThreshold",
+              "offset": 0,
+              "slot": "24",
+              "type": "t_uint256",
+              "contract": "TreasuryCore",
+              "src": "src/TreasuryCore.sol:81"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_array(t_address)dyn_storage": {
+              "label": "address[]",
+              "numberOfBytes": "32"
+            },
+            "t_array(t_uint256)dyn_storage": {
+              "label": "uint256[]",
+              "numberOfBytes": "32"
+            },
+            "t_bool": {
+              "label": "bool",
+              "numberOfBytes": "1"
+            },
+            "t_bytes32": {
+              "label": "bytes32",
+              "numberOfBytes": "32"
+            },
+            "t_bytes_storage": {
+              "label": "bytes",
+              "numberOfBytes": "32"
+            },
+            "t_enum(TransactionCategory)1030": {
+              "label": "enum TreasuryCore.TransactionCategory",
+              "members": [
+                "REVENUE",
+                "OPERATING_EXPENSE",
+                "CAPITAL_EXPENSE",
+                "RESERVE_ALLOCATION",
+                "PROFIT_DISTRIBUTION",
+                "EMERGENCY_WITHDRAWAL"
+              ],
+              "numberOfBytes": "1"
+            },
+            "t_mapping(t_address,t_bool)": {
+              "label": "mapping(address => bool)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_address,t_mapping(t_enum(TransactionCategory)1030,t_uint256))": {
+              "label": "mapping(address => mapping(enum TreasuryCore.TransactionCategory => uint256))",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_address,t_struct(AssetConfig)1059_storage)": {
+              "label": "mapping(address => struct TreasuryCore.AssetConfig)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_bytes32,t_struct(RoleData)2671_storage)": {
+              "label": "mapping(bytes32 => struct AccessControl.RoleData)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_bytes32,t_uint256)": {
+              "label": "mapping(bytes32 => uint256)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_enum(TransactionCategory)1030,t_uint256)": {
+              "label": "mapping(enum TreasuryCore.TransactionCategory => uint256)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_uint256,t_struct(FinancialTransaction)1048_storage)": {
+              "label": "mapping(uint256 => struct TreasuryCore.FinancialTransaction)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_uint256,t_struct(Transaction)3273_storage)": {
+              "label": "mapping(uint256 => struct MultiSigWallet.Transaction)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_uint256,t_uint256)": {
+              "label": "mapping(uint256 => uint256)",
+              "numberOfBytes": "32"
+            },
+            "t_string_storage": {
+              "label": "string",
+              "numberOfBytes": "32"
+            },
+            "t_struct(AllocationConfig)1023_storage": {
+              "label": "struct TreasuryCore.AllocationConfig",
+              "members": [
+                {
+                  "label": "operations",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "reserves",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "1"
+                },
+                {
+                  "label": "upgrades",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "2"
+                },
+                {
+                  "label": "profits",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "3"
+                }
+              ],
+              "numberOfBytes": "128"
+            },
+            "t_struct(AssetConfig)1059_storage": {
+              "label": "struct TreasuryCore.AssetConfig",
+              "members": [
+                {
+                  "label": "token",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "targetPercentage",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "1"
+                },
+                {
+                  "label": "rebalanceThreshold",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "2"
+                },
+                {
+                  "label": "isStablecoin",
+                  "type": "t_bool",
+                  "offset": 0,
+                  "slot": "3"
+                },
+                {
+                  "label": "isActive",
+                  "type": "t_bool",
+                  "offset": 1,
+                  "slot": "3"
+                }
+              ],
+              "numberOfBytes": "128"
+            },
+            "t_struct(FinancialTransaction)1048_storage": {
+              "label": "struct TreasuryCore.FinancialTransaction",
+              "members": [
+                {
+                  "label": "id",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "token",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "1"
+                },
+                {
+                  "label": "amount",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "2"
+                },
+                {
+                  "label": "category",
+                  "type": "t_enum(TransactionCategory)1030",
+                  "offset": 0,
+                  "slot": "3"
+                },
+                {
+                  "label": "description",
+                  "type": "t_string_storage",
+                  "offset": 0,
+                  "slot": "4"
+                },
+                {
+                  "label": "timestamp",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "5"
+                },
+                {
+                  "label": "initiator",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "6"
+                },
+                {
+                  "label": "referenceHash",
+                  "type": "t_bytes32",
+                  "offset": 0,
+                  "slot": "7"
+                }
+              ],
+              "numberOfBytes": "256"
+            },
+            "t_struct(RoleData)2671_storage": {
+              "label": "struct AccessControl.RoleData",
+              "members": [
+                {
+                  "label": "members",
+                  "type": "t_mapping(t_address,t_bool)",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "adminRole",
+                  "type": "t_bytes32",
+                  "offset": 0,
+                  "slot": "1"
+                }
+              ],
+              "numberOfBytes": "64"
+            },
+            "t_struct(Transaction)3273_storage": {
+              "label": "struct MultiSigWallet.Transaction",
+              "members": [
+                {
+                  "label": "destination",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "value",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "1"
+                },
+                {
+                  "label": "data",
+                  "type": "t_bytes_storage",
+                  "offset": 0,
+                  "slot": "2"
+                },
+                {
+                  "label": "executed",
+                  "type": "t_bool",
+                  "offset": 0,
+                  "slot": "3"
+                },
+                {
+                  "label": "confirmations",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "4"
+                },
+                {
+                  "label": "isConfirmed",
+                  "type": "t_mapping(t_address,t_bool)",
+                  "offset": 0,
+                  "slot": "5"
+                }
+              ],
+              "numberOfBytes": "192"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.19"
+      },
+      "src/TreasuryUpgradeable.sol:StorageSlot": {
+        "src": "src/TreasuryUpgradeable.sol:115",
+        "version": {
+          "withMetadata": "f380845687d395b99d8a8f30d0265905345e7e58789ae687c1e043f881142aa3",
+          "withoutMetadata": "a64c6cf9c6ba9368f5132c93a0196b3204a7963dbb4dd05dfddb4ab23126b8db",
+          "linkedWithoutMetadata": "a64c6cf9c6ba9368f5132c93a0196b3204a7963dbb4dd05dfddb4ab23126b8db"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.19"
+      },
+      "src/TreasuryUpgradeable.sol:TreasuryUpgradeable": {
+        "src": "src/TreasuryUpgradeable.sol:10",
+        "version": {
+          "withMetadata": "b6c033bcf485409b2a570134c27187816df359224bb20e3a2b50cc05e1ca1f2a",
+          "withoutMetadata": "b6c033bcf485409b2a570134c27187816df359224bb20e3a2b50cc05e1ca1f2a",
+          "linkedWithoutMetadata": "b6c033bcf485409b2a570134c27187816df359224bb20e3a2b50cc05e1ca1f2a"
+        },
+        "inherit": [],
+        "libraries": [
+          "src/TreasuryUpgradeable.sol:StorageSlot"
+        ],
+        "methods": [
+          "(address,address,bytes)",
+          "()",
+          "()",
+          "admin()",
+          "implementation()",
+          "changeAdmin(address)",
+          "upgradeTo(address)",
+          "upgradeToAndCall(address,bytes)"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "TreasuryUpgradeable",
+            "src": "src/TreasuryUpgradeable.sol:25"
+          },
+          {
+            "kind": "delegatecall",
+            "src": "src/TreasuryUpgradeable.sol:64"
+          },
+          {
+            "kind": "delegatecall",
+            "src": "src/TreasuryUpgradeable.sol:33"
+          }
+        ],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.19"
+      },
+      "src/governance/AccessControl.sol:AccessControl": {
+        "src": "src/governance/AccessControl.sol:8",
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "supportsInterface(bytes4)",
+          "hasRole(bytes32,address)",
+          "getRoleAdmin(bytes32)",
+          "grantRole(bytes32,address)",
+          "revokeRole(bytes32,address)",
+          "renounceRole(bytes32,address)"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [
+            {
+              "label": "_roles",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_mapping(t_bytes32,t_struct(RoleData)2671_storage)",
+              "contract": "AccessControl",
+              "src": "src/governance/AccessControl.sol:14"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_bool": {
+              "label": "bool",
+              "numberOfBytes": "1"
+            },
+            "t_bytes32": {
+              "label": "bytes32",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_address,t_bool)": {
+              "label": "mapping(address => bool)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_bytes32,t_struct(RoleData)2671_storage)": {
+              "label": "mapping(bytes32 => struct AccessControl.RoleData)",
+              "numberOfBytes": "32"
+            },
+            "t_struct(RoleData)2671_storage": {
+              "label": "struct AccessControl.RoleData",
+              "members": [
+                {
+                  "label": "members",
+                  "type": "t_mapping(t_address,t_bool)",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "adminRole",
+                  "type": "t_bytes32",
+                  "offset": 0,
+                  "slot": "1"
+                }
+              ],
+              "numberOfBytes": "64"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.19"
+      },
+      "src/interfaces/ITreasury.sol:IERC20": {
+        "src": "src/interfaces/ITreasury.sol:20",
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "transfer(address,uint256)",
+          "transferFrom(address,address,uint256)",
+          "balanceOf(address)",
+          "totalSupply()",
+          "allowance(address,address)",
+          "approve(address,uint256)"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.19"
+      },
+      "src/interfaces/ITreasury.sol:ITreasury": {
+        "src": "src/interfaces/ITreasury.sol:8",
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "receiveRevenue(address,uint256,string)",
+          "spendOperational(address,uint256,address,string)",
+          "spendUpgrades(address,uint256,address,string)",
+          "rebalancePortfolio()",
+          "getFinancialSummary()"
+        ],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.19"
+      },
+      "src/interfaces/ITreasury.sol:SafeMath": {
+        "src": "src/interfaces/ITreasury.sol:33",
+        "version": {
+          "withMetadata": "51ff840849ba501807d2cbbf94a54cbf197092e7873e0d3681cd09d501bb3441",
+          "withoutMetadata": "a64c6cf9c6ba9368f5132c93a0196b3204a7963dbb4dd05dfddb4ab23126b8db",
+          "linkedWithoutMetadata": "a64c6cf9c6ba9368f5132c93a0196b3204a7963dbb4dd05dfddb4ab23126b8db"
+        },
+        "inherit": [],
+        "libraries": [],
+        "methods": [],
+        "linkReferences": [],
+        "errors": [],
+        "layout": {
+          "storage": [],
+          "types": {},
+          "layoutVersion": "1.2",
+          "flat": false,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.19"
+      },
+      "src/security/MultiSigWallet.sol:MultiSigWallet": {
+        "src": "src/security/MultiSigWallet.sol:10",
+        "version": {
+          "withMetadata": "c01eb6619ebf376cfaa4d9ff15078d04009f18001bbd64caab81672c010bb976",
+          "withoutMetadata": "a38720d1a1fc723a4430db68e06c4115e0eace641c0f57d71677f2b4de98cef9",
+          "linkedWithoutMetadata": "a38720d1a1fc723a4430db68e06c4115e0eace641c0f57d71677f2b4de98cef9"
+        },
+        "inherit": [],
+        "libraries": [
+          "src/interfaces/ITreasury.sol:SafeMath"
+        ],
+        "methods": [
+          "(address[],uint256)",
+          "()",
+          "submitTransaction(address,uint256,bytes)",
+          "confirmTransaction(uint256)",
+          "revokeConfirmation(uint256)",
+          "executeTransaction(uint256)",
+          "getRequiredSignatures(uint256)",
+          "getConfirmationCount(uint256)",
+          "getTransactionCount(bool,bool)",
+          "getOwners()",
+          "getConfirmations(uint256)",
+          "getTransactionIds(uint256,uint256,bool,bool)",
+          "addOwner(address)",
+          "removeOwner(address)",
+          "replaceOwner(address,address)",
+          "changeRequirement(uint256)",
+          "updateApprovalThreshold(uint256,uint256)"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "MultiSigWallet",
+            "src": "src/security/MultiSigWallet.sol:110"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "transactions",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_mapping(t_uint256,t_struct(Transaction)3273_storage)",
+              "contract": "MultiSigWallet",
+              "src": "src/security/MultiSigWallet.sol:22"
+            },
+            {
+              "label": "isOwner",
+              "offset": 0,
+              "slot": "1",
+              "type": "t_mapping(t_address,t_bool)",
+              "contract": "MultiSigWallet",
+              "src": "src/security/MultiSigWallet.sol:23"
+            },
+            {
+              "label": "owners",
+              "offset": 0,
+              "slot": "2",
+              "type": "t_array(t_address)dyn_storage",
+              "contract": "MultiSigWallet",
+              "src": "src/security/MultiSigWallet.sol:24"
+            },
+            {
+              "label": "required",
+              "offset": 0,
+              "slot": "3",
+              "type": "t_uint256",
+              "contract": "MultiSigWallet",
+              "src": "src/security/MultiSigWallet.sol:25"
+            },
+            {
+              "label": "transactionCount",
+              "offset": 0,
+              "slot": "4",
+              "type": "t_uint256",
+              "contract": "MultiSigWallet",
+              "src": "src/security/MultiSigWallet.sol:26"
+            },
+            {
+              "label": "approvalThresholds",
+              "offset": 0,
+              "slot": "5",
+              "type": "t_mapping(t_uint256,t_uint256)",
+              "contract": "MultiSigWallet",
+              "src": "src/security/MultiSigWallet.sol:29"
+            },
+            {
+              "label": "thresholdAmounts",
+              "offset": 0,
+              "slot": "6",
+              "type": "t_array(t_uint256)dyn_storage",
+              "contract": "MultiSigWallet",
+              "src": "src/security/MultiSigWallet.sol:30"
+            }
+          ],
+          "types": {
+            "t_address": {
+              "label": "address",
+              "numberOfBytes": "20"
+            },
+            "t_array(t_address)dyn_storage": {
+              "label": "address[]",
+              "numberOfBytes": "32"
+            },
+            "t_array(t_uint256)dyn_storage": {
+              "label": "uint256[]",
+              "numberOfBytes": "32"
+            },
+            "t_bool": {
+              "label": "bool",
+              "numberOfBytes": "1"
+            },
+            "t_bytes_storage": {
+              "label": "bytes",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_address,t_bool)": {
+              "label": "mapping(address => bool)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_uint256,t_struct(Transaction)3273_storage)": {
+              "label": "mapping(uint256 => struct MultiSigWallet.Transaction)",
+              "numberOfBytes": "32"
+            },
+            "t_mapping(t_uint256,t_uint256)": {
+              "label": "mapping(uint256 => uint256)",
+              "numberOfBytes": "32"
+            },
+            "t_struct(Transaction)3273_storage": {
+              "label": "struct MultiSigWallet.Transaction",
+              "members": [
+                {
+                  "label": "destination",
+                  "type": "t_address",
+                  "offset": 0,
+                  "slot": "0"
+                },
+                {
+                  "label": "value",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "1"
+                },
+                {
+                  "label": "data",
+                  "type": "t_bytes_storage",
+                  "offset": 0,
+                  "slot": "2"
+                },
+                {
+                  "label": "executed",
+                  "type": "t_bool",
+                  "offset": 0,
+                  "slot": "3"
+                },
+                {
+                  "label": "confirmations",
+                  "type": "t_uint256",
+                  "offset": 0,
+                  "slot": "4"
+                },
+                {
+                  "label": "isConfirmed",
+                  "type": "t_mapping(t_address,t_bool)",
+                  "offset": 0,
+                  "slot": "5"
+                }
+              ],
+              "numberOfBytes": "192"
+            },
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.19"
+      },
+      "src/utils/Pausable.sol:Pausable": {
+        "src": "src/utils/Pausable.sol:8",
+        "inherit": [],
+        "libraries": [],
+        "methods": [
+          "paused()"
+        ],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "Pausable",
+            "src": "src/utils/Pausable.sol:14"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "_paused",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_bool",
+              "contract": "Pausable",
+              "src": "src/utils/Pausable.sol:12"
+            }
+          ],
+          "types": {
+            "t_bool": {
+              "label": "bool",
+              "numberOfBytes": "1"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.19"
+      },
+      "src/utils/ReentrancyGuard.sol:ReentrancyGuard": {
+        "src": "src/utils/ReentrancyGuard.sol:8",
+        "inherit": [],
+        "libraries": [],
+        "methods": [],
+        "linkReferences": [],
+        "errors": [
+          {
+            "kind": "constructor",
+            "contract": "ReentrancyGuard",
+            "src": "src/utils/ReentrancyGuard.sol:14"
+          }
+        ],
+        "layout": {
+          "storage": [
+            {
+              "label": "_status",
+              "offset": 0,
+              "slot": "0",
+              "type": "t_uint256",
+              "contract": "ReentrancyGuard",
+              "src": "src/utils/ReentrancyGuard.sol:12"
+            }
+          ],
+          "types": {
+            "t_uint256": {
+              "label": "uint256",
+              "numberOfBytes": "32"
+            }
+          },
+          "layoutVersion": "1.2",
+          "flat": true,
+          "namespaces": {}
+        },
+        "solcVersion": "0.8.19"
+      }
+    }
+  ]
+}

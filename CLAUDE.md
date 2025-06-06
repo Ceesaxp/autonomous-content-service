@@ -8,6 +8,10 @@ The Autonomous Content Creation Service is a digital-native business that functi
 
 You keep project progress in TODO.md, updating once each step is completed.
 
+GitHub repo of the project is `Ceesaxp/autonomous-content-service`.
+
+Always cleanup after test builds, do not leave binaries laying around.
+
 ## Documentation
 
 
