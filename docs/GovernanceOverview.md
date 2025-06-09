@@ -121,7 +121,8 @@ Enables decentralized control through:
 - Community participation
 - Upgrade mechanisms
 
-[Framework Documentation](./DAOFramework.md)
+[Framework Documentation](./DAOFramework.md)  
+[Backend Service: Treasury Integration](./TreasuryIntegration.md)
 
 ### HR & Talent Management
 **Status**: 🔄 Pending (Phase 5.6)

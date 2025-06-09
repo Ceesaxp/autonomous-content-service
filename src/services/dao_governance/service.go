@@ -13,12 +13,12 @@ import (
 
 // Service implements the GovernanceService interface
 type Service struct {
-	governanceRepo   repositories.GovernanceRepository
-	eventRepo        repositories.EventRepository
-	votingService    VotingService
-	membershipService MembershipService
-	treasuryService  TreasuryGovernanceService
-	blockchainService BlockchainIntegrationService
+	governanceRepo      repositories.GovernanceRepository
+	eventRepo           repositories.EventRepository
+	votingService       VotingService
+	membershipService   MembershipService
+	treasuryService     TreasuryGovernanceService
+	blockchainService   BlockchainIntegrationService
 	orchestratorService ProposalOrchestratorService
 }
 
@@ -59,27 +59,27 @@ func (s *Service) CreateProposal(ctx context.Context, request ProposalCreationRe
 	}
 
 	if member.VotingPower.Amount < config.ProposalThreshold.Amount {
-		return nil, fmt.Errorf("insufficient voting power: required %.2f, has %.2f", 
+		return nil, fmt.Errorf("insufficient voting power: required %.2f, has %.2f",
 			config.ProposalThreshold.Amount, member.VotingPower.Amount)
 	}
 
 	// Set default values based on governance config and proposal type
 	proposal := &entities.GovernanceProposal{
-		ID:                uuid.New(),
-		Title:             request.Title,
-		Description:       request.Description,
-		Type:              request.Type,
-		Status:            entities.ProposalStatusDraft,
-		ProposerID:        request.ProposerID,
-		ProposerAddress:   member.Address,
-		VotingPower:       member.VotingPower,
-		Actions:           request.Actions,
-		Parameters:        request.Parameters,
-		Metadata:          make(map[string]interface{}),
-		IPFSHash:          request.IPFSHash,
-		SubmittedAt:       time.Now(),
-		CreatedAt:         time.Now(),
-		UpdatedAt:         time.Now(),
+		ID:              uuid.New(),
+		Title:           request.Title,
+		Description:     request.Description,
+		Type:            request.Type,
+		Status:          entities.ProposalStatusDraft,
+		ProposerID:      request.ProposerID,
+		ProposerAddress: member.Address,
+		VotingPower:     member.VotingPower,
+		Actions:         request.Actions,
+		Parameters:      request.Parameters,
+		Metadata:        make(map[string]interface{}),
+		IPFSHash:        request.IPFSHash,
+		SubmittedAt:     time.Now(),
+		CreatedAt:       time.Now(),
+		UpdatedAt:       time.Now(),
 	}
 
 	// Set proposal-specific parameters
@@ -161,11 +161,11 @@ func (s *Service) SubmitProposal(ctx context.Context, proposalID uuid.UUID) erro
 
 	// Start proposal workflow
 	workflowRequest := ProposalWorkflowRequest{
-		ProposalID:    proposalID,
-		WorkflowType:  "standard",
-		AutoAdvance:   true,
+		ProposalID:   proposalID,
+		WorkflowType: "standard",
+		AutoAdvance:  true,
 		Configuration: map[string]interface{}{
-			"voting_period": proposal.VotingEndTime.Sub(proposal.VotingStartTime).String(),
+			"voting_period":   proposal.VotingEndTime.Sub(proposal.VotingStartTime).String(),
 			"quorum_required": proposal.QuorumRequired,
 		},
 	}
@@ -603,13 +603,114 @@ func (s *Service) GetDelegatedVotingPower(ctx context.Context, memberID uuid.UUI
 // Treasury Integration (simplified implementations)
 
 func (s *Service) CreateAllocation(ctx context.Context, request AllocationRequest) (*entities.TreasuryAllocation, error) {
-	// TODO: Implement treasury service integration
-	return nil, fmt.Errorf("treasury allocation creation not yet implemented")
+	if err := s.treasuryService.ValidateAllocationRequest(ctx, request); err != nil {
+		return nil, fmt.Errorf("invalid allocation request: %w", err)
+	}
+
+	govProposal, err := s.governanceRepo.GetProposalByID(ctx, request.ProposalID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load governing proposal %s: %w", request.ProposalID, err)
+	}
+	if govProposal.Status != entities.ProposalStatusExecuted {
+		return nil, fmt.Errorf("cannot create allocation: proposal %s not executed (status=%s)", request.ProposalID, govProposal.Status)
+	}
+
+	now := time.Now()
+	alloc := &entities.TreasuryAllocation{
+		ID:               uuid.New(),
+		ProposalID:       request.ProposalID,
+		Title:            request.Title,
+		Description:      request.Description,
+		Amount:           request.Amount,
+		Currency:         request.Currency,
+		RecipientID:      request.RecipientID,
+		RecipientAddress: request.RecipientAddress,
+		Category:         request.Category,
+		Status:           entities.AllocationStatusApproved,
+		InstallmentPlan:  request.InstallmentPlan,
+		Conditions:       request.Conditions,
+		Milestones:       request.Milestones,
+		ApprovedAt:       &now,
+		CreatedAt:        now,
+		UpdatedAt:        now,
+	}
+	if err := s.governanceRepo.CreateAllocation(ctx, alloc); err != nil {
+		return nil, fmt.Errorf("failed to persist allocation: %w", err)
+	}
+
+	evt := &events.AllocationCreatedEvent{
+		BaseEvent:       *events.NewBaseEventWithID(string(events.GovernanceEventAllocationCreated), alloc.ID),
+		AllocationID:    alloc.ID,
+		ProposalID:      alloc.ProposalID,
+		Title:           alloc.Title,
+		Amount:          alloc.Amount,
+		RecipientID:     alloc.RecipientID,
+		Category:        alloc.Category,
+		InstallmentPlan: alloc.InstallmentPlan,
+		Conditions:      alloc.Conditions,
+		Milestones:      alloc.Milestones,
+	}
+	if err := s.eventRepo.Save(ctx, evt); err != nil {
+		fmt.Printf("warning: failed to save AllocationCreatedEvent: %v\n", err)
+	}
+
+	return alloc, nil
 }
 
 func (s *Service) ExecuteAllocation(ctx context.Context, allocationID uuid.UUID) error {
-	// TODO: Implement treasury service integration
-	return fmt.Errorf("treasury allocation execution not yet implemented")
+	alloc, err := s.governanceRepo.GetAllocationByID(ctx, allocationID)
+	if err != nil {
+		return fmt.Errorf("failed to load allocation %s: %w", allocationID, err)
+	}
+	if alloc.Status != entities.AllocationStatusApproved {
+		return fmt.Errorf("cannot execute allocation %s: status must be Approved, got %s", allocationID, alloc.Status)
+	}
+
+	now := time.Now()
+	var amountToSend *entities.Money
+	if plan := alloc.InstallmentPlan; plan != nil {
+		if now.Before(plan.NextPaymentDate) {
+			return fmt.Errorf("installment not yet due for allocation %s (next payment %s)", allocationID, plan.NextPaymentDate)
+		}
+		amountToSend = plan.InstallmentAmount
+
+		inst := entities.InstallmentPayment{
+			InstallmentNumber: len(plan.Installments) + 1,
+			Amount:            plan.InstallmentAmount,
+			ScheduledDate:     plan.NextPaymentDate,
+			PaidDate:          &now,
+			Status:            "paid",
+		}
+		plan.Installments = append(plan.Installments, inst)
+		plan.NextPaymentDate = plan.NextPaymentDate.Add(plan.Frequency)
+	} else {
+		amountToSend = alloc.Amount
+	}
+
+	action := TreasuryAction{
+		Type:        "transfer",
+		Target:      alloc.RecipientAddress,
+		Amount:      amountToSend,
+		Currency:    alloc.Currency,
+		Description: fmt.Sprintf("Disbursement for allocation %s", allocationID),
+	}
+	if err := s.treasuryService.ExecuteTreasuryAction(ctx, action); err != nil {
+		return fmt.Errorf("treasury execution failed: %w", err)
+	}
+
+	alloc.Status = entities.AllocationStatusDisbursed
+	alloc.DisbursedAt = &now
+	alloc.UpdatedAt = now
+	if err := s.governanceRepo.UpdateAllocation(ctx, alloc); err != nil {
+		return fmt.Errorf("failed to update allocation %s: %w", allocationID, err)
+	}
+
+	evt := events.NewAllocationDisbursedEvent(alloc, amountToSend, "", uuid.Nil)
+	if err := s.eventRepo.Save(ctx, evt); err != nil {
+		fmt.Printf("warning: failed to save AllocationDisbursedEvent: %v\n", err)
+	}
+
+	return nil
 }
 
 func (s *Service) GetAllocation(ctx context.Context, allocationID uuid.UUID) (*entities.TreasuryAllocation, error) {
@@ -621,8 +722,22 @@ func (s *Service) ListAllocations(ctx context.Context, filter repositories.Alloc
 }
 
 func (s *Service) ProcessInstallmentPayments(ctx context.Context) error {
-	// TODO: Implement treasury service integration
-	return fmt.Errorf("installment payment processing not yet implemented")
+	pendingAllocs, err := s.governanceRepo.GetPendingAllocations(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to fetch pending allocations: %w", err)
+	}
+
+	for _, alloc := range pendingAllocs {
+		if alloc.InstallmentPlan == nil {
+			continue
+		}
+		if time.Now().After(alloc.InstallmentPlan.NextPaymentDate) {
+			if err := s.ExecuteAllocation(ctx, alloc.ID); err != nil {
+				fmt.Printf("error processing installment for allocation %s: %v\n", alloc.ID, err)
+			}
+		}
+	}
+	return nil
 }
 
 // Analytics and Reporting
