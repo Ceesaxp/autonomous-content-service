@@ -139,12 +139,6 @@ type RiskMetrics struct {
 	LastBackup           time.Time      `json:"last_backup"`
 }
 
-// TimeRange represents a time range for queries
-type TimeRange struct {
-	Start time.Time `json:"start"`
-	End   time.Time `json:"end"`
-}
-
 // IncidentRepository defines the interface for incident data access
 type IncidentRepository interface {
 	FindByID(ctx context.Context, id uuid.UUID) (*entities.Incident, error)
