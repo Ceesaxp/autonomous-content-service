@@ -112,7 +112,7 @@ func (v *VotingServiceImpl) CalculateVotingPower(ctx context.Context, memberID u
 	}
 
 	// Get proposal for snapshot block
-	proposal, err := v.governanceRepo.GetProposalByID(ctx, proposalID)
+	_, err = v.governanceRepo.GetProposalByID(ctx, proposalID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get proposal: %w", err)
 	}
@@ -200,7 +200,7 @@ func (v *VotingServiceImpl) TallyVotes(ctx context.Context, proposalID uuid.UUID
 
 	// Tally votes
 	for _, vote := range votes {
-		weightedPower := int64(float64(vote.VotingPower.Amount) * vote.Weight)
+		weightedPower := float64(vote.VotingPower.Amount) * vote.Weight
 		
 		switch vote.Choice {
 		case entities.VoteChoiceFor:
@@ -335,7 +335,7 @@ func (v *VotingServiceImpl) calculateQuorumRequired(ctx context.Context, proposa
 	// In a full implementation, this would query the total supply at the proposal snapshot block
 	
 	// Get governance config for quorum percentage
-	config, err := v.governanceRepo.GetActiveConfig(ctx)
+	_, err := v.governanceRepo.GetActiveConfig(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get governance config: %w", err)
 	}
@@ -351,7 +351,7 @@ func (v *VotingServiceImpl) calculateQuorumRequired(ctx context.Context, proposa
 	quorumAmount := int64(float64(distribution.TotalSupply.Amount) * proposal.QuorumRequired)
 
 	return &entities.Money{
-		Amount:   quorumAmount,
+		Amount:   float64(quorumAmount),
 		Currency: distribution.TotalSupply.Currency,
 	}, nil
 }
@@ -391,8 +391,9 @@ func (v *VotingServiceImpl) GetVoteHistory(ctx context.Context, memberID uuid.UU
 
 // GetActiveProposalsForVoting returns proposals that are currently in voting phase
 func (v *VotingServiceImpl) GetActiveProposalsForVoting(ctx context.Context) ([]*entities.GovernanceProposal, error) {
+	activeStatus := entities.ProposalStatusActive
 	filter := repositories.ProposalFilter{
-		Status: &entities.ProposalStatusActive,
+		Status: &activeStatus,
 		SortBy: "voting_end_time",
 		SortOrder: "asc",
 	}

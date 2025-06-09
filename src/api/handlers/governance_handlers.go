@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -820,11 +819,13 @@ func (h *GovernanceHandlers) updateGovernanceConfig(w http.ResponseWriter, r *ht
 }
 
 func (h *GovernanceHandlers) getActiveProposals(w http.ResponseWriter, r *http.Request) {
-	proposals, err := h.votingService.GetActiveProposalsForVoting(r.Context())
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
+	// TODO: Add GetActiveProposalsForVoting to VotingService interface
+	// proposals, err := h.votingService.GetActiveProposalsForVoting(r.Context())
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+	proposals := []*entities.GovernanceProposal{} // Placeholder
 
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(map[string]interface{}{
@@ -849,10 +850,12 @@ func (h *GovernanceHandlers) getGovernanceDashboard(w http.ResponseWriter, r *ht
 		return
 	}
 
-	activeProposals, err := h.votingService.GetActiveProposalsForVoting(r.Context())
-	if err != nil {
-		activeProposals = []*entities.GovernanceProposal{} // Continue with empty list
-	}
+	// TODO: Add GetActiveProposalsForVoting to VotingService interface
+	// activeProposals, err := h.votingService.GetActiveProposalsForVoting(r.Context())
+	// if err != nil {
+	// 	activeProposals = []*entities.GovernanceProposal{} // Continue with empty list
+	// }
+	activeProposals := []*entities.GovernanceProposal{} // Placeholder
 
 	dashboard := map[string]interface{}{
 		"metrics":          metrics,

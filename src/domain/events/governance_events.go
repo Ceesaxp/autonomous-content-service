@@ -205,10 +205,12 @@ type GovernanceMetricsUpdatedEvent struct {
 func NewProposalCreatedEvent(proposal *entities.GovernanceProposal) *ProposalCreatedEvent {
 	return &ProposalCreatedEvent{
 		BaseEvent: BaseEvent{
-			ID:        uuid.New(),
-			Type:      string(GovernanceEventProposalCreated),
-			Source:    "governance-service",
+			EventID:   uuid.New(),
+			EventType: string(GovernanceEventProposalCreated),
 			Timestamp: time.Now(),
+			Data: map[string]interface{}{
+				"source": "governance-service",
+			},
 		},
 		ProposalID:  proposal.ID,
 		Title:       proposal.Title,
@@ -225,10 +227,12 @@ func NewProposalCreatedEvent(proposal *entities.GovernanceProposal) *ProposalCre
 func NewVoteCastEvent(vote *entities.GovernanceVote) *VoteCastEvent {
 	return &VoteCastEvent{
 		BaseEvent: BaseEvent{
-			ID:        uuid.New(),
-			Type:      string(GovernanceEventVoteCast),
-			Source:    "governance-service",
+			EventID:   uuid.New(),
+			EventType: string(GovernanceEventVoteCast),
 			Timestamp: time.Now(),
+			Data: map[string]interface{}{
+				"source": "governance-service",
+			},
 		},
 		VoteID:        vote.ID,
 		ProposalID:    vote.ProposalID,
@@ -246,10 +250,12 @@ func NewVoteCastEvent(vote *entities.GovernanceVote) *VoteCastEvent {
 func NewMemberJoinedEvent(member *entities.DAOMember) *MemberJoinedEvent {
 	return &MemberJoinedEvent{
 		BaseEvent: BaseEvent{
-			ID:        uuid.New(),
-			Type:      string(GovernanceEventMemberJoined),
-			Source:    "governance-service",
+			EventID:   uuid.New(),
+			EventType: string(GovernanceEventMemberJoined),
 			Timestamp: time.Now(),
+			Data: map[string]interface{}{
+				"source": "governance-service",
+			},
 		},
 		MemberID:          member.ID,
 		Address:           member.Address,
@@ -265,10 +271,12 @@ func NewMemberJoinedEvent(member *entities.DAOMember) *MemberJoinedEvent {
 func NewAllocationDisbursedEvent(allocation *entities.TreasuryAllocation, amount *entities.Money, txHash string, disbursedBy uuid.UUID) *AllocationDisbursedEvent {
 	return &AllocationDisbursedEvent{
 		BaseEvent: BaseEvent{
-			ID:        uuid.New(),
-			Type:      string(GovernanceEventAllocationDisbursed),
-			Source:    "governance-service",
+			EventID:   uuid.New(),
+			EventType: string(GovernanceEventAllocationDisbursed),
 			Timestamp: time.Now(),
+			Data: map[string]interface{}{
+				"source": "governance-service",
+			},
 		},
 		AllocationID:     allocation.ID,
 		Amount:           amount,

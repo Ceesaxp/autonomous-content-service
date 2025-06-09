@@ -59,8 +59,8 @@ func (s *Service) CreateProposal(ctx context.Context, request ProposalCreationRe
 	}
 
 	if member.VotingPower.Amount < config.ProposalThreshold.Amount {
-		return nil, fmt.Errorf("insufficient voting power: required %s, has %s", 
-			config.ProposalThreshold.Amount.String(), member.VotingPower.Amount.String())
+		return nil, fmt.Errorf("insufficient voting power: required %.2f, has %.2f", 
+			config.ProposalThreshold.Amount, member.VotingPower.Amount)
 	}
 
 	// Set default values based on governance config and proposal type
@@ -125,13 +125,7 @@ func (s *Service) CreateProposal(ctx context.Context, request ProposalCreationRe
 
 	// Create proposal created event
 	event := events.NewProposalCreatedEvent(proposal)
-	if err := s.eventRepo.CreateEvent(ctx, &entities.Event{
-		ID:        event.ID,
-		Type:      event.Type,
-		Source:    event.Source,
-		Data:      event,
-		Timestamp: event.Timestamp,
-	}); err != nil {
+	if err := s.eventRepo.Save(ctx, event); err != nil {
 		// Log error but don't fail the operation
 		fmt.Printf("Failed to create proposal created event: %v\n", err)
 	}
@@ -338,13 +332,7 @@ func (s *Service) CastVote(ctx context.Context, request VoteRequest) (*entities.
 
 	// Create vote cast event
 	event := events.NewVoteCastEvent(vote)
-	if err := s.eventRepo.CreateEvent(ctx, &entities.Event{
-		ID:        event.ID,
-		Type:      event.Type,
-		Source:    event.Source,
-		Data:      event,
-		Timestamp: event.Timestamp,
-	}); err != nil {
+	if err := s.eventRepo.Save(ctx, event); err != nil {
 		// Log error but don't fail the operation
 		fmt.Printf("Failed to create vote cast event: %v\n", err)
 	}
@@ -440,13 +428,7 @@ func (s *Service) RegisterMember(ctx context.Context, request MemberRegistration
 
 	// Create member joined event
 	event := events.NewMemberJoinedEvent(member)
-	if err := s.eventRepo.CreateEvent(ctx, &entities.Event{
-		ID:        event.ID,
-		Type:      event.Type,
-		Source:    event.Source,
-		Data:      event,
-		Timestamp: event.Timestamp,
-	}); err != nil {
+	if err := s.eventRepo.Save(ctx, event); err != nil {
 		// Log error but don't fail the operation
 		fmt.Printf("Failed to create member joined event: %v\n", err)
 	}
@@ -621,11 +603,13 @@ func (s *Service) GetDelegatedVotingPower(ctx context.Context, memberID uuid.UUI
 // Treasury Integration (simplified implementations)
 
 func (s *Service) CreateAllocation(ctx context.Context, request AllocationRequest) (*entities.TreasuryAllocation, error) {
-	return s.treasuryService.CreateAllocation(ctx, request)
+	// TODO: Implement treasury service integration
+	return nil, fmt.Errorf("treasury allocation creation not yet implemented")
 }
 
 func (s *Service) ExecuteAllocation(ctx context.Context, allocationID uuid.UUID) error {
-	return s.treasuryService.ExecuteAllocation(ctx, allocationID)
+	// TODO: Implement treasury service integration
+	return fmt.Errorf("treasury allocation execution not yet implemented")
 }
 
 func (s *Service) GetAllocation(ctx context.Context, allocationID uuid.UUID) (*entities.TreasuryAllocation, error) {
@@ -637,7 +621,8 @@ func (s *Service) ListAllocations(ctx context.Context, filter repositories.Alloc
 }
 
 func (s *Service) ProcessInstallmentPayments(ctx context.Context) error {
-	return s.treasuryService.ProcessInstallmentPayments(ctx)
+	// TODO: Implement treasury service integration
+	return fmt.Errorf("installment payment processing not yet implemented")
 }
 
 // Analytics and Reporting

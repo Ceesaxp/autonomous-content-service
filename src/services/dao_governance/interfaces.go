@@ -224,7 +224,7 @@ type ProposalExecutionResult struct {
 	TxHashes        []string                   `json:"tx_hashes,omitempty"`
 	ErrorMessage    string                     `json:"error_message,omitempty"`
 	ExecutedAt      time.Time                  `json:"executed_at"`
-	Gas Used        uint64                     `json:"gas_used,omitempty"`
+	GasUsed         uint64                     `json:"gas_used,omitempty"`
 }
 
 // VoteEligibility represents vote eligibility information

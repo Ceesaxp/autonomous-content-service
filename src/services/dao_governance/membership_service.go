@@ -432,7 +432,7 @@ func (m *MembershipServiceImpl) calculateVestedAmount(schedule *entities.Vesting
 	vestedAmount := int64(float64(schedule.TotalAmount.Amount) * vestedPercentage)
 
 	return &entities.Money{
-		Amount:   vestedAmount,
+		Amount:   float64(vestedAmount),
 		Currency: schedule.TotalAmount.Currency,
 	}
 }
@@ -464,8 +464,9 @@ func (m *MembershipServiceImpl) isValidPromotion(currentRole, newRole entities.M
 
 // GetMembersByContributionScore returns members sorted by contribution score
 func (m *MembershipServiceImpl) GetMembersByContributionScore(ctx context.Context, limit int) ([]*entities.DAOMember, error) {
+	activeStatus := entities.MemberStatusActive
 	filter := repositories.MemberFilter{
-		Status:    &entities.MemberStatusActive,
+		Status:    &activeStatus,
 		Limit:     limit,
 		SortBy:    "contribution_score",
 		SortOrder: "desc",
