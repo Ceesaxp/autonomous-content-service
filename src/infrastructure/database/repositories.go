@@ -1038,3 +1038,4 @@ func (r *PostgresRiskRepository) GetLastSuccessfulBackup(ctx context.Context, ba
 func (r *PostgresRiskRepository) CleanupOldBackups(ctx context.Context, retentionDays int) error {
 	return nil
 }
+

@@ -12,8 +12,6 @@ import (
 
 	"github.com/Ceesaxp/autonomous-content-service/src/config"
 	"github.com/Ceesaxp/autonomous-content-service/src/infrastructure/database"
-	"github.com/Ceesaxp/autonomous-content-service/src/services/payment"
-	"github.com/Ceesaxp/autonomous-content-service/src/services/pricing"
 	"github.com/gorilla/mux"
 )
 
@@ -33,14 +31,8 @@ func main() {
 	}
 	defer db.Close()
 
-	// Initialize repositories
-	paymentRepo := database.NewPaymentRepository(db)
-	pricingRepo := database.NewPricingRepository(db)
-	transactionRepo := database.NewTransactionRepository(db)
-
-	// Initialize financial services
-	paymentService := payment.NewPaymentService(paymentRepo, transactionRepo)
-	pricingService := pricing.NewPricingService(pricingRepo)
+	// Initialize repositories for future use
+	_ = database.NewTransactionRepository(db)
 
 	// Set up router
 	router := mux.NewRouter()
@@ -51,7 +43,7 @@ func main() {
 
 	// Financial service routes
 	financialRouter := router.PathPrefix("/api/v1").Subrouter()
-	setupFinancialRoutes(financialRouter, paymentService, pricingService)
+	setupFinancialRoutes(financialRouter)
 
 	// Set up server
 	port := getServicePort("FINANCIAL_SERVICE_PORT", 8084)
@@ -90,108 +82,32 @@ func main() {
 }
 
 // setupFinancialRoutes configures financial-specific routes
-func setupFinancialRoutes(router *mux.Router, paymentService payment.PaymentService, pricingService pricing.PricingService) {
+func setupFinancialRoutes(router *mux.Router) {
 	// Payment processing
-	router.HandleFunc("/payments/process", handleProcessPayment(paymentService)).Methods("POST")
-	router.HandleFunc("/payments/refund", handleRefundPayment(paymentService)).Methods("POST")
-	router.HandleFunc("/payments/{id}/status", handleGetPaymentStatus(paymentService)).Methods("GET")
-	router.HandleFunc("/payments/methods", handleGetPaymentMethods(paymentService)).Methods("GET")
+	router.HandleFunc("/payments/process", basicHandler("payment processed")).Methods("POST")
+	router.HandleFunc("/payments/refund", basicHandler("payment refunded")).Methods("POST")
+	router.HandleFunc("/payments/{id}/status", basicHandler("payment status")).Methods("GET")
+	router.HandleFunc("/payments/methods", basicHandler("payment methods")).Methods("GET")
 	
 	// Pricing and quotes
-	router.HandleFunc("/pricing/quote", handleGetPriceQuote(pricingService)).Methods("POST")
-	router.HandleFunc("/pricing/models", handleGetPricingModels(pricingService)).Methods("GET")
-	router.HandleFunc("/pricing/experiments", handleCreatePricingExperiment(pricingService)).Methods("POST")
-	router.HandleFunc("/pricing/market-data", handleGetMarketData(pricingService)).Methods("GET")
+	router.HandleFunc("/pricing/quote", basicHandler("price quote")).Methods("POST")
+	router.HandleFunc("/pricing/models", basicHandler("pricing models")).Methods("GET")
+	router.HandleFunc("/pricing/experiments", basicHandler("pricing experiment")).Methods("POST")
+	router.HandleFunc("/pricing/market-data", basicHandler("market data")).Methods("GET")
 	
-	// Treasury operations (placeholder for smart contract integration)
-	router.HandleFunc("/treasury/balance", handleGetTreasuryBalance).Methods("GET")
-	router.HandleFunc("/treasury/allocate", handleAllocateFunds).Methods("POST")
-	router.HandleFunc("/treasury/transactions", handleGetTreasuryTransactions).Methods("GET")
+	// Treasury operations
+	router.HandleFunc("/treasury/balance", basicHandler("treasury balance")).Methods("GET")
+	router.HandleFunc("/treasury/allocate", basicHandler("funds allocated")).Methods("POST")
+	router.HandleFunc("/treasury/transactions", basicHandler("treasury transactions")).Methods("GET")
 }
 
-// Payment handlers (placeholder implementations)
-func handleProcessPayment(service payment.PaymentService) http.HandlerFunc {
+// basicHandler returns a simple JSON response for testing
+func basicHandler(action string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status":"success","message":"Payment processing endpoint - implementation pending"}`))
+		w.Write([]byte(fmt.Sprintf(`{"status":"success","action":"%s","message":"Financial service endpoint - implementation pending"}`, action)))
 	}
-}
-
-func handleRefundPayment(service payment.PaymentService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status":"success","message":"Payment refund endpoint - implementation pending"}`))
-	}
-}
-
-func handleGetPaymentStatus(service payment.PaymentService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status":"success","message":"Payment status endpoint - implementation pending"}`))
-	}
-}
-
-func handleGetPaymentMethods(service payment.PaymentService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status":"success","message":"Payment methods endpoint - implementation pending"}`))
-	}
-}
-
-// Pricing handlers (placeholder implementations)
-func handleGetPriceQuote(service pricing.PricingService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status":"success","message":"Price quote endpoint - implementation pending"}`))
-	}
-}
-
-func handleGetPricingModels(service pricing.PricingService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status":"success","message":"Pricing models endpoint - implementation pending"}`))
-	}
-}
-
-func handleCreatePricingExperiment(service pricing.PricingService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status":"success","message":"Pricing experiment endpoint - implementation pending"}`))
-	}
-}
-
-func handleGetMarketData(service pricing.PricingService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status":"success","message":"Market data endpoint - implementation pending"}`))
-	}
-}
-
-// Treasury handlers (placeholder implementations)
-func handleGetTreasuryBalance(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"status":"success","message":"Treasury balance endpoint - implementation pending"}`))
-}
-
-func handleAllocateFunds(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"status":"success","message":"Fund allocation endpoint - implementation pending"}`))
-}
-
-func handleGetTreasuryTransactions(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"status":"success","message":"Treasury transactions endpoint - implementation pending"}`))
 }
 
 // healthCheckHandler provides health status for the Financial Service

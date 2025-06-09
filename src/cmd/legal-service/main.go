@@ -10,10 +10,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Ceesaxp/autonomous-content-service/src/api/handlers"
 	"github.com/Ceesaxp/autonomous-content-service/src/config"
 	"github.com/Ceesaxp/autonomous-content-service/src/infrastructure/database"
-	"github.com/Ceesaxp/autonomous-content-service/src/services/legal_compliance"
 	"github.com/gorilla/mux"
 )
 
@@ -33,14 +31,8 @@ func main() {
 	}
 	defer db.Close()
 
-	// Initialize repositories
-	legalRepo := database.NewLegalRepository(db)
-
-	// Initialize legal service
-	legalService := legal_compliance.NewLegalService(legalRepo)
-
-	// Initialize handlers
-	legalHandler := handlers.NewLegalHandlers(legalService)
+	// Initialize repositories (using existing event repo for now)
+	_ = database.NewEventRepository(db) // eventRepo for future use
 
 	// Set up router
 	router := mux.NewRouter()
@@ -49,9 +41,9 @@ func main() {
 	// Health check endpoint
 	router.HandleFunc("/health", healthCheckHandler).Methods("GET")
 
-	// Legal service routes
+	// Legal service routes (basic implementations for testing)
 	legalRouter := router.PathPrefix("/api/v1").Subrouter()
-	setupLegalRoutes(legalRouter, legalHandler)
+	setupLegalRoutes(legalRouter)
 
 	// Set up server
 	port := getServicePort("LEGAL_SERVICE_PORT", 8086)
@@ -89,39 +81,48 @@ func main() {
 	log.Println("Legal Service exited gracefully")
 }
 
-// setupLegalRoutes configures legal-specific routes
-func setupLegalRoutes(router *mux.Router, legalHandler *handlers.LegalHandlers) {
+// setupLegalRoutes configures legal-specific routes with basic implementations
+func setupLegalRoutes(router *mux.Router) {
 	// Contract management
-	router.HandleFunc("/contracts", legalHandler.GenerateContract).Methods("POST")
-	router.HandleFunc("/contracts", legalHandler.GetContracts).Methods("GET")
-	router.HandleFunc("/contracts/{id}", legalHandler.GetContract).Methods("GET")
-	router.HandleFunc("/contracts/{id}/review", legalHandler.ReviewContract).Methods("POST")
-	router.HandleFunc("/contracts/{id}/sign", legalHandler.RequestSignature).Methods("POST")
+	router.HandleFunc("/contracts", basicHandler("contracts", "contract generated")).Methods("POST")
+	router.HandleFunc("/contracts", basicHandler("contracts", "contracts retrieved")).Methods("GET")
+	router.HandleFunc("/contracts/{id}", basicHandler("contracts", "contract retrieved")).Methods("GET")
+	router.HandleFunc("/contracts/{id}/review", basicHandler("contracts", "contract reviewed")).Methods("POST")
+	router.HandleFunc("/contracts/{id}/sign", basicHandler("contracts", "signature requested")).Methods("POST")
 	
 	// Compliance monitoring
-	router.HandleFunc("/compliance/check", legalHandler.CheckCompliance).Methods("POST")
-	router.HandleFunc("/compliance/requirements", legalHandler.GetComplianceRequirements).Methods("GET")
-	router.HandleFunc("/compliance/reports", legalHandler.GenerateComplianceReport).Methods("POST")
+	router.HandleFunc("/compliance/check", basicHandler("compliance", "compliance checked")).Methods("POST")
+	router.HandleFunc("/compliance/requirements", basicHandler("compliance", "requirements retrieved")).Methods("GET")
+	router.HandleFunc("/compliance/reports", basicHandler("compliance", "report generated")).Methods("POST")
 	
 	// Data privacy (GDPR)
-	router.HandleFunc("/privacy/data-subject-request", legalHandler.ProcessDataSubjectRequest).Methods("POST")
-	router.HandleFunc("/privacy/detect-pii", legalHandler.DetectPII).Methods("POST")
-	router.HandleFunc("/privacy/consent", legalHandler.ManageConsent).Methods("POST")
+	router.HandleFunc("/privacy/data-subject-request", basicHandler("privacy", "data subject request processed")).Methods("POST")
+	router.HandleFunc("/privacy/detect-pii", basicHandler("privacy", "PII detected")).Methods("POST")
+	router.HandleFunc("/privacy/consent", basicHandler("privacy", "consent managed")).Methods("POST")
 	
 	// IP management
-	router.HandleFunc("/ip/licenses", legalHandler.RegisterIPLicense).Methods("POST")
-	router.HandleFunc("/ip/licenses", legalHandler.GetIPLicenses).Methods("GET")
-	router.HandleFunc("/ip/usage/validate", legalHandler.ValidateIPUsage).Methods("POST")
+	router.HandleFunc("/ip/licenses", basicHandler("ip", "IP license registered")).Methods("POST")
+	router.HandleFunc("/ip/licenses", basicHandler("ip", "IP licenses retrieved")).Methods("GET")
+	router.HandleFunc("/ip/usage/validate", basicHandler("ip", "IP usage validated")).Methods("POST")
 	
 	// Insurance management
-	router.HandleFunc("/insurance/policies", legalHandler.GetInsurancePolicies).Methods("GET")
-	router.HandleFunc("/insurance/requirements", legalHandler.CalculateInsuranceRequirements).Methods("POST")
-	router.HandleFunc("/insurance/claims", legalHandler.ProcessInsuranceClaim).Methods("POST")
+	router.HandleFunc("/insurance/policies", basicHandler("insurance", "policies retrieved")).Methods("GET")
+	router.HandleFunc("/insurance/requirements", basicHandler("insurance", "requirements calculated")).Methods("POST")
+	router.HandleFunc("/insurance/claims", basicHandler("insurance", "claim processed")).Methods("POST")
 	
 	// Dispute management
-	router.HandleFunc("/disputes", legalHandler.CreateDispute).Methods("POST")
-	router.HandleFunc("/disputes", legalHandler.GetDisputes).Methods("GET")
-	router.HandleFunc("/disputes/{id}/resolve", legalHandler.ResolveDispute).Methods("POST")
+	router.HandleFunc("/disputes", basicHandler("disputes", "dispute created")).Methods("POST")
+	router.HandleFunc("/disputes", basicHandler("disputes", "disputes retrieved")).Methods("GET")
+	router.HandleFunc("/disputes/{id}/resolve", basicHandler("disputes", "dispute resolved")).Methods("POST")
+}
+
+// basicHandler creates a basic JSON response handler
+func basicHandler(action, message string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(fmt.Sprintf(`{"status":"success","action":"%s","message":"Legal service endpoint - implementation pending: %s"}`, action, message)))
+	}
 }
 
 // healthCheckHandler provides health status for the Legal Service

@@ -10,10 +10,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Ceesaxp/autonomous-content-service/src/api/handlers"
 	"github.com/Ceesaxp/autonomous-content-service/src/config"
 	"github.com/Ceesaxp/autonomous-content-service/src/infrastructure/database"
-	"github.com/Ceesaxp/autonomous-content-service/src/services/decision_making"
 	"github.com/gorilla/mux"
 )
 
@@ -33,25 +31,19 @@ func main() {
 	}
 	defer db.Close()
 
-	// Initialize repositories
-	decisionRepo := database.NewDecisionRepository(db)
+	// Initialize repositories (using existing event repo for now)
+	_ = database.NewEventRepository(db) // eventRepo for future use
 
-	// Initialize decision making service
-	decisionService := decision_making.NewDecisionService(decisionRepo)
-
-	// Initialize handlers
-	decisionHandler := handlers.NewDecisionHandlers(decisionService)
-
-	// Set up router
+	// Set up router with basic handlers for initial microservices implementation
 	router := mux.NewRouter()
 	router.Use(loggingMiddleware)
 
 	// Health check endpoint
 	router.HandleFunc("/health", healthCheckHandler).Methods("GET")
 
-	// Decision service routes
+	// Decision service routes (basic implementations for testing)
 	decisionRouter := router.PathPrefix("/api/v1").Subrouter()
-	setupDecisionRoutes(decisionRouter, decisionHandler)
+	setupDecisionRoutes(decisionRouter)
 
 	// Set up server
 	port := getServicePort("DECISION_SERVICE_PORT", 8082)
@@ -89,19 +81,88 @@ func main() {
 	log.Println("Decision Service exited gracefully")
 }
 
-// setupDecisionRoutes configures decision-specific routes
-func setupDecisionRoutes(router *mux.Router, decisionHandler *handlers.DecisionHandlers) {
-	router.HandleFunc("/decisions", decisionHandler.CreateDecision).Methods("POST")
-	router.HandleFunc("/decisions/{id}", decisionHandler.GetDecision).Methods("GET")
-	router.HandleFunc("/decisions/{id}/execute", decisionHandler.ExecuteDecision).Methods("POST")
-	router.HandleFunc("/decisions/{id}/override", decisionHandler.OverrideDecision).Methods("POST")
-	router.HandleFunc("/decisions/{id}/quality", decisionHandler.AssessDecisionQuality).Methods("GET")
-	router.HandleFunc("/decisions/metrics", decisionHandler.GetDecisionMetrics).Methods("GET")
-	router.HandleFunc("/policies", decisionHandler.CreatePolicy).Methods("POST")
-	router.HandleFunc("/policies", decisionHandler.GetPolicies).Methods("GET")
-	router.HandleFunc("/ethical-guidelines", decisionHandler.CreateEthicalGuideline).Methods("POST")
-	router.HandleFunc("/system/health", decisionHandler.CheckSystemHealth).Methods("GET")
-	router.HandleFunc("/system/emergency", decisionHandler.ActivateEmergencyMode).Methods("POST")
+// setupDecisionRoutes configures decision-specific routes with basic implementations
+func setupDecisionRoutes(router *mux.Router) {
+	router.HandleFunc("/decisions", createDecisionHandler).Methods("POST")
+	router.HandleFunc("/decisions/{id}", getDecisionHandler).Methods("GET")
+	router.HandleFunc("/decisions/{id}/execute", executeDecisionHandler).Methods("POST")
+	router.HandleFunc("/decisions/{id}/override", overrideDecisionHandler).Methods("POST")
+	router.HandleFunc("/decisions/{id}/quality", assessDecisionQualityHandler).Methods("GET")
+	router.HandleFunc("/decisions/metrics", getDecisionMetricsHandler).Methods("GET")
+	router.HandleFunc("/policies", createPolicyHandler).Methods("POST")
+	router.HandleFunc("/policies", getPoliciesHandler).Methods("GET")
+	router.HandleFunc("/ethical-guidelines", createEthicalGuidelineHandler).Methods("POST")
+	router.HandleFunc("/system/health", checkSystemHealthHandler).Methods("GET")
+	router.HandleFunc("/system/emergency", activateEmergencyModeHandler).Methods("POST")
+}
+
+// Basic handler implementations for testing microservices architecture
+func createDecisionHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status":"decision created","id":"mock-decision-123","message":"Decision service endpoint - implementation pending"}`))
+}
+
+func getDecisionHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(fmt.Sprintf(`{"id":"%s","status":"pending","type":"mock","message":"Decision service endpoint - implementation pending"}`, id)))
+}
+
+func executeDecisionHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status":"executed","message":"Decision service endpoint - implementation pending"}`))
+}
+
+func overrideDecisionHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status":"overridden","message":"Decision service endpoint - implementation pending"}`))
+}
+
+func assessDecisionQualityHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"quality_score":0.85,"message":"Decision service endpoint - implementation pending"}`))
+}
+
+func getDecisionMetricsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"metrics":{"total_decisions":42,"success_rate":0.91},"message":"Decision service endpoint - implementation pending"}`))
+}
+
+func createPolicyHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status":"policy created","message":"Decision service endpoint - implementation pending"}`))
+}
+
+func getPoliciesHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"policies":[],"message":"Decision service endpoint - implementation pending"}`))
+}
+
+func createEthicalGuidelineHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status":"guideline created","message":"Decision service endpoint - implementation pending"}`))
+}
+
+func checkSystemHealthHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status":"healthy","components":{"decision_engine":"healthy"},"message":"Decision service endpoint - implementation pending"}`))
+}
+
+func activateEmergencyModeHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`{"status":"emergency mode activated","message":"Decision service endpoint - implementation pending"}`))
 }
 
 // healthCheckHandler provides health status for the Decision Service
@@ -129,3 +190,4 @@ func getServicePort(envVar string, defaultPort int) int {
 	}
 	return defaultPort
 }
+

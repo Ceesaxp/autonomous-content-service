@@ -10,10 +10,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Ceesaxp/autonomous-content-service/src/api/handlers"
 	"github.com/Ceesaxp/autonomous-content-service/src/config"
 	"github.com/Ceesaxp/autonomous-content-service/src/infrastructure/database"
-	"github.com/Ceesaxp/autonomous-content-service/src/services/self_improvement"
 	"github.com/gorilla/mux"
 )
 
@@ -33,14 +31,8 @@ func main() {
 	}
 	defer db.Close()
 
-	// Initialize repositories
-	learningRepo := database.NewLearningRepository(db)
-
-	// Initialize self-improvement service
-	selfImprovementService := self_improvement.NewSelfImprovementService(learningRepo)
-
-	// Initialize handlers
-	selfImprovementHandler := handlers.NewSelfImprovementHandler(selfImprovementService)
+	// Initialize repositories (using existing event repo for now)
+	_ = database.NewEventRepository(db) // eventRepo for future use
 
 	// Set up router
 	router := mux.NewRouter()
@@ -49,9 +41,9 @@ func main() {
 	// Health check endpoint
 	router.HandleFunc("/health", healthCheckHandler).Methods("GET")
 
-	// Self-improvement service routes
+	// Self-improvement service routes (basic implementations for testing)
 	siRouter := router.PathPrefix("/api/v1").Subrouter()
-	setupSelfImprovementRoutes(siRouter, selfImprovementHandler)
+	setupSelfImprovementRoutes(siRouter)
 
 	// Set up server
 	port := getServicePort("SELF_IMPROVEMENT_SERVICE_PORT", 8088)
@@ -89,36 +81,45 @@ func main() {
 	log.Println("Self-Improvement Service exited gracefully")
 }
 
-// setupSelfImprovementRoutes configures self-improvement-specific routes
-func setupSelfImprovementRoutes(router *mux.Router, siHandler *handlers.SelfImprovementHandler) {
+// setupSelfImprovementRoutes configures self-improvement-specific routes with basic implementations
+func setupSelfImprovementRoutes(router *mux.Router) {
 	// Learning and knowledge management
-	router.HandleFunc("/learning/artifacts", siHandler.CreateLearningArtifact).Methods("POST")
-	router.HandleFunc("/learning/artifacts", siHandler.GetLearningArtifacts).Methods("GET")
-	router.HandleFunc("/learning/artifacts/{id}", siHandler.GetLearningArtifact).Methods("GET")
-	router.HandleFunc("/learning/learn", siHandler.LearnFromProject).Methods("POST")
-	router.HandleFunc("/learning/feedback", siHandler.LearnFromFeedback).Methods("POST")
+	router.HandleFunc("/learning/artifacts", basicHandler("learning", "learning artifact created")).Methods("POST")
+	router.HandleFunc("/learning/artifacts", basicHandler("learning", "learning artifacts retrieved")).Methods("GET")
+	router.HandleFunc("/learning/artifacts/{id}", basicHandler("learning", "learning artifact retrieved")).Methods("GET")
+	router.HandleFunc("/learning/learn", basicHandler("learning", "learned from project")).Methods("POST")
+	router.HandleFunc("/learning/feedback", basicHandler("learning", "learned from feedback")).Methods("POST")
 	
 	// Performance metrics and monitoring
-	router.HandleFunc("/metrics/collect", siHandler.CollectMetrics).Methods("POST")
-	router.HandleFunc("/metrics/performance", siHandler.GetPerformanceMetrics).Methods("GET")
-	router.HandleFunc("/metrics/system", siHandler.GetSystemMetrics).Methods("GET")
+	router.HandleFunc("/metrics/collect", basicHandler("metrics", "metrics collected")).Methods("POST")
+	router.HandleFunc("/metrics/performance", basicHandler("metrics", "performance metrics retrieved")).Methods("GET")
+	router.HandleFunc("/metrics/system", basicHandler("metrics", "system metrics retrieved")).Methods("GET")
 	
 	// Experimentation and A/B testing
-	router.HandleFunc("/experiments", siHandler.CreateExperiment).Methods("POST")
-	router.HandleFunc("/experiments", siHandler.GetExperiments).Methods("GET")
-	router.HandleFunc("/experiments/{id}/results", siHandler.GetExperimentResults).Methods("GET")
-	router.HandleFunc("/experiments/{id}/conclude", siHandler.ConcludeExperiment).Methods("POST")
+	router.HandleFunc("/experiments", basicHandler("experiments", "experiment created")).Methods("POST")
+	router.HandleFunc("/experiments", basicHandler("experiments", "experiments retrieved")).Methods("GET")
+	router.HandleFunc("/experiments/{id}/results", basicHandler("experiments", "experiment results retrieved")).Methods("GET")
+	router.HandleFunc("/experiments/{id}/conclude", basicHandler("experiments", "experiment concluded")).Methods("POST")
 	
 	// Capability acquisition and optimization
-	router.HandleFunc("/capabilities/gaps", siHandler.IdentifyCapabilityGaps).Methods("GET")
-	router.HandleFunc("/capabilities/acquire", siHandler.AcquireCapability).Methods("POST")
-	router.HandleFunc("/optimization/prompts", siHandler.OptimizePrompts).Methods("POST")
-	router.HandleFunc("/optimization/workflows", siHandler.OptimizeWorkflows).Methods("POST")
+	router.HandleFunc("/capabilities/gaps", basicHandler("capabilities", "capability gaps identified")).Methods("GET")
+	router.HandleFunc("/capabilities/acquire", basicHandler("capabilities", "capability acquired")).Methods("POST")
+	router.HandleFunc("/optimization/prompts", basicHandler("capabilities", "prompts optimized")).Methods("POST")
+	router.HandleFunc("/optimization/workflows", basicHandler("capabilities", "workflows optimized")).Methods("POST")
 	
 	// Knowledge graph and insights
-	router.HandleFunc("/knowledge/query", siHandler.QueryKnowledge).Methods("POST")
-	router.HandleFunc("/knowledge/insights", siHandler.GetInsights).Methods("GET")
-	router.HandleFunc("/knowledge/recommendations", siHandler.GetRecommendations).Methods("GET")
+	router.HandleFunc("/knowledge/query", basicHandler("knowledge", "knowledge queried")).Methods("POST")
+	router.HandleFunc("/knowledge/insights", basicHandler("knowledge", "insights retrieved")).Methods("GET")
+	router.HandleFunc("/knowledge/recommendations", basicHandler("knowledge", "recommendations retrieved")).Methods("GET")
+}
+
+// basicHandler creates a basic JSON response handler
+func basicHandler(action, message string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(fmt.Sprintf(`{"status":"success","action":"%s","message":"Self-improvement service endpoint - implementation pending: %s"}`, action, message)))
+	}
 }
 
 // healthCheckHandler provides health status for the Self-Improvement Service
