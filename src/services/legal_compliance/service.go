@@ -17,16 +17,16 @@ import (
 
 // Service implements the LegalComplianceService interface
 type Service struct {
-	legalRepo    repositories.LegalRepository
-	clientRepo   repositories.ClientRepository
-	projectRepo  repositories.ProjectRepository
-	contentRepo  repositories.ContentRepository
-	
+	legalRepo   repositories.LegalRepository
+	clientRepo  repositories.ClientRepository
+	projectRepo repositories.ProjectRepository
+	contentRepo repositories.ContentRepository
+
 	// External service dependencies
 	signatureProvider SignatureProvider
 	complianceEngine  ComplianceEngine
-	ipAnalyzer       IPAnalyzer
-	regulatoryAPI    RegulatoryAPI
+	ipAnalyzer        IPAnalyzer
+	regulatoryAPI     RegulatoryAPI
 }
 
 // NewService creates a new legal compliance service
@@ -134,13 +134,13 @@ func (s *Service) GetContractStatus(ctx context.Context, contractID uuid.UUID) (
 	}
 
 	result := &ContractStatusResult{
-		Status:             contract.Status,
-		SignedPercentage:   signedPercentage,
-		PendingSignatures:  totalSignatures - signedCount,
-		ComplianceStatus:   complianceStatus,
-		ExpirationDate:     contract.ExpirationDate,
-		RenewalRequired:    renewalRequired,
-		Issues:             issues,
+		Status:            contract.Status,
+		SignedPercentage:  signedPercentage,
+		PendingSignatures: totalSignatures - signedCount,
+		ComplianceStatus:  complianceStatus,
+		ExpirationDate:    contract.ExpirationDate,
+		RenewalRequired:   renewalRequired,
+		Issues:            issues,
 	}
 
 	return result, nil
@@ -156,21 +156,21 @@ func (s *Service) ProcessContractRenewal(ctx context.Context, contractID uuid.UU
 
 	// Create new contract based on original
 	renewedContract := &entities.Contract{
-		ID:                uuid.New(),
-		Title:             fmt.Sprintf("%s (Renewed)", originalContract.Title),
-		Type:              originalContract.Type,
-		Status:            entities.ContractStatusDraft,
-		Version:           originalContract.Version + 1,
-		ParentContractID:  &originalContract.ID,
-		ClientID:          originalContract.ClientID,
-		ProjectID:         originalContract.ProjectID,
-		TemplateID:        originalContract.TemplateID,
-		Content:           originalContract.Content,
-		Parameters:        originalContract.Parameters,
-		Terms:             originalContract.Terms,
-		EffectiveDate:     time.Now(),
-		CreatedAt:         time.Now(),
-		UpdatedAt:         time.Now(),
+		ID:               uuid.New(),
+		Title:            fmt.Sprintf("%s (Renewed)", originalContract.Title),
+		Type:             originalContract.Type,
+		Status:           entities.ContractStatusDraft,
+		Version:          originalContract.Version + 1,
+		ParentContractID: &originalContract.ID,
+		ClientID:         originalContract.ClientID,
+		ProjectID:        originalContract.ProjectID,
+		TemplateID:       originalContract.TemplateID,
+		Content:          originalContract.Content,
+		Parameters:       originalContract.Parameters,
+		Terms:            originalContract.Terms,
+		EffectiveDate:    time.Now(),
+		CreatedAt:        time.Now(),
+		UpdatedAt:        time.Now(),
 	}
 
 	// Set new expiration date (1 year from now by default)
@@ -344,7 +344,7 @@ func (s *Service) GenerateRiskReport(ctx context.Context, timeRange TimeRange) (
 	// Get all contracts (simplified since GetContractsByDateRange is not implemented)
 	// In a real implementation, this would filter by date range
 	contracts := []*entities.Contract{} // Simplified for now
-	
+
 	// Note: Would implement GetContractsByDateRange in repository layer
 	// contracts, err := s.legalRepo.GetContractsByDateRange(ctx, timeRange.Start, timeRange.End)
 	// if err != nil {
@@ -372,24 +372,24 @@ func (s *Service) GenerateRiskReport(ctx context.Context, timeRange TimeRange) (
 			}
 
 			risk := entities.Risk{
-				ID:              uuid.New(),
-				Title:           fmt.Sprintf("Contract Risk: %s", contract.Title),
-				Description:     fmt.Sprintf("Legal risk for contract %s", contract.Title),
-				Category:        entities.RiskCategoryLegal,
-				Severity:        riskSeverity,
-				Likelihood:      contract.RiskAssessment.RiskScore,
-				Impact:          contract.RiskAssessment.RiskScore,
-				Status:          entities.RiskStatusIdentified,
-				IdentifiedAt:    contract.RiskAssessment.AssessedAt,
-				LastAssessment:  contract.RiskAssessment.AssessedAt,
-				CreatedAt:       contract.RiskAssessment.AssessedAt,
-				UpdatedAt:       contract.RiskAssessment.AssessedAt,
+				ID:             uuid.New(),
+				Title:          fmt.Sprintf("Contract Risk: %s", contract.Title),
+				Description:    fmt.Sprintf("Legal risk for contract %s", contract.Title),
+				Category:       entities.RiskCategoryLegal,
+				Severity:       riskSeverity,
+				Likelihood:     contract.RiskAssessment.RiskScore,
+				Impact:         contract.RiskAssessment.RiskScore,
+				Status:         entities.RiskStatusIdentified,
+				IdentifiedAt:   contract.RiskAssessment.AssessedAt,
+				LastAssessment: contract.RiskAssessment.AssessedAt,
+				CreatedAt:      contract.RiskAssessment.AssessedAt,
+				UpdatedAt:      contract.RiskAssessment.AssessedAt,
 			}
 			risks = append(risks, risk)
 
 			overallRiskScore += contract.RiskAssessment.RiskScore
-			if contract.RiskAssessment.RiskLevel == entities.RiskLevelHigh || 
-			   contract.RiskAssessment.RiskLevel == entities.RiskLevelCritical {
+			if contract.RiskAssessment.RiskLevel == entities.RiskLevelHigh ||
+				contract.RiskAssessment.RiskLevel == entities.RiskLevelCritical {
 				highRiskCount++
 			}
 		}
@@ -425,7 +425,7 @@ func (s *Service) GenerateRiskReport(ctx context.Context, timeRange TimeRange) (
 	}
 
 	if highRiskCount > 0 {
-		recommendations = append(recommendations, 
+		recommendations = append(recommendations,
 			fmt.Sprintf("Address %d high-risk contracts immediately", highRiskCount))
 	}
 
@@ -495,15 +495,15 @@ func (s *Service) MonitorRiskThresholds(ctx context.Context) ([]*RiskAlert, erro
 			assessment := contract.RiskAssessment
 
 			// Check for high risk threshold
-			if assessment.RiskLevel == entities.RiskLevelHigh || 
-			   assessment.RiskLevel == entities.RiskLevelCritical {
+			if assessment.RiskLevel == entities.RiskLevelHigh ||
+				assessment.RiskLevel == entities.RiskLevelCritical {
 				alert := &RiskAlert{
-					AlertID:     uuid.New(),
-					RiskID:      uuid.New(), // Would be actual risk ID in real implementation
-					AlertType:   "threshold_violation",
-					Severity:    assessment.RiskLevel,
-					Message:     fmt.Sprintf("High risk contract: %s", contract.Title),
-					TriggeredAt: time.Now(),
+					AlertID:        uuid.New(),
+					RiskID:         uuid.New(), // Would be actual risk ID in real implementation
+					AlertType:      "threshold_violation",
+					Severity:       assessment.RiskLevel,
+					Message:        fmt.Sprintf("High risk contract: %s", contract.Title),
+					TriggeredAt:    time.Now(),
 					RequiresAction: true,
 					SuggestedActions: []string{
 						"Review contract terms",
@@ -517,12 +517,12 @@ func (s *Service) MonitorRiskThresholds(ctx context.Context) ([]*RiskAlert, erro
 			// Check for expired risk assessments
 			if time.Now().After(assessment.ExpiresAt) {
 				alert := &RiskAlert{
-					AlertID:     uuid.New(),
-					RiskID:      uuid.New(),
-					AlertType:   "assessment_expired",
-					Severity:    entities.RiskLevelMedium,
-					Message:     fmt.Sprintf("Risk assessment expired for contract: %s", contract.Title),
-					TriggeredAt: time.Now(),
+					AlertID:        uuid.New(),
+					RiskID:         uuid.New(),
+					AlertType:      "assessment_expired",
+					Severity:       entities.RiskLevelMedium,
+					Message:        fmt.Sprintf("Risk assessment expired for contract: %s", contract.Title),
+					TriggeredAt:    time.Now(),
 					RequiresAction: true,
 					SuggestedActions: []string{
 						"Update risk assessment",
@@ -638,7 +638,7 @@ func (s *Service) ValidateInsuranceCoverage(ctx context.Context, contractID uuid
 	totalCoverage := entities.Money{Amount: 0, Currency: "USD"}
 	totalDeductible := entities.Money{Amount: 0, Currency: "USD"}
 	coverageGaps := []string{}
-	
+
 	// Calculate total coverage
 	for _, policy := range policies {
 		totalCoverage.Amount += policy.Coverage.Amount
@@ -716,7 +716,7 @@ func (s *Service) MonitorInsuranceRenewal(ctx context.Context) ([]*InsuranceRene
 
 	// This would query all active insurance policies
 	// For now, return empty list as it's not implemented in repository
-	
+
 	return alerts, nil
 }
 
@@ -725,10 +725,10 @@ func (s *Service) CalculateInsuranceRequirements(ctx context.Context, riskAssess
 	// Base requirements
 	requiredCoverage := []CoverageRequirement{
 		{
-			Type:           entities.InsuranceTypeGeneral,
-			MinimumAmount:  entities.Money{Amount: 1000000, Currency: "USD"},
-			Description:    "General liability coverage",
-			Justification:  "Standard business protection",
+			Type:          entities.InsuranceTypeGeneral,
+			MinimumAmount: entities.Money{Amount: 1000000, Currency: "USD"},
+			Description:   "General liability coverage",
+			Justification: "Standard business protection",
 		},
 	}
 
@@ -739,10 +739,10 @@ func (s *Service) CalculateInsuranceRequirements(ctx context.Context, riskAssess
 	// Adjust based on risk level
 	if riskAssessment.RiskLevel == entities.RiskLevelHigh || riskAssessment.RiskLevel == entities.RiskLevelCritical {
 		requiredCoverage = append(requiredCoverage, CoverageRequirement{
-			Type:           entities.InsuranceTypeProfessional,
-			MinimumAmount:  entities.Money{Amount: 2000000, Currency: "USD"},
-			Description:    "Professional liability coverage",
-			Justification:  "High-risk contract requires additional protection",
+			Type:          entities.InsuranceTypeProfessional,
+			MinimumAmount: entities.Money{Amount: 2000000, Currency: "USD"},
+			Description:   "Professional liability coverage",
+			Justification: "High-risk contract requires additional protection",
 		})
 		minimumLimits.Amount = 2000000
 		recommendedLimits.Amount = 5000000
@@ -952,7 +952,7 @@ func (s *Service) ProcessIPRenewal(ctx context.Context, licenseID uuid.UUID) (*e
 // HandleIPDispute handles IP dispute requests
 func (s *Service) HandleIPDispute(ctx context.Context, request IPDisputeRequest) (*IPDisputeResult, error) {
 	disputeID := uuid.New()
-	
+
 	// Calculate estimated cost based on dispute type
 	var estimatedCost *entities.Money
 	var timelineEstimate string
@@ -1024,10 +1024,10 @@ func (s *Service) GeneratePrivacyReport(ctx context.Context, timeRange TimeRange
 			ConsentRate:       0.95,
 			WithdrawalRate:    0.05,
 		},
-		SubjectRequests:  []DataSubjectRequest{},
-		ComplianceScore:  0.95,
-		Violations:       []ComplianceViolation{},
-		Recommendations:  []string{"Continue monitoring data processing activities"},
+		SubjectRequests: []DataSubjectRequest{},
+		ComplianceScore: 0.95,
+		Violations:      []ComplianceViolation{},
+		Recommendations: []string{"Continue monitoring data processing activities"},
 	}
 
 	return report, nil
@@ -1107,7 +1107,7 @@ func (s *Service) MonitorFilingDeadlines(ctx context.Context) ([]*FilingDeadline
 
 	// This would query pending reports and check deadlines
 	// For now, return empty list
-	
+
 	return alerts, nil
 }
 
@@ -1384,7 +1384,7 @@ func (s *Service) VerifyContractIntegrity(ctx context.Context, contractID uuid.U
 
 	// Verify contract hash
 	_ = s.calculateContractHash(contract) // currentHash would be compared with stored hash
-	hashMatches := true // Simplified - would compare with stored hash
+	hashMatches := true                   // Simplified - would compare with stored hash
 
 	// Verify all signatures
 	signatures, err := s.legalRepo.GetSignaturesByContract(ctx, contractID)
@@ -1416,14 +1416,14 @@ func (s *Service) VerifyContractIntegrity(ctx context.Context, contractID uuid.U
 
 // Compliance Implementation
 
-func (s *Service) RunComplianceCheck(ctx context.Context, request ComplianceCheckRequest) (*entities.ComplianceCheck, error) {
-	check := &entities.ComplianceCheck{
-		ID:          uuid.New(),
-		Type:        request.Type,
-		Regulation:  request.Regulation,
-		CheckedAt:   time.Now(),
-		CheckedBy:   "system",
-		Status:      entities.ComplianceStatusPending,
+func (s *Service) RunComplianceCheck(ctx context.Context, request ComplianceCheckRequest) (*entities.LegalComplianceCheck, error) {
+	check := &entities.LegalComplianceCheck{
+		ID:         uuid.New(),
+		Type:       request.Type,
+		Regulation: request.Regulation,
+		CheckedAt:  time.Now(),
+		CheckedBy:  "system",
+		Status:     entities.ComplianceStatusPending,
 	}
 
 	// Run specific compliance check based on type
@@ -1588,9 +1588,9 @@ func (s *Service) ValidateIPUsage(ctx context.Context, contentID uuid.UUID) (*IP
 	}
 
 	result := &IPValidationResult{
-		IsValid:        analysis.NoViolations,
-		UsagePermitted: analysis.UsagePermitted,
-		Restrictions:   analysis.Restrictions,
+		IsValid:         analysis.NoViolations,
+		UsagePermitted:  analysis.UsagePermitted,
+		Restrictions:    analysis.Restrictions,
 		RequiredActions: analysis.RequiredActions,
 	}
 
@@ -1666,11 +1666,11 @@ func (s *Service) performInitialRiskAssessment(ctx context.Context, contract *en
 	return assessment, nil
 }
 
-func (s *Service) runInitialComplianceChecks(ctx context.Context, contract *entities.Contract) ([]entities.ComplianceCheck, error) {
-	checks := []entities.ComplianceCheck{}
+func (s *Service) runInitialComplianceChecks(ctx context.Context, contract *entities.Contract) ([]entities.LegalComplianceCheck, error) {
+	checks := []entities.LegalComplianceCheck{}
 
 	// Basic GDPR check
-	gdprCheck := entities.ComplianceCheck{
+	gdprCheck := entities.LegalComplianceCheck{
 		ID:          uuid.New(),
 		Type:        entities.ComplianceTypeGDPR,
 		Regulation:  "GDPR",
@@ -1945,10 +1945,10 @@ type RegulatoryAPI interface {
 }
 
 type SignatureCreationRequest struct {
-	DocumentID    string                    `json:"document_id"`
-	SignerName    string                    `json:"signer_name"`
-	SignerEmail   string                    `json:"signer_email"`
-	SignatureType entities.SignatureType    `json:"signature_type"`
+	DocumentID    string                 `json:"document_id"`
+	SignerName    string                 `json:"signer_name"`
+	SignerEmail   string                 `json:"signer_email"`
+	SignatureType entities.SignatureType `json:"signature_type"`
 }
 
 type SignatureData struct {
@@ -1964,10 +1964,10 @@ type PIIScanResult struct {
 }
 
 type ComplianceCheckResult struct {
-	Summary   string                   `json:"summary"`
+	Summary   string                    `json:"summary"`
 	Status    entities.ComplianceStatus `json:"status"`
-	Evidence  []string                 `json:"evidence"`
-	RiskLevel entities.RiskLevel       `json:"risk_level"`
+	Evidence  []string                  `json:"evidence"`
+	RiskLevel entities.RiskLevel        `json:"risk_level"`
 }
 
 type ComplianceResult struct {
@@ -1977,11 +1977,11 @@ type ComplianceResult struct {
 }
 
 type IPAnalysisResult struct {
-	NoViolations    bool                  `json:"no_violations"`
-	UsagePermitted  bool                  `json:"usage_permitted"`
-	Restrictions    []string              `json:"restrictions"`
-	RequiredActions []string              `json:"required_actions"`
-	License         *entities.IPLicense   `json:"license,omitempty"`
+	NoViolations    bool                `json:"no_violations"`
+	UsagePermitted  bool                `json:"usage_permitted"`
+	Restrictions    []string            `json:"restrictions"`
+	RequiredActions []string            `json:"required_actions"`
+	License         *entities.IPLicense `json:"license,omitempty"`
 }
 
 type SubmissionResult struct {
@@ -1993,21 +1993,21 @@ type SubmissionResult struct {
 // Additional supporting types for interfaces
 
 type PrivacyReport struct {
-	Period           TimeRange                `json:"period"`
-	DataProcessing   []DataProcessingActivity `json:"data_processing"`
-	ConsentMetrics   ConsentMetrics           `json:"consent_metrics"`
-	SubjectRequests  []DataSubjectRequest     `json:"subject_requests"`
-	ComplianceScore  float64                  `json:"compliance_score"`
-	Violations       []ComplianceViolation    `json:"violations"`
-	Recommendations  []string                 `json:"recommendations"`
+	Period          TimeRange                `json:"period"`
+	DataProcessing  []DataProcessingActivity `json:"data_processing"`
+	ConsentMetrics  ConsentMetrics           `json:"consent_metrics"`
+	SubjectRequests []DataSubjectRequest     `json:"subject_requests"`
+	ComplianceScore float64                  `json:"compliance_score"`
+	Violations      []ComplianceViolation    `json:"violations"`
+	Recommendations []string                 `json:"recommendations"`
 }
 
 type ConsentPreferences struct {
-	UserID            string            `json:"user_id"`
-	Purposes          map[string]bool   `json:"purposes"`
-	ConsentDate       time.Time         `json:"consent_date"`
-	ExpirationDate    *time.Time        `json:"expiration_date,omitempty"`
-	WithdrawnPurposes []string          `json:"withdrawn_purposes"`
+	UserID            string                 `json:"user_id"`
+	Purposes          map[string]bool        `json:"purposes"`
+	ConsentDate       time.Time              `json:"consent_date"`
+	ExpirationDate    *time.Time             `json:"expiration_date,omitempty"`
+	WithdrawnPurposes []string               `json:"withdrawn_purposes"`
 	Metadata          map[string]interface{} `json:"metadata"`
 }
 
@@ -2023,110 +2023,110 @@ type IPUsageEvent struct {
 }
 
 type IPRightsResult struct {
-	HasRights       bool                    `json:"has_rights"`
-	LicenseRequired bool                    `json:"license_required"`
-	ExistingLicense *entities.IPLicense     `json:"existing_license,omitempty"`
-	Violations      []IPViolation           `json:"violations"`
-	Recommendations []string                `json:"recommendations"`
-	RiskLevel       entities.RiskLevel      `json:"risk_level"`
+	HasRights       bool                `json:"has_rights"`
+	LicenseRequired bool                `json:"license_required"`
+	ExistingLicense *entities.IPLicense `json:"existing_license,omitempty"`
+	Violations      []IPViolation       `json:"violations"`
+	Recommendations []string            `json:"recommendations"`
+	RiskLevel       entities.RiskLevel  `json:"risk_level"`
 }
 
 type IPDisputeRequest struct {
-	DisputeType   string    `json:"dispute_type"`
-	ClaimantName  string    `json:"claimant_name"`
-	ClaimantEmail string    `json:"claimant_email"`
-	IPDescription string    `json:"ip_description"`
-	ClaimDetails  string    `json:"claim_details"`
-	Evidence      []string  `json:"evidence"`
-	RequestedAction string  `json:"requested_action"`
-	DeadlineDate  time.Time `json:"deadline_date"`
+	DisputeType     string    `json:"dispute_type"`
+	ClaimantName    string    `json:"claimant_name"`
+	ClaimantEmail   string    `json:"claimant_email"`
+	IPDescription   string    `json:"ip_description"`
+	ClaimDetails    string    `json:"claim_details"`
+	Evidence        []string  `json:"evidence"`
+	RequestedAction string    `json:"requested_action"`
+	DeadlineDate    time.Time `json:"deadline_date"`
 }
 
 type IPDisputeResult struct {
-	DisputeID       uuid.UUID `json:"dispute_id"`
-	Status          string    `json:"status"`
-	InitialResponse string    `json:"initial_response"`
-	NextSteps       []string  `json:"next_steps"`
-	EstimatedCost   *entities.Money `json:"estimated_cost,omitempty"`
-	TimelineEstimate string   `json:"timeline_estimate"`
+	DisputeID        uuid.UUID       `json:"dispute_id"`
+	Status           string          `json:"status"`
+	InitialResponse  string          `json:"initial_response"`
+	NextSteps        []string        `json:"next_steps"`
+	EstimatedCost    *entities.Money `json:"estimated_cost,omitempty"`
+	TimelineEstimate string          `json:"timeline_estimate"`
 }
 
 type InsuranceCoverageResult struct {
-	IsCovered       bool                    `json:"is_covered"`
-	CoverageAmount  entities.Money          `json:"coverage_amount"`
-	Deductible      entities.Money          `json:"deductible"`
+	IsCovered       bool                       `json:"is_covered"`
+	CoverageAmount  entities.Money             `json:"coverage_amount"`
+	Deductible      entities.Money             `json:"deductible"`
 	PolicyDetails   []entities.InsurancePolicy `json:"policy_details"`
-	CoverageGaps    []string                `json:"coverage_gaps"`
-	Recommendations []string                `json:"recommendations"`
+	CoverageGaps    []string                   `json:"coverage_gaps"`
+	Recommendations []string                   `json:"recommendations"`
 }
 
 type InsuranceClaim struct {
-	ClaimType       string                 `json:"claim_type"`
-	PolicyID        uuid.UUID              `json:"policy_id"`
-	IncidentDate    time.Time              `json:"incident_date"`
-	Description     string                 `json:"description"`
-	ClaimedAmount   entities.Money         `json:"claimed_amount"`
-	Evidence        []string               `json:"evidence"`
-	ClaimantInfo    ContactInfo            `json:"claimant_info"`
-	Metadata        map[string]interface{} `json:"metadata"`
+	ClaimType     string                 `json:"claim_type"`
+	PolicyID      uuid.UUID              `json:"policy_id"`
+	IncidentDate  time.Time              `json:"incident_date"`
+	Description   string                 `json:"description"`
+	ClaimedAmount entities.Money         `json:"claimed_amount"`
+	Evidence      []string               `json:"evidence"`
+	ClaimantInfo  ContactInfo            `json:"claimant_info"`
+	Metadata      map[string]interface{} `json:"metadata"`
 }
 
 type InsuranceClaimResult struct {
-	ClaimID         uuid.UUID      `json:"claim_id"`
-	Status          string         `json:"status"`
-	ClaimNumber     string         `json:"claim_number"`
+	ClaimID         uuid.UUID       `json:"claim_id"`
+	Status          string          `json:"status"`
+	ClaimNumber     string          `json:"claim_number"`
 	EstimatedPayout *entities.Money `json:"estimated_payout,omitempty"`
-	ProcessingTime  string         `json:"processing_time"`
-	NextSteps       []string       `json:"next_steps"`
+	ProcessingTime  string          `json:"processing_time"`
+	NextSteps       []string        `json:"next_steps"`
 }
 
 type InsuranceRenewalAlert struct {
-	PolicyID        uuid.UUID              `json:"policy_id"`
-	PolicyType      entities.InsuranceType `json:"policy_type"`
-	ExpirationDate  time.Time              `json:"expiration_date"`
-	DaysUntilExpiry int                    `json:"days_until_expiry"`
-	RenewalOptions  []RenewalOption        `json:"renewal_options"`
-	CurrentPremium  entities.Money         `json:"current_premium"`
-	RecommendedAction string               `json:"recommended_action"`
+	PolicyID          uuid.UUID              `json:"policy_id"`
+	PolicyType        entities.InsuranceType `json:"policy_type"`
+	ExpirationDate    time.Time              `json:"expiration_date"`
+	DaysUntilExpiry   int                    `json:"days_until_expiry"`
+	RenewalOptions    []RenewalOption        `json:"renewal_options"`
+	CurrentPremium    entities.Money         `json:"current_premium"`
+	RecommendedAction string                 `json:"recommended_action"`
 }
 
 type InsuranceRequirement struct {
-	RequiredCoverage []CoverageRequirement  `json:"required_coverage"`
-	MinimumLimits    entities.Money         `json:"minimum_limits"`
+	RequiredCoverage  []CoverageRequirement `json:"required_coverage"`
+	MinimumLimits     entities.Money        `json:"minimum_limits"`
 	RecommendedLimits entities.Money        `json:"recommended_limits"`
-	EstimatedCost    entities.Money         `json:"estimated_cost"`
-	Providers        []InsuranceProvider    `json:"providers"`
+	EstimatedCost     entities.Money        `json:"estimated_cost"`
+	Providers         []InsuranceProvider   `json:"providers"`
 }
 
 type RiskReport struct {
-	Period          TimeRange              `json:"period"`
-	OverallRisk     entities.RiskLevel     `json:"overall_risk"`
-	RiskScore       float64                `json:"risk_score"`
-	TopRisks        []entities.Risk        `json:"top_risks"`
-	TrendAnalysis   RiskTrend              `json:"trend_analysis"`
-	Recommendations []string               `json:"recommendations"`
-	Metrics         RiskMetrics            `json:"metrics"`
+	Period          TimeRange          `json:"period"`
+	OverallRisk     entities.RiskLevel `json:"overall_risk"`
+	RiskScore       float64            `json:"risk_score"`
+	TopRisks        []entities.Risk    `json:"top_risks"`
+	TrendAnalysis   RiskTrend          `json:"trend_analysis"`
+	Recommendations []string           `json:"recommendations"`
+	Metrics         RiskMetrics        `json:"metrics"`
 }
 
 type RiskAlert struct {
-	AlertID     uuid.UUID          `json:"alert_id"`
-	RiskID      uuid.UUID          `json:"risk_id"`
-	AlertType   string             `json:"alert_type"`
-	Severity    entities.RiskLevel `json:"severity"`
-	Message     string             `json:"message"`
-	TriggeredAt time.Time          `json:"triggered_at"`
-	RequiresAction bool            `json:"requires_action"`
-	SuggestedActions []string      `json:"suggested_actions"`
+	AlertID          uuid.UUID          `json:"alert_id"`
+	RiskID           uuid.UUID          `json:"risk_id"`
+	AlertType        string             `json:"alert_type"`
+	Severity         entities.RiskLevel `json:"severity"`
+	Message          string             `json:"message"`
+	TriggeredAt      time.Time          `json:"triggered_at"`
+	RequiresAction   bool               `json:"requires_action"`
+	SuggestedActions []string           `json:"suggested_actions"`
 }
 
 type DisputeRequest struct {
-	ContractID    uuid.UUID          `json:"contract_id"`
-	DisputeType   entities.DisputeType `json:"dispute_type"`
-	Description   string             `json:"description"`
-	InitiatedBy   string             `json:"initiated_by"`
-	Evidence      []string           `json:"evidence"`
-	RequestedResolution string       `json:"requested_resolution"`
-	PreferredMethod entities.ResolutionMethod `json:"preferred_method"`
+	ContractID          uuid.UUID                 `json:"contract_id"`
+	DisputeType         entities.DisputeType      `json:"dispute_type"`
+	Description         string                    `json:"description"`
+	InitiatedBy         string                    `json:"initiated_by"`
+	Evidence            []string                  `json:"evidence"`
+	RequestedResolution string                    `json:"requested_resolution"`
+	PreferredMethod     entities.ResolutionMethod `json:"preferred_method"`
 }
 
 type DisputeStep struct {
@@ -2140,71 +2140,71 @@ type DisputeStep struct {
 }
 
 type DisputeCostEstimate struct {
-	TotalCost      entities.Money     `json:"total_cost"`
-	BreakdownCosts []CostBreakdown    `json:"breakdown_costs"`
-	TimeEstimate   string             `json:"time_estimate"`
-	ConfidenceLevel float64           `json:"confidence_level"`
-	Factors        []string           `json:"factors"`
+	TotalCost       entities.Money  `json:"total_cost"`
+	BreakdownCosts  []CostBreakdown `json:"breakdown_costs"`
+	TimeEstimate    string          `json:"time_estimate"`
+	ConfidenceLevel float64         `json:"confidence_level"`
+	Factors         []string        `json:"factors"`
 }
 
 type ReportGenerationRequest struct {
-	ReportType   entities.ReportType `json:"report_type"`
-	Regulation   string              `json:"regulation"`
-	Authority    string              `json:"authority"`
-	Period       string              `json:"period"`
-	DataSources  []string            `json:"data_sources"`
+	ReportType     entities.ReportType    `json:"report_type"`
+	Regulation     string                 `json:"regulation"`
+	Authority      string                 `json:"authority"`
+	Period         string                 `json:"period"`
+	DataSources    []string               `json:"data_sources"`
 	Customizations map[string]interface{} `json:"customizations"`
 }
 
 type ReportSubmissionResult struct {
-	SubmissionID   uuid.UUID `json:"submission_id"`
-	Status         string    `json:"status"`
-	ConfirmationID string    `json:"confirmation_id"`
-	SubmittedAt    time.Time `json:"submitted_at"`
+	SubmissionID   uuid.UUID  `json:"submission_id"`
+	Status         string     `json:"status"`
+	ConfirmationID string     `json:"confirmation_id"`
+	SubmittedAt    time.Time  `json:"submitted_at"`
 	AcknowledgedAt *time.Time `json:"acknowledged_at,omitempty"`
 	NextDeadline   *time.Time `json:"next_deadline,omitempty"`
 }
 
 type FilingDeadlineAlert struct {
-	ReportType     entities.ReportType `json:"report_type"`
-	Regulation     string              `json:"regulation"`
-	Authority      string              `json:"authority"`
-	DeadlineDate   time.Time           `json:"deadline_date"`
-	DaysRemaining  int                 `json:"days_remaining"`
-	Status         string              `json:"status"`
-	Priority       string              `json:"priority"`
+	ReportType    entities.ReportType `json:"report_type"`
+	Regulation    string              `json:"regulation"`
+	Authority     string              `json:"authority"`
+	DeadlineDate  time.Time           `json:"deadline_date"`
+	DaysRemaining int                 `json:"days_remaining"`
+	Status        string              `json:"status"`
+	Priority      string              `json:"priority"`
 }
 
 type ComplianceMetrics struct {
-	Regulation      string             `json:"regulation"`
-	ComplianceScore float64            `json:"compliance_score"`
-	LastAssessment  time.Time          `json:"last_assessment"`
-	TotalChecks     int                `json:"total_checks"`
-	PassedChecks    int                `json:"passed_checks"`
-	FailedChecks    int                `json:"failed_checks"`
-	Trends          ComplianceTrend    `json:"trends"`
+	Regulation       string                `json:"regulation"`
+	ComplianceScore  float64               `json:"compliance_score"`
+	LastAssessment   time.Time             `json:"last_assessment"`
+	TotalChecks      int                   `json:"total_checks"`
+	PassedChecks     int                   `json:"passed_checks"`
+	FailedChecks     int                   `json:"failed_checks"`
+	Trends           ComplianceTrend       `json:"trends"`
 	RecentViolations []ComplianceViolation `json:"recent_violations"`
 }
 
 type ComplianceDashboard struct {
-	OverallScore    float64                    `json:"overall_score"`
-	RegulationScores map[string]float64        `json:"regulation_scores"`
-	RecentAlerts    []ComplianceAlert          `json:"recent_alerts"`
-	UpcomingDeadlines []FilingDeadlineAlert    `json:"upcoming_deadlines"`
-	ActiveViolations []ComplianceViolation     `json:"active_violations"`
-	Trends          ComplianceTrend            `json:"trends"`
-	Recommendations []string                   `json:"recommendations"`
+	OverallScore      float64               `json:"overall_score"`
+	RegulationScores  map[string]float64    `json:"regulation_scores"`
+	RecentAlerts      []ComplianceAlert     `json:"recent_alerts"`
+	UpcomingDeadlines []FilingDeadlineAlert `json:"upcoming_deadlines"`
+	ActiveViolations  []ComplianceViolation `json:"active_violations"`
+	Trends            ComplianceTrend       `json:"trends"`
+	Recommendations   []string              `json:"recommendations"`
 }
 
 // Supporting helper types
 
 type DataProcessingActivity struct {
-	Purpose       string    `json:"purpose"`
-	LegalBasis    string    `json:"legal_basis"`
-	DataTypes     []string  `json:"data_types"`
-	Recipients    []string  `json:"recipients"`
-	RetentionPeriod string  `json:"retention_period"`
-	LastProcessed time.Time `json:"last_processed"`
+	Purpose         string    `json:"purpose"`
+	LegalBasis      string    `json:"legal_basis"`
+	DataTypes       []string  `json:"data_types"`
+	Recipients      []string  `json:"recipients"`
+	RetentionPeriod string    `json:"retention_period"`
+	LastProcessed   time.Time `json:"last_processed"`
 }
 
 type ConsentMetrics struct {
@@ -2232,10 +2232,10 @@ type RenewalOption struct {
 }
 
 type CoverageRequirement struct {
-	Type           entities.InsuranceType `json:"type"`
-	MinimumAmount  entities.Money         `json:"minimum_amount"`
-	Description    string                 `json:"description"`
-	Justification  string                 `json:"justification"`
+	Type          entities.InsuranceType `json:"type"`
+	MinimumAmount entities.Money         `json:"minimum_amount"`
+	Description   string                 `json:"description"`
+	Justification string                 `json:"justification"`
 }
 
 type InsuranceProvider struct {
@@ -2247,10 +2247,10 @@ type InsuranceProvider struct {
 }
 
 type RiskTrend struct {
-	Direction      string    `json:"direction"` // increasing, decreasing, stable
-	ChangePercent  float64   `json:"change_percent"`
-	PeriodCompared string    `json:"period_compared"`
-	KeyFactors     []string  `json:"key_factors"`
+	Direction      string   `json:"direction"` // increasing, decreasing, stable
+	ChangePercent  float64  `json:"change_percent"`
+	PeriodCompared string   `json:"period_compared"`
+	KeyFactors     []string `json:"key_factors"`
 }
 
 type RiskMetrics struct {
@@ -2268,38 +2268,38 @@ type CostBreakdown struct {
 }
 
 type ComplianceAlert struct {
-	AlertID     uuid.UUID              `json:"alert_id"`
-	Type        string                 `json:"type"`
-	Regulation  string                 `json:"regulation"`
-	Severity    entities.RiskLevel     `json:"severity"`
-	Message     string                 `json:"message"`
-	TriggeredAt time.Time              `json:"triggered_at"`
-	DueDate     *time.Time             `json:"due_date,omitempty"`
+	AlertID     uuid.UUID          `json:"alert_id"`
+	Type        string             `json:"type"`
+	Regulation  string             `json:"regulation"`
+	Severity    entities.RiskLevel `json:"severity"`
+	Message     string             `json:"message"`
+	TriggeredAt time.Time          `json:"triggered_at"`
+	DueDate     *time.Time         `json:"due_date,omitempty"`
 }
 
 type ComplianceTrend struct {
-	Direction     string    `json:"direction"`
-	ChangePercent float64   `json:"change_percent"`
-	TimeFrame     string    `json:"time_frame"`
-	KeyFactors    []string  `json:"key_factors"`
+	Direction     string   `json:"direction"`
+	ChangePercent float64  `json:"change_percent"`
+	TimeFrame     string   `json:"time_frame"`
+	KeyFactors    []string `json:"key_factors"`
 }
 
 // Additional supporting types for interfaces
 
 type TermValidationResult struct {
-	IsValid         bool                   `json:"is_valid"`
-	MissingTerms    []string               `json:"missing_terms"`
-	ConflictingTerms []string              `json:"conflicting_terms"`
-	Recommendations []string               `json:"recommendations"`
-	RiskLevel       entities.RiskLevel     `json:"risk_level"`
+	IsValid          bool               `json:"is_valid"`
+	MissingTerms     []string           `json:"missing_terms"`
+	ConflictingTerms []string           `json:"conflicting_terms"`
+	Recommendations  []string           `json:"recommendations"`
+	RiskLevel        entities.RiskLevel `json:"risk_level"`
 }
 
 type ContractComplianceResult struct {
-	IsCompliant     bool                   `json:"is_compliant"`
-	Violations      []ComplianceViolation  `json:"violations"`
-	Recommendations []string               `json:"recommendations"`
-	ComplianceScore float64                `json:"compliance_score"`
-	NextReview      time.Time              `json:"next_review"`
+	IsCompliant     bool                  `json:"is_compliant"`
+	Violations      []ComplianceViolation `json:"violations"`
+	Recommendations []string              `json:"recommendations"`
+	ComplianceScore float64               `json:"compliance_score"`
+	NextReview      time.Time             `json:"next_review"`
 }
 
 type AnonymizationRules struct {
@@ -2321,220 +2321,220 @@ type GDPRValidationRequest struct {
 }
 
 type GDPRComplianceResult struct {
-	IsCompliant     bool                   `json:"is_compliant"`
-	Violations      []string               `json:"violations"`
-	Recommendations []string               `json:"recommendations"`
-	RiskLevel       entities.RiskLevel     `json:"risk_level"`
-	RequiredActions []string               `json:"required_actions"`
-	NextAssessment  time.Time              `json:"next_assessment"`
+	IsCompliant     bool               `json:"is_compliant"`
+	Violations      []string           `json:"violations"`
+	Recommendations []string           `json:"recommendations"`
+	RiskLevel       entities.RiskLevel `json:"risk_level"`
+	RequiredActions []string           `json:"required_actions"`
+	NextAssessment  time.Time          `json:"next_assessment"`
 }
 
 type ErasureResult struct {
-	RequestID       uuid.UUID              `json:"request_id"`
-	Status          string                 `json:"status"`
-	DataDeleted     []string               `json:"data_deleted"`
-	DataRetained    []string               `json:"data_retained"`
-	RetentionReason map[string]string      `json:"retention_reason"`
-	CompletedAt     time.Time              `json:"completed_at"`
-	VerificationHash string                `json:"verification_hash"`
+	RequestID        uuid.UUID         `json:"request_id"`
+	Status           string            `json:"status"`
+	DataDeleted      []string          `json:"data_deleted"`
+	DataRetained     []string          `json:"data_retained"`
+	RetentionReason  map[string]string `json:"retention_reason"`
+	CompletedAt      time.Time         `json:"completed_at"`
+	VerificationHash string            `json:"verification_hash"`
 }
 
 type ConsentForm struct {
-	FormID          uuid.UUID              `json:"form_id"`
-	Title           string                 `json:"title"`
-	Description     string                 `json:"description"`
-	Purposes        []ConsentPurpose       `json:"purposes"`
-	DataTypes       []string               `json:"data_types"`
-	Recipients      []string               `json:"recipients"`
-	LegalBasis      string                 `json:"legal_basis"`
-	OptionalFields  []ConsentField         `json:"optional_fields"`
-	ExpirationPeriod *time.Duration        `json:"expiration_period,omitempty"`
+	FormID           uuid.UUID        `json:"form_id"`
+	Title            string           `json:"title"`
+	Description      string           `json:"description"`
+	Purposes         []ConsentPurpose `json:"purposes"`
+	DataTypes        []string         `json:"data_types"`
+	Recipients       []string         `json:"recipients"`
+	LegalBasis       string           `json:"legal_basis"`
+	OptionalFields   []ConsentField   `json:"optional_fields"`
+	ExpirationPeriod *time.Duration   `json:"expiration_period,omitempty"`
 }
 
 type ConsentHistory struct {
-	UserID          string                 `json:"user_id"`
-	ConsentEvents   []ConsentEvent         `json:"consent_events"`
-	CurrentStatus   ConsentStatus          `json:"current_status"`
-	LastUpdated     time.Time              `json:"last_updated"`
-	ActivePurposes  []string               `json:"active_purposes"`
-	WithdrawnPurposes []string             `json:"withdrawn_purposes"`
+	UserID            string         `json:"user_id"`
+	ConsentEvents     []ConsentEvent `json:"consent_events"`
+	CurrentStatus     ConsentStatus  `json:"current_status"`
+	LastUpdated       time.Time      `json:"last_updated"`
+	ActivePurposes    []string       `json:"active_purposes"`
+	WithdrawnPurposes []string       `json:"withdrawn_purposes"`
 }
 
 type CopyrightAnalysis struct {
-	ContentID       uuid.UUID              `json:"content_id"`
-	HasViolations   bool                   `json:"has_violations"`
-	Matches         []CopyrightMatch       `json:"matches"`
-	OriginalityScore float64               `json:"originality_score"`
-	RiskLevel       entities.RiskLevel     `json:"risk_level"`
-	Recommendations []string               `json:"recommendations"`
-	AnalyzedAt      time.Time              `json:"analyzed_at"`
+	ContentID        uuid.UUID          `json:"content_id"`
+	HasViolations    bool               `json:"has_violations"`
+	Matches          []CopyrightMatch   `json:"matches"`
+	OriginalityScore float64            `json:"originality_score"`
+	RiskLevel        entities.RiskLevel `json:"risk_level"`
+	Recommendations  []string           `json:"recommendations"`
+	AnalyzedAt       time.Time          `json:"analyzed_at"`
 }
 
 type LicenseValidation struct {
-	LicenseID       uuid.UUID              `json:"license_id"`
-	IsValid         bool                   `json:"is_valid"`
-	UsagePermitted  bool                   `json:"usage_permitted"`
-	Restrictions    []string               `json:"restrictions"`
-	ExpirationDate  *time.Time             `json:"expiration_date,omitempty"`
-	ComplianceIssues []string              `json:"compliance_issues"`
-	RequiredActions []string               `json:"required_actions"`
+	LicenseID        uuid.UUID  `json:"license_id"`
+	IsValid          bool       `json:"is_valid"`
+	UsagePermitted   bool       `json:"usage_permitted"`
+	Restrictions     []string   `json:"restrictions"`
+	ExpirationDate   *time.Time `json:"expiration_date,omitempty"`
+	ComplianceIssues []string   `json:"compliance_issues"`
+	RequiredActions  []string   `json:"required_actions"`
 }
 
 type LicenseRequest struct {
-	LicenseType     entities.LicenseType   `json:"license_type"`
-	IPType          entities.IPType        `json:"ip_type"`
-	UsageRights     []entities.UsageRight  `json:"usage_rights"`
-	Territory       string                 `json:"territory"`
-	Duration        time.Duration          `json:"duration"`
-	RoyaltyRate     *float64               `json:"royalty_rate,omitempty"`
-	LicensorInfo    ContactInfo            `json:"licensor_info"`
-	LicenseeInfo    ContactInfo            `json:"licensee_info"`
+	LicenseType  entities.LicenseType  `json:"license_type"`
+	IPType       entities.IPType       `json:"ip_type"`
+	UsageRights  []entities.UsageRight `json:"usage_rights"`
+	Territory    string                `json:"territory"`
+	Duration     time.Duration         `json:"duration"`
+	RoyaltyRate  *float64              `json:"royalty_rate,omitempty"`
+	LicensorInfo ContactInfo           `json:"licensor_info"`
+	LicenseeInfo ContactInfo           `json:"licensee_info"`
 }
 
 type RoyaltyCalculation struct {
-	LicenseID       uuid.UUID              `json:"license_id"`
-	UsagePeriod     TimeRange              `json:"usage_period"`
-	TotalUsage      IPUsageMetrics         `json:"total_usage"`
-	RoyaltyRate     float64                `json:"royalty_rate"`
-	TotalRoyalty    entities.Money         `json:"total_royalty"`
-	Breakdown       []RoyaltyBreakdown     `json:"breakdown"`
-	PaymentDue      time.Time              `json:"payment_due"`
+	LicenseID    uuid.UUID          `json:"license_id"`
+	UsagePeriod  TimeRange          `json:"usage_period"`
+	TotalUsage   IPUsageMetrics     `json:"total_usage"`
+	RoyaltyRate  float64            `json:"royalty_rate"`
+	TotalRoyalty entities.Money     `json:"total_royalty"`
+	Breakdown    []RoyaltyBreakdown `json:"breakdown"`
+	PaymentDue   time.Time          `json:"payment_due"`
 }
 
 type IPViolationAlert struct {
-	AlertID         uuid.UUID              `json:"alert_id"`
-	ViolationType   string                 `json:"violation_type"`
-	Severity        entities.RiskLevel     `json:"severity"`
-	ContentID       uuid.UUID              `json:"content_id"`
-	Description     string                 `json:"description"`
-	Evidence        []string               `json:"evidence"`
-	RecommendedAction string               `json:"recommended_action"`
-	DetectedAt      time.Time              `json:"detected_at"`
+	AlertID           uuid.UUID          `json:"alert_id"`
+	ViolationType     string             `json:"violation_type"`
+	Severity          entities.RiskLevel `json:"severity"`
+	ContentID         uuid.UUID          `json:"content_id"`
+	Description       string             `json:"description"`
+	Evidence          []string           `json:"evidence"`
+	RecommendedAction string             `json:"recommended_action"`
+	DetectedAt        time.Time          `json:"detected_at"`
 }
 
 type SignatureVerification struct {
-	SignatureID     uuid.UUID              `json:"signature_id"`
-	IsValid         bool                   `json:"is_valid"`
-	VerificationMethod string              `json:"verification_method"`
-	TrustLevel      string                 `json:"trust_level"`
-	CertificateInfo *CertificateInfo       `json:"certificate_info,omitempty"`
-	VerifiedAt      time.Time              `json:"verified_at"`
-	Issues          []string               `json:"issues"`
+	SignatureID        uuid.UUID        `json:"signature_id"`
+	IsValid            bool             `json:"is_valid"`
+	VerificationMethod string           `json:"verification_method"`
+	TrustLevel         string           `json:"trust_level"`
+	CertificateInfo    *CertificateInfo `json:"certificate_info,omitempty"`
+	VerifiedAt         time.Time        `json:"verified_at"`
+	Issues             []string         `json:"issues"`
 }
 
 type SignatureCertificate struct {
-	CertificateID   uuid.UUID              `json:"certificate_id"`
-	SignatureID     uuid.UUID              `json:"signature_id"`
-	CertificateData string                 `json:"certificate_data"`
-	IssuerInfo      CertificateIssuer      `json:"issuer_info"`
-	ValidFrom       time.Time              `json:"valid_from"`
-	ValidUntil      time.Time              `json:"valid_until"`
-	CertificateHash string                 `json:"certificate_hash"`
+	CertificateID   uuid.UUID         `json:"certificate_id"`
+	SignatureID     uuid.UUID         `json:"signature_id"`
+	CertificateData string            `json:"certificate_data"`
+	IssuerInfo      CertificateIssuer `json:"issuer_info"`
+	ValidFrom       time.Time         `json:"valid_from"`
+	ValidUntil      time.Time         `json:"valid_until"`
+	CertificateHash string            `json:"certificate_hash"`
 }
 
 type SignatureStatus struct {
-	RequestID       uuid.UUID              `json:"request_id"`
-	Status          string                 `json:"status"`
-	SignedCount     int                    `json:"signed_count"`
-	TotalRequired   int                    `json:"total_required"`
-	PendingSigners  []string               `json:"pending_signers"`
-	CompletedAt     *time.Time             `json:"completed_at,omitempty"`
-	ExpiresAt       time.Time              `json:"expires_at"`
+	RequestID      uuid.UUID  `json:"request_id"`
+	Status         string     `json:"status"`
+	SignedCount    int        `json:"signed_count"`
+	TotalRequired  int        `json:"total_required"`
+	PendingSigners []string   `json:"pending_signers"`
+	CompletedAt    *time.Time `json:"completed_at,omitempty"`
+	ExpiresAt      time.Time  `json:"expires_at"`
 }
 
 // Supporting helper types
 
 type ConsentPurpose struct {
-	Purpose         string    `json:"purpose"`
-	Description     string    `json:"description"`
-	Required        bool      `json:"required"`
-	LegalBasis      string    `json:"legal_basis"`
-	DataRetention   string    `json:"data_retention"`
+	Purpose       string `json:"purpose"`
+	Description   string `json:"description"`
+	Required      bool   `json:"required"`
+	LegalBasis    string `json:"legal_basis"`
+	DataRetention string `json:"data_retention"`
 }
 
 type ConsentField struct {
-	FieldID         string    `json:"field_id"`
-	FieldType       string    `json:"field_type"`
-	Label           string    `json:"label"`
-	Required        bool      `json:"required"`
-	DefaultValue    interface{} `json:"default_value,omitempty"`
+	FieldID      string      `json:"field_id"`
+	FieldType    string      `json:"field_type"`
+	Label        string      `json:"label"`
+	Required     bool        `json:"required"`
+	DefaultValue interface{} `json:"default_value,omitempty"`
 }
 
 type ConsentEvent struct {
-	EventID         uuid.UUID `json:"event_id"`
-	EventType       string    `json:"event_type"` // granted, withdrawn, updated
-	Purpose         string    `json:"purpose"`
-	Timestamp       time.Time `json:"timestamp"`
-	IPAddress       string    `json:"ip_address"`
-	UserAgent       string    `json:"user_agent"`
-	ConsentMethod   string    `json:"consent_method"`
+	EventID       uuid.UUID `json:"event_id"`
+	EventType     string    `json:"event_type"` // granted, withdrawn, updated
+	Purpose       string    `json:"purpose"`
+	Timestamp     time.Time `json:"timestamp"`
+	IPAddress     string    `json:"ip_address"`
+	UserAgent     string    `json:"user_agent"`
+	ConsentMethod string    `json:"consent_method"`
 }
 
 type ConsentStatus struct {
-	UserID          string               `json:"user_id"`
-	Purposes        map[string]bool      `json:"purposes"`
-	LastConsent     time.Time            `json:"last_consent"`
-	ExpirationDate  *time.Time           `json:"expiration_date,omitempty"`
-	ConsentMethod   string               `json:"consent_method"`
+	UserID         string          `json:"user_id"`
+	Purposes       map[string]bool `json:"purposes"`
+	LastConsent    time.Time       `json:"last_consent"`
+	ExpirationDate *time.Time      `json:"expiration_date,omitempty"`
+	ConsentMethod  string          `json:"consent_method"`
 }
 
 type CopyrightMatch struct {
-	SourceURL       string                 `json:"source_url"`
-	MatchPercentage float64                `json:"match_percentage"`
-	MatchedText     string                 `json:"matched_text"`
-	Context         string                 `json:"context"`
-	License         *entities.IPLicense    `json:"license,omitempty"`
-	Action          string                 `json:"action"` // permit, request_license, remove
+	SourceURL       string              `json:"source_url"`
+	MatchPercentage float64             `json:"match_percentage"`
+	MatchedText     string              `json:"matched_text"`
+	Context         string              `json:"context"`
+	License         *entities.IPLicense `json:"license,omitempty"`
+	Action          string              `json:"action"` // permit, request_license, remove
 }
 
 type IPUsageMetrics struct {
-	TotalUsage      int64                  `json:"total_usage"`
-	UsageByType     map[string]int64       `json:"usage_by_type"`
-	UsageByRegion   map[string]int64       `json:"usage_by_region"`
-	Period          TimeRange              `json:"period"`
-	RevenueGenerated *entities.Money       `json:"revenue_generated,omitempty"`
+	TotalUsage       int64            `json:"total_usage"`
+	UsageByType      map[string]int64 `json:"usage_by_type"`
+	UsageByRegion    map[string]int64 `json:"usage_by_region"`
+	Period           TimeRange        `json:"period"`
+	RevenueGenerated *entities.Money  `json:"revenue_generated,omitempty"`
 }
 
 type RoyaltyBreakdown struct {
-	UsageType       string                 `json:"usage_type"`
-	Quantity        int64                  `json:"quantity"`
-	Rate            float64                `json:"rate"`
-	Amount          entities.Money         `json:"amount"`
-	Period          TimeRange              `json:"period"`
+	UsageType string         `json:"usage_type"`
+	Quantity  int64          `json:"quantity"`
+	Rate      float64        `json:"rate"`
+	Amount    entities.Money `json:"amount"`
+	Period    TimeRange      `json:"period"`
 }
 
 type CertificateInfo struct {
-	SerialNumber    string                 `json:"serial_number"`
-	Issuer          string                 `json:"issuer"`
-	Subject         string                 `json:"subject"`
-	ValidFrom       time.Time              `json:"valid_from"`
-	ValidUntil      time.Time              `json:"valid_until"`
-	Fingerprint     string                 `json:"fingerprint"`
-	Algorithm       string                 `json:"algorithm"`
+	SerialNumber string    `json:"serial_number"`
+	Issuer       string    `json:"issuer"`
+	Subject      string    `json:"subject"`
+	ValidFrom    time.Time `json:"valid_from"`
+	ValidUntil   time.Time `json:"valid_until"`
+	Fingerprint  string    `json:"fingerprint"`
+	Algorithm    string    `json:"algorithm"`
 }
 
 type CertificateIssuer struct {
-	Name            string                 `json:"name"`
-	Country         string                 `json:"country"`
-	Organization    string                 `json:"organization"`
-	OrganizationalUnit string              `json:"organizational_unit"`
-	ContactEmail    string                 `json:"contact_email"`
+	Name               string `json:"name"`
+	Country            string `json:"country"`
+	Organization       string `json:"organization"`
+	OrganizationalUnit string `json:"organizational_unit"`
+	ContactEmail       string `json:"contact_email"`
 }
 
 type RegulatoryUpdate struct {
-	Regulation     string    `json:"regulation"`
-	UpdateType     string    `json:"update_type"`
-	Title          string    `json:"title"`
-	Description    string    `json:"description"`
-	EffectiveDate  time.Time `json:"effective_date"`
-	Impact         string    `json:"impact"`
-	Source         string    `json:"source"`
+	Regulation    string    `json:"regulation"`
+	UpdateType    string    `json:"update_type"`
+	Title         string    `json:"title"`
+	Description   string    `json:"description"`
+	EffectiveDate time.Time `json:"effective_date"`
+	Impact        string    `json:"impact"`
+	Source        string    `json:"source"`
 }
 
 type ComplianceCost struct {
-	Regulation     string             `json:"regulation"`
-	AnnualCost     entities.Money     `json:"annual_cost"`
-	CostBreakdown  []CostBreakdown    `json:"cost_breakdown"`
-	ComplianceROI  float64            `json:"compliance_roi"`
-	CostTrend      string             `json:"cost_trend"`
+	Regulation    string          `json:"regulation"`
+	AnnualCost    entities.Money  `json:"annual_cost"`
+	CostBreakdown []CostBreakdown `json:"cost_breakdown"`
+	ComplianceROI float64         `json:"compliance_roi"`
+	CostTrend     string          `json:"cost_trend"`
 }

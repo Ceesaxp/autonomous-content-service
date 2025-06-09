@@ -41,13 +41,13 @@ type LegalRepository interface {
 	GetExpiredSignatures(ctx context.Context) ([]*entities.ContractSignature, error)
 
 	// Compliance Checks
-	CreateComplianceCheck(ctx context.Context, check *entities.ComplianceCheck) error
-	GetComplianceCheckByID(ctx context.Context, id uuid.UUID) (*entities.ComplianceCheck, error)
-	ListComplianceChecks(ctx context.Context, filters ComplianceFilters) ([]*entities.ComplianceCheck, error)
-	UpdateComplianceCheck(ctx context.Context, check *entities.ComplianceCheck) error
-	GetChecksByRegulation(ctx context.Context, regulation string) ([]*entities.ComplianceCheck, error)
-	GetChecksByStatus(ctx context.Context, status entities.ComplianceStatus) ([]*entities.ComplianceCheck, error)
-	GetOverdueChecks(ctx context.Context) ([]*entities.ComplianceCheck, error)
+	CreateComplianceCheck(ctx context.Context, check *entities.LegalComplianceCheck) error
+	GetComplianceCheckByID(ctx context.Context, id uuid.UUID) (*entities.LegalComplianceCheck, error)
+	ListComplianceChecks(ctx context.Context, filters ComplianceFilters) ([]*entities.LegalComplianceCheck, error)
+	UpdateComplianceCheck(ctx context.Context, check *entities.LegalComplianceCheck) error
+	GetChecksByRegulation(ctx context.Context, regulation string) ([]*entities.LegalComplianceCheck, error)
+	GetChecksByStatus(ctx context.Context, status entities.ComplianceStatus) ([]*entities.LegalComplianceCheck, error)
+	GetOverdueChecks(ctx context.Context) ([]*entities.LegalComplianceCheck, error)
 
 	// IP Licenses
 	CreateIPLicense(ctx context.Context, license *entities.IPLicense) error
@@ -107,17 +107,17 @@ type LegalRepository interface {
 // Filter structures for repository queries
 
 type ContractFilters struct {
-	Status      *entities.ContractStatus
-	Type        *entities.ContractType
-	ClientID    *uuid.UUID
-	ProjectID   *uuid.UUID
-	TemplateID  *uuid.UUID
-	StartDate   *time.Time
-	EndDate     *time.Time
-	IsExpiring  *bool
+	Status       *entities.ContractStatus
+	Type         *entities.ContractType
+	ClientID     *uuid.UUID
+	ProjectID    *uuid.UUID
+	TemplateID   *uuid.UUID
+	StartDate    *time.Time
+	EndDate      *time.Time
+	IsExpiring   *bool
 	ExpiringDays *int
-	Offset      int
-	Limit       int
+	Offset       int
+	Limit        int
 }
 
 type TemplateFilters struct {
@@ -173,15 +173,15 @@ type DisputeFilters struct {
 }
 
 type RiskAssessmentFilters struct {
-	RiskLevel        *entities.RiskLevel
-	ContractID       *uuid.UUID
-	RequiresReview   *bool
+	RiskLevel         *entities.RiskLevel
+	ContractID        *uuid.UUID
+	RequiresReview    *bool
 	RequiresInsurance *bool
-	IsExpired        *bool
-	StartDate        *time.Time
-	EndDate          *time.Time
-	Offset           int
-	Limit            int
+	IsExpired         *bool
+	StartDate         *time.Time
+	EndDate           *time.Time
+	Offset            int
+	Limit             int
 }
 
 type ReportFilters struct {

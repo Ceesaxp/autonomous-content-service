@@ -20,7 +20,7 @@ type LegalComplianceService interface {
 	ProcessContractRenewal(ctx context.Context, contractID uuid.UUID) (*entities.Contract, error)
 
 	// Compliance Monitoring
-	RunComplianceCheck(ctx context.Context, request ComplianceCheckRequest) (*entities.ComplianceCheck, error)
+	RunComplianceCheck(ctx context.Context, request ComplianceCheckRequest) (*entities.LegalComplianceCheck, error)
 	GetComplianceStatus(ctx context.Context, regulation string) (*ComplianceStatusResult, error)
 	MonitorDataPrivacy(ctx context.Context, data interface{}) (*DataPrivacyResult, error)
 	ProcessDataSubjectRequest(ctx context.Context, request DataSubjectRequest) (*DataSubjectResponse, error)
@@ -118,43 +118,43 @@ type RegulatoryService interface {
 // Request and Response Types
 
 type ContractGenerationRequest struct {
-	TemplateID  uuid.UUID              `json:"template_id"`
-	ClientID    uuid.UUID              `json:"client_id"`
-	ProjectID   *uuid.UUID             `json:"project_id,omitempty"`
-	Parameters  map[string]interface{} `json:"parameters"`
-	Terms       []entities.ContractTerm `json:"terms"`
-	SignerInfo  []SignerInfo           `json:"signer_info"`
-	Metadata    map[string]interface{} `json:"metadata"`
+	TemplateID uuid.UUID               `json:"template_id"`
+	ClientID   uuid.UUID               `json:"client_id"`
+	ProjectID  *uuid.UUID              `json:"project_id,omitempty"`
+	Parameters map[string]interface{}  `json:"parameters"`
+	Terms      []entities.ContractTerm `json:"terms"`
+	SignerInfo []SignerInfo            `json:"signer_info"`
+	Metadata   map[string]interface{}  `json:"metadata"`
 }
 
 type ContractReviewRequest struct {
-	ReviewType   string   `json:"review_type"`
-	ReviewerID   string   `json:"reviewer_id"`
-	FocusAreas   []string `json:"focus_areas"`
-	Comments     string   `json:"comments"`
-	Urgency      string   `json:"urgency"`
+	ReviewType string   `json:"review_type"`
+	ReviewerID string   `json:"reviewer_id"`
+	FocusAreas []string `json:"focus_areas"`
+	Comments   string   `json:"comments"`
+	Urgency    string   `json:"urgency"`
 }
 
 type ContractReviewResult struct {
-	ReviewID       uuid.UUID            `json:"review_id"`
-	Status         string               `json:"status"`
-	Issues         []ContractIssue      `json:"issues"`
-	Recommendations []string            `json:"recommendations"`
-	RiskLevel      entities.RiskLevel   `json:"risk_level"`
-	RequiredChanges []string            `json:"required_changes"`
-	ApprovalStatus string               `json:"approval_status"`
-	ReviewedAt     time.Time            `json:"reviewed_at"`
+	ReviewID        uuid.UUID          `json:"review_id"`
+	Status          string             `json:"status"`
+	Issues          []ContractIssue    `json:"issues"`
+	Recommendations []string           `json:"recommendations"`
+	RiskLevel       entities.RiskLevel `json:"risk_level"`
+	RequiredChanges []string           `json:"required_changes"`
+	ApprovalStatus  string             `json:"approval_status"`
+	ReviewedAt      time.Time          `json:"reviewed_at"`
 }
 
 type SignatureRequest struct {
-	ContractID    uuid.UUID     `json:"contract_id"`
-	SignerName    string        `json:"signer_name"`
-	SignerEmail   string        `json:"signer_email"`
-	SignerRole    string        `json:"signer_role"`
-	SignatureType entities.SignatureType `json:"signature_type"`
-	DeadlineDate  *time.Time    `json:"deadline_date,omitempty"`
-	Message       string        `json:"message"`
-	RequiresNotary bool         `json:"requires_notary"`
+	ContractID     uuid.UUID              `json:"contract_id"`
+	SignerName     string                 `json:"signer_name"`
+	SignerEmail    string                 `json:"signer_email"`
+	SignerRole     string                 `json:"signer_role"`
+	SignatureType  entities.SignatureType `json:"signature_type"`
+	DeadlineDate   *time.Time             `json:"deadline_date,omitempty"`
+	Message        string                 `json:"message"`
+	RequiresNotary bool                   `json:"requires_notary"`
 }
 
 type SignatureRequestResult struct {
@@ -173,21 +173,21 @@ type ContractIntegrityResult struct {
 }
 
 type ContractStatusResult struct {
-	Status             entities.ContractStatus `json:"status"`
-	SignedPercentage   float64                 `json:"signed_percentage"`
-	PendingSignatures  int                     `json:"pending_signatures"`
-	ComplianceStatus   string                  `json:"compliance_status"`
-	ExpirationDate     *time.Time              `json:"expiration_date,omitempty"`
-	RenewalRequired    bool                    `json:"renewal_required"`
-	Issues             []string                `json:"issues"`
+	Status            entities.ContractStatus `json:"status"`
+	SignedPercentage  float64                 `json:"signed_percentage"`
+	PendingSignatures int                     `json:"pending_signatures"`
+	ComplianceStatus  string                  `json:"compliance_status"`
+	ExpirationDate    *time.Time              `json:"expiration_date,omitempty"`
+	RenewalRequired   bool                    `json:"renewal_required"`
+	Issues            []string                `json:"issues"`
 }
 
 type ComplianceCheckRequest struct {
-	Type        entities.ComplianceType `json:"type"`
-	Regulation  string                  `json:"regulation"`
-	Scope       string                  `json:"scope"`
-	Data        interface{}             `json:"data"`
-	CheckLevel  string                  `json:"check_level"`
+	Type       entities.ComplianceType `json:"type"`
+	Regulation string                  `json:"regulation"`
+	Scope      string                  `json:"scope"`
+	Data       interface{}             `json:"data"`
+	CheckLevel string                  `json:"check_level"`
 }
 
 type ComplianceStatusResult struct {
@@ -201,49 +201,49 @@ type ComplianceStatusResult struct {
 }
 
 type DataPrivacyResult struct {
-	HasPII          bool              `json:"has_pii"`
-	PIITypes        []string          `json:"pii_types"`
-	ProcessingBasis []string          `json:"processing_basis"`
-	ConsentRequired bool              `json:"consent_required"`
-	RetentionPeriod *time.Duration    `json:"retention_period,omitempty"`
-	Recommendations []string          `json:"recommendations"`
+	HasPII          bool           `json:"has_pii"`
+	PIITypes        []string       `json:"pii_types"`
+	ProcessingBasis []string       `json:"processing_basis"`
+	ConsentRequired bool           `json:"consent_required"`
+	RetentionPeriod *time.Duration `json:"retention_period,omitempty"`
+	Recommendations []string       `json:"recommendations"`
 }
 
 type DataSubjectRequest struct {
-	Type       string    `json:"type"` // access, portability, erasure, rectification
-	UserID     string    `json:"user_id"`
-	UserEmail  string    `json:"user_email"`
-	Scope      []string  `json:"scope"`
+	Type        string    `json:"type"` // access, portability, erasure, rectification
+	UserID      string    `json:"user_id"`
+	UserEmail   string    `json:"user_email"`
+	Scope       []string  `json:"scope"`
 	RequestedAt time.Time `json:"requested_at"`
-	DeadlineAt time.Time `json:"deadline_at"`
+	DeadlineAt  time.Time `json:"deadline_at"`
 }
 
 type DataSubjectResponse struct {
-	RequestID     uuid.UUID   `json:"request_id"`
-	Status        string      `json:"status"`
-	Data          interface{} `json:"data,omitempty"`
-	ProcessedAt   time.Time   `json:"processed_at"`
-	DeliveryMethod string     `json:"delivery_method"`
+	RequestID      uuid.UUID   `json:"request_id"`
+	Status         string      `json:"status"`
+	Data           interface{} `json:"data,omitempty"`
+	ProcessedAt    time.Time   `json:"processed_at"`
+	DeliveryMethod string      `json:"delivery_method"`
 }
 
 type IPLicenseRequest struct {
-	IPType         entities.IPType    `json:"ip_type"`
-	LicenseType    entities.LicenseType `json:"license_type"`
-	UsageRights    []entities.UsageRight `json:"usage_rights"`
-	Territory      string             `json:"territory"`
-	Duration       time.Duration      `json:"duration"`
-	RoyaltyRate    *float64           `json:"royalty_rate,omitempty"`
-	LicensorInfo   ContactInfo        `json:"licensor_info"`
-	LicenseeInfo   ContactInfo        `json:"licensee_info"`
+	IPType       entities.IPType       `json:"ip_type"`
+	LicenseType  entities.LicenseType  `json:"license_type"`
+	UsageRights  []entities.UsageRight `json:"usage_rights"`
+	Territory    string                `json:"territory"`
+	Duration     time.Duration         `json:"duration"`
+	RoyaltyRate  *float64              `json:"royalty_rate,omitempty"`
+	LicensorInfo ContactInfo           `json:"licensor_info"`
+	LicenseeInfo ContactInfo           `json:"licensee_info"`
 }
 
 type IPValidationResult struct {
-	IsValid         bool                    `json:"is_valid"`
-	LicenseStatus   string                  `json:"license_status"`
-	UsagePermitted  bool                    `json:"usage_permitted"`
-	Restrictions    []string                `json:"restrictions"`
-	ExpirationDate  *time.Time              `json:"expiration_date,omitempty"`
-	RequiredActions []string                `json:"required_actions"`
+	IsValid         bool       `json:"is_valid"`
+	LicenseStatus   string     `json:"license_status"`
+	UsagePermitted  bool       `json:"usage_permitted"`
+	Restrictions    []string   `json:"restrictions"`
+	ExpirationDate  *time.Time `json:"expiration_date,omitempty"`
+	RequiredActions []string   `json:"required_actions"`
 }
 
 type RiskAssessmentRequest struct {
@@ -273,11 +273,11 @@ type SignerInfo struct {
 }
 
 type ContractIssue struct {
-	Type        string                `json:"type"`
-	Severity    entities.RiskLevel    `json:"severity"`
-	Description string                `json:"description"`
-	Location    string                `json:"location"`
-	Suggestion  string                `json:"suggestion"`
+	Type        string             `json:"type"`
+	Severity    entities.RiskLevel `json:"severity"`
+	Description string             `json:"description"`
+	Location    string             `json:"location"`
+	Suggestion  string             `json:"suggestion"`
 }
 
 type ComplianceIssue struct {
@@ -290,12 +290,12 @@ type ComplianceIssue struct {
 }
 
 type ComplianceViolation struct {
-	Type        string    `json:"type"`
-	Description string    `json:"description"`
-	OccurredAt  time.Time `json:"occurred_at"`
-	Status      string    `json:"status"`
+	Type        string          `json:"type"`
+	Description string          `json:"description"`
+	OccurredAt  time.Time       `json:"occurred_at"`
+	Status      string          `json:"status"`
 	Fine        *entities.Money `json:"fine,omitempty"`
-	Remediation string    `json:"remediation"`
+	Remediation string          `json:"remediation"`
 }
 
 // Additional supporting types would be defined here...
