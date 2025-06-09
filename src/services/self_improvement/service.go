@@ -661,7 +661,7 @@ func (s *Service) PrioritizeGaps(ctx context.Context, gaps []*entities.Capabilit
 
 // Helper methods
 
-func (s *Service) calculateMetricStats(metrics []*entities.PerformanceMetric) MetricStats {
+func (s *Service) calculateMetricStats(metrics []*entities.SystemPerformanceMetric) MetricStats {
 	if len(metrics) == 0 {
 		return MetricStats{}
 	}
@@ -705,7 +705,7 @@ func (s *Service) calculateMetricStats(metrics []*entities.PerformanceMetric) Me
 	}
 }
 
-func (s *Service) analyzeTrend(metrics []*entities.PerformanceMetric) Trend {
+func (s *Service) analyzeTrend(metrics []*entities.SystemPerformanceMetric) Trend {
 	if len(metrics) < 2 {
 		return Trend{Direction: "stable", Confidence: 0.5}
 	}

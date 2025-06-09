@@ -33,8 +33,8 @@ func NewMetricsCollector(
 }
 
 // CollectContentMetrics collects metrics from content creation
-func (mc *metricsCollector) CollectContentMetrics(ctx context.Context) ([]*entities.PerformanceMetric, error) {
-	var metrics []*entities.PerformanceMetric
+func (mc *metricsCollector) CollectContentMetrics(ctx context.Context) ([]*entities.SystemPerformanceMetric, error) {
+	var metrics []*entities.SystemPerformanceMetric
 	
 	// Get content by status to approximate recent content
 	recentContent, _, err := mc.contentRepo.FindByStatus(ctx, entities.ContentStatusPublished, 0, 100)
@@ -60,7 +60,7 @@ func (mc *metricsCollector) CollectContentMetrics(ctx context.Context) ([]*entit
 	
 	if qualityCount > 0 {
 		avgQuality := totalQuality / float64(qualityCount)
-		metrics = append(metrics, &entities.PerformanceMetric{
+		metrics = append(metrics, &entities.SystemPerformanceMetric{
 			ID:         fmt.Sprintf("content_quality_%d", time.Now().Unix()),
 			Component:  "content_creation",
 			MetricName: "quality_score",
@@ -78,7 +78,7 @@ func (mc *metricsCollector) CollectContentMetrics(ctx context.Context) ([]*entit
 	// Average revision count
 	if len(recentContent) > 0 {
 		avgRevisions := float64(revisionTotal) / float64(len(recentContent))
-		metrics = append(metrics, &entities.PerformanceMetric{
+		metrics = append(metrics, &entities.SystemPerformanceMetric{
 			ID:         fmt.Sprintf("content_revisions_%d", time.Now().Unix()),
 			Component:  "content_creation",
 			MetricName: "revision_rate",
@@ -106,7 +106,7 @@ func (mc *metricsCollector) CollectContentMetrics(ctx context.Context) ([]*entit
 	
 	if len(recentContent) > 0 {
 		approvalRate := float64(approved) / float64(len(recentContent)) * 100
-		metrics = append(metrics, &entities.PerformanceMetric{
+		metrics = append(metrics, &entities.SystemPerformanceMetric{
 			ID:         fmt.Sprintf("content_approval_%d", time.Now().Unix()),
 			Component:  "content_creation",
 			MetricName: "approval_rate",
@@ -126,8 +126,8 @@ func (mc *metricsCollector) CollectContentMetrics(ctx context.Context) ([]*entit
 }
 
 // CollectDecisionMetrics collects metrics from decision making
-func (mc *metricsCollector) CollectDecisionMetrics(ctx context.Context) ([]*entities.PerformanceMetric, error) {
-	var metrics []*entities.PerformanceMetric
+func (mc *metricsCollector) CollectDecisionMetrics(ctx context.Context) ([]*entities.SystemPerformanceMetric, error) {
+	var metrics []*entities.SystemPerformanceMetric
 	
 	// Get recent decisions (using GetDecisionsByStatus)
 	recentDecisions, err := mc.decisionRepo.GetDecisionsByStatus(ctx, entities.StatusExecuted)
@@ -159,7 +159,7 @@ func (mc *metricsCollector) CollectDecisionMetrics(ctx context.Context) ([]*enti
 	if len(recentDecisions) > 0 {
 		// Average confidence
 		avgConfidence := totalConfidence / float64(len(recentDecisions))
-		metrics = append(metrics, &entities.PerformanceMetric{
+		metrics = append(metrics, &entities.SystemPerformanceMetric{
 			ID:         fmt.Sprintf("decision_confidence_%d", time.Now().Unix()),
 			Component:  "decision_making",
 			MetricName: "confidence_score",
@@ -176,7 +176,7 @@ func (mc *metricsCollector) CollectDecisionMetrics(ctx context.Context) ([]*enti
 		// Success rate
 		if executedCount > 0 {
 			successRate := float64(successCount) / float64(executedCount) * 100
-			metrics = append(metrics, &entities.PerformanceMetric{
+			metrics = append(metrics, &entities.SystemPerformanceMetric{
 				ID:         fmt.Sprintf("decision_success_%d", time.Now().Unix()),
 				Component:  "decision_making",
 				MetricName: "success_rate",
@@ -193,7 +193,7 @@ func (mc *metricsCollector) CollectDecisionMetrics(ctx context.Context) ([]*enti
 			
 			// Average execution time
 			avgExecutionTime := totalExecutionTime / float64(executedCount)
-			metrics = append(metrics, &entities.PerformanceMetric{
+			metrics = append(metrics, &entities.SystemPerformanceMetric{
 				ID:         fmt.Sprintf("decision_exec_time_%d", time.Now().Unix()),
 				Component:  "decision_making",
 				MetricName: "execution_time",
@@ -213,8 +213,8 @@ func (mc *metricsCollector) CollectDecisionMetrics(ctx context.Context) ([]*enti
 }
 
 // CollectFinancialMetrics collects financial performance metrics
-func (mc *metricsCollector) CollectFinancialMetrics(ctx context.Context) ([]*entities.PerformanceMetric, error) {
-	var metrics []*entities.PerformanceMetric
+func (mc *metricsCollector) CollectFinancialMetrics(ctx context.Context) ([]*entities.SystemPerformanceMetric, error) {
+	var metrics []*entities.SystemPerformanceMetric
 	
 	// Get recent projects for financial analysis (using FindByStatus)
 	recentProjects, _, err := mc.projectRepo.FindByStatus(ctx, entities.ProjectStatusCompleted, 0, 30)
@@ -241,7 +241,7 @@ func (mc *metricsCollector) CollectFinancialMetrics(ctx context.Context) ([]*ent
 	// Average revenue per project
 	if completedProjects > 0 {
 		avgRevenue := totalRevenue / float64(completedProjects)
-		metrics = append(metrics, &entities.PerformanceMetric{
+		metrics = append(metrics, &entities.SystemPerformanceMetric{
 			ID:         fmt.Sprintf("financial_avg_revenue_%d", time.Now().Unix()),
 			Component:  "pricing",
 			MetricName: "average_revenue",
@@ -258,7 +258,7 @@ func (mc *metricsCollector) CollectFinancialMetrics(ctx context.Context) ([]*ent
 		
 		// Average margin
 		avgMargin := totalMargin / float64(completedProjects)
-		metrics = append(metrics, &entities.PerformanceMetric{
+		metrics = append(metrics, &entities.SystemPerformanceMetric{
 			ID:         fmt.Sprintf("financial_margin_%d", time.Now().Unix()),
 			Component:  "pricing",
 			MetricName: "profit_margin",
@@ -289,7 +289,7 @@ func (mc *metricsCollector) CollectFinancialMetrics(ctx context.Context) ([]*ent
 	
 	if pricingCount > 0 {
 		avgVariance := pricingVariance / float64(pricingCount)
-		metrics = append(metrics, &entities.PerformanceMetric{
+		metrics = append(metrics, &entities.SystemPerformanceMetric{
 			ID:         fmt.Sprintf("pricing_accuracy_%d", time.Now().Unix()),
 			Component:  "pricing",
 			MetricName: "pricing_variance",
@@ -308,8 +308,8 @@ func (mc *metricsCollector) CollectFinancialMetrics(ctx context.Context) ([]*ent
 }
 
 // CollectClientMetrics collects client-related metrics
-func (mc *metricsCollector) CollectClientMetrics(ctx context.Context) ([]*entities.PerformanceMetric, error) {
-	var metrics []*entities.PerformanceMetric
+func (mc *metricsCollector) CollectClientMetrics(ctx context.Context) ([]*entities.SystemPerformanceMetric, error) {
+	var metrics []*entities.SystemPerformanceMetric
 	
 	// Get recent feedback (using FindByStatus)
 	recentFeedback, _, err := mc.feedbackRepo.FindByStatus(ctx, entities.FeedbackStatusResolved, 0, 100)
@@ -340,7 +340,7 @@ func (mc *metricsCollector) CollectClientMetrics(ctx context.Context) ([]*entiti
 	// Average satisfaction rating
 	if ratingCount > 0 {
 		avgRating := totalRating / float64(ratingCount)
-		metrics = append(metrics, &entities.PerformanceMetric{
+		metrics = append(metrics, &entities.SystemPerformanceMetric{
 			ID:         fmt.Sprintf("client_satisfaction_%d", time.Now().Unix()),
 			Component:  "client",
 			MetricName: "satisfaction_rating",
@@ -358,7 +358,7 @@ func (mc *metricsCollector) CollectClientMetrics(ctx context.Context) ([]*entiti
 	// Sentiment ratio
 	if len(recentFeedback) > 0 {
 		sentimentRatio := float64(positiveCount-negativeCount) / float64(len(recentFeedback)) * 100
-		metrics = append(metrics, &entities.PerformanceMetric{
+		metrics = append(metrics, &entities.SystemPerformanceMetric{
 			ID:         fmt.Sprintf("client_sentiment_%d", time.Now().Unix()),
 			Component:  "client",
 			MetricName: "sentiment_ratio",
@@ -385,12 +385,12 @@ func (mc *metricsCollector) CollectClientMetrics(ctx context.Context) ([]*entiti
 }
 
 // CollectSystemMetrics collects overall system health metrics
-func (mc *metricsCollector) CollectSystemMetrics(ctx context.Context) ([]*entities.PerformanceMetric, error) {
-	var metrics []*entities.PerformanceMetric
+func (mc *metricsCollector) CollectSystemMetrics(ctx context.Context) ([]*entities.SystemPerformanceMetric, error) {
+	var metrics []*entities.SystemPerformanceMetric
 	
 	// System availability (assumed to be tracked elsewhere)
 	// For now, we'll simulate with a high availability
-	metrics = append(metrics, &entities.PerformanceMetric{
+	metrics = append(metrics, &entities.SystemPerformanceMetric{
 		ID:         fmt.Sprintf("system_availability_%d", time.Now().Unix()),
 		Component:  "system",
 		MetricName: "availability",
@@ -403,7 +403,7 @@ func (mc *metricsCollector) CollectSystemMetrics(ctx context.Context) ([]*entiti
 	})
 	
 	// Error rate (would be collected from logs/monitoring)
-	metrics = append(metrics, &entities.PerformanceMetric{
+	metrics = append(metrics, &entities.SystemPerformanceMetric{
 		ID:         fmt.Sprintf("system_error_rate_%d", time.Now().Unix()),
 		Component:  "system",
 		MetricName: "error_rate",
@@ -416,7 +416,7 @@ func (mc *metricsCollector) CollectSystemMetrics(ctx context.Context) ([]*entiti
 	})
 	
 	// API response time (would be collected from API monitoring)
-	metrics = append(metrics, &entities.PerformanceMetric{
+	metrics = append(metrics, &entities.SystemPerformanceMetric{
 		ID:         fmt.Sprintf("api_response_time_%d", time.Now().Unix()),
 		Component:  "api",
 		MetricName: "response_time",
@@ -435,7 +435,7 @@ func (mc *metricsCollector) CollectSystemMetrics(ctx context.Context) ([]*entiti
 }
 
 // AggregateMetrics aggregates metrics into a summary
-func (mc *metricsCollector) AggregateMetrics(ctx context.Context, metrics []*entities.PerformanceMetric) (*MetricsSummary, error) {
+func (mc *metricsCollector) AggregateMetrics(ctx context.Context, metrics []*entities.SystemPerformanceMetric) (*MetricsSummary, error) {
 	summary := &MetricsSummary{
 		Period:         "1h",
 		ComponentStats: make(map[string]ComponentStats),
@@ -446,7 +446,7 @@ func (mc *metricsCollector) AggregateMetrics(ctx context.Context, metrics []*ent
 	}
 	
 	// Group metrics by component
-	componentMetrics := make(map[string][]*entities.PerformanceMetric)
+	componentMetrics := make(map[string][]*entities.SystemPerformanceMetric)
 	for _, metric := range metrics {
 		componentMetrics[metric.Component] = append(componentMetrics[metric.Component], metric)
 	}
@@ -489,7 +489,7 @@ func (mc *metricsCollector) AggregateMetrics(ctx context.Context, metrics []*ent
 	return summary, nil
 }
 
-func (mc *metricsCollector) calculateComponentStats(metrics []*entities.PerformanceMetric) ComponentStats {
+func (mc *metricsCollector) calculateComponentStats(metrics []*entities.SystemPerformanceMetric) ComponentStats {
 	stats := ComponentStats{
 		Health:       85.0, // Default health
 		Availability: 99.0, // Default availability

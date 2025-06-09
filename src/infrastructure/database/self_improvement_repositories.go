@@ -371,7 +371,7 @@ func NewPostgresMetricsRepository(db *sql.DB) repositories.MetricsRepository {
 }
 
 // RecordMetric records a performance metric
-func (r *PostgresMetricsRepository) RecordMetric(ctx context.Context, metric *entities.PerformanceMetric) error {
+func (r *PostgresMetricsRepository) RecordMetric(ctx context.Context, metric *entities.SystemPerformanceMetric) error {
 	contextJSON, _ := json.Marshal(metric.Context)
 	tagsJSON, _ := json.Marshal(metric.Tags)
 	
@@ -389,7 +389,7 @@ func (r *PostgresMetricsRepository) RecordMetric(ctx context.Context, metric *en
 }
 
 // GetMetrics retrieves metrics for a component and metric name in a time range
-func (r *PostgresMetricsRepository) GetMetrics(ctx context.Context, component, metricName string, from, to time.Time) ([]*entities.PerformanceMetric, error) {
+func (r *PostgresMetricsRepository) GetMetrics(ctx context.Context, component, metricName string, from, to time.Time) ([]*entities.SystemPerformanceMetric, error) {
 	query := `
 		SELECT id, component, metric_name, value, unit, timestamp,
 			   context, aggregation, period, tags
@@ -403,9 +403,9 @@ func (r *PostgresMetricsRepository) GetMetrics(ctx context.Context, component, m
 	}
 	defer rows.Close()
 	
-	var metrics []*entities.PerformanceMetric
+	var metrics []*entities.SystemPerformanceMetric
 	for rows.Next() {
-		var metric entities.PerformanceMetric
+		var metric entities.SystemPerformanceMetric
 		var contextJSON, tagsJSON []byte
 		
 		err := rows.Scan(
@@ -430,7 +430,7 @@ func (r *PostgresMetricsRepository) GetMetrics(ctx context.Context, component, m
 }
 
 // GetLatestMetric gets the latest metric value
-func (r *PostgresMetricsRepository) GetLatestMetric(ctx context.Context, component, metricName string) (*entities.PerformanceMetric, error) {
+func (r *PostgresMetricsRepository) GetLatestMetric(ctx context.Context, component, metricName string) (*entities.SystemPerformanceMetric, error) {
 	query := `
 		SELECT id, component, metric_name, value, unit, timestamp,
 			   context, aggregation, period, tags
@@ -439,7 +439,7 @@ func (r *PostgresMetricsRepository) GetLatestMetric(ctx context.Context, compone
 		ORDER BY timestamp DESC
 		LIMIT 1`
 	
-	var metric entities.PerformanceMetric
+	var metric entities.SystemPerformanceMetric
 	var contextJSON, tagsJSON []byte
 	
 	err := r.db.QueryRowContext(ctx, query, component, metricName).Scan(
@@ -553,7 +553,7 @@ func (r *PostgresMetricsRepository) GetComponentMetrics(ctx context.Context, com
 }
 
 // GetMetricAnomalies gets metrics that are anomalous
-func (r *PostgresMetricsRepository) GetMetricAnomalies(ctx context.Context, component, metricName string, threshold float64) ([]*entities.PerformanceMetric, error) {
+func (r *PostgresMetricsRepository) GetMetricAnomalies(ctx context.Context, component, metricName string, threshold float64) ([]*entities.SystemPerformanceMetric, error) {
 	// Simplified implementation - get values that deviate significantly from recent average
 	query := `
 		WITH recent_avg AS (
@@ -575,9 +575,9 @@ func (r *PostgresMetricsRepository) GetMetricAnomalies(ctx context.Context, comp
 	}
 	defer rows.Close()
 	
-	var metrics []*entities.PerformanceMetric
+	var metrics []*entities.SystemPerformanceMetric
 	for rows.Next() {
-		var metric entities.PerformanceMetric
+		var metric entities.SystemPerformanceMetric
 		var contextJSON, tagsJSON []byte
 		
 		err := rows.Scan(

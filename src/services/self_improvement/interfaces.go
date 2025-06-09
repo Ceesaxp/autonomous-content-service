@@ -47,14 +47,14 @@ type SelfImprovementService interface {
 // MetricsCollector gathers performance metrics from all system components
 type MetricsCollector interface {
 	// Component-specific collectors
-	CollectContentMetrics(ctx context.Context) ([]*entities.PerformanceMetric, error)
-	CollectDecisionMetrics(ctx context.Context) ([]*entities.PerformanceMetric, error)
-	CollectFinancialMetrics(ctx context.Context) ([]*entities.PerformanceMetric, error)
-	CollectClientMetrics(ctx context.Context) ([]*entities.PerformanceMetric, error)
-	CollectSystemMetrics(ctx context.Context) ([]*entities.PerformanceMetric, error)
+	CollectContentMetrics(ctx context.Context) ([]*entities.SystemPerformanceMetric, error)
+	CollectDecisionMetrics(ctx context.Context) ([]*entities.SystemPerformanceMetric, error)
+	CollectFinancialMetrics(ctx context.Context) ([]*entities.SystemPerformanceMetric, error)
+	CollectClientMetrics(ctx context.Context) ([]*entities.SystemPerformanceMetric, error)
+	CollectSystemMetrics(ctx context.Context) ([]*entities.SystemPerformanceMetric, error)
 	
 	// Aggregation
-	AggregateMetrics(ctx context.Context, metrics []*entities.PerformanceMetric) (*MetricsSummary, error)
+	AggregateMetrics(ctx context.Context, metrics []*entities.SystemPerformanceMetric) (*MetricsSummary, error)
 }
 
 // LearningEngine processes experiences into actionable knowledge

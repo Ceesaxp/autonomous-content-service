@@ -37,9 +37,9 @@ type LearningRepository interface {
 // MetricsRepository manages performance metrics
 type MetricsRepository interface {
 	// Metric storage
-	RecordMetric(ctx context.Context, metric *entities.PerformanceMetric) error
-	GetMetrics(ctx context.Context, component, metricName string, from, to time.Time) ([]*entities.PerformanceMetric, error)
-	GetLatestMetric(ctx context.Context, component, metricName string) (*entities.PerformanceMetric, error)
+	RecordMetric(ctx context.Context, metric *entities.SystemPerformanceMetric) error
+	GetMetrics(ctx context.Context, component, metricName string, from, to time.Time) ([]*entities.SystemPerformanceMetric, error)
+	GetLatestMetric(ctx context.Context, component, metricName string) (*entities.SystemPerformanceMetric, error)
 	
 	// Aggregations
 	GetAggregatedMetrics(ctx context.Context, component, metricName string, aggregation entities.AggregationType, period string) (float64, error)
@@ -47,7 +47,7 @@ type MetricsRepository interface {
 	GetComponentMetrics(ctx context.Context, component string) (map[string]float64, error)
 	
 	// Anomaly detection
-	GetMetricAnomalies(ctx context.Context, component, metricName string, threshold float64) ([]*entities.PerformanceMetric, error)
+	GetMetricAnomalies(ctx context.Context, component, metricName string, threshold float64) ([]*entities.SystemPerformanceMetric, error)
 	GetMetricBaseline(ctx context.Context, component, metricName string, days int) (mean, stddev float64, err error)
 }
 
