@@ -78,8 +78,8 @@ const (
 	ArtifactStatusArchived   ArtifactStatus = "archived"
 )
 
-// PerformanceMetric represents a system performance measurement
-type PerformanceMetric struct {
+// SystemPerformanceMetric represents a system performance measurement
+type SystemPerformanceMetric struct {
 	ID          string                 `json:"id"`
 	Component   string                 `json:"component"`
 	MetricName  string                 `json:"metric_name"`
