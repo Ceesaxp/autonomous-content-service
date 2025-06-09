@@ -538,41 +538,33 @@ type AssignmentCreationRequest struct {
 // Placeholder service implementations (to be implemented in separate files)
 
 func NewTalentAcquisitionService(applicationRepo repositories.TalentApplicationRepository, talentRepo repositories.TalentRepository, eventRepo repositories.EventRepository) TalentAcquisitionService {
-	// TODO: Implement TalentAcquisitionServiceImpl
-	return nil
+	return NewTalentAcquisitionServiceImpl(applicationRepo, talentRepo, eventRepo)
 }
 
 func NewOnboardingService(talentRepo repositories.TalentRepository, complianceRepo repositories.ComplianceRepository, trainingRepo repositories.TrainingRepository, eventRepo repositories.EventRepository) OnboardingService {
-	// TODO: Implement OnboardingServiceImpl
-	return nil
+	return NewOnboardingServiceImpl(talentRepo, complianceRepo, trainingRepo, eventRepo)
 }
 
 func NewPerformanceManagementService(performanceRepo repositories.PerformanceRepository, talentRepo repositories.TalentRepository, eventRepo repositories.EventRepository) PerformanceManagementService {
-	// TODO: Implement PerformanceManagementServiceImpl
-	return nil
+	return NewPerformanceManagementServiceImpl(performanceRepo, talentRepo, eventRepo)
 }
 
 func NewCompensationService(compensationRepo repositories.CompensationRepository, talentRepo repositories.TalentRepository, eventRepo repositories.EventRepository) CompensationService {
-	// TODO: Implement CompensationServiceImpl
-	return nil
+	return NewCompensationServiceImpl(compensationRepo, talentRepo, eventRepo)
 }
 
 func NewTrainingService(trainingRepo repositories.TrainingRepository, talentRepo repositories.TalentRepository, eventRepo repositories.EventRepository) TrainingService {
-	// TODO: Implement TrainingServiceImpl
-	return nil
+	return NewTrainingServiceImpl(trainingRepo, talentRepo, eventRepo)
 }
 
 func NewComplianceManagementService(complianceRepo repositories.ComplianceRepository, talentRepo repositories.TalentRepository, eventRepo repositories.EventRepository) ComplianceManagementService {
-	// TODO: Implement ComplianceManagementServiceImpl
-	return nil
+	return NewComplianceManagementServiceImpl(complianceRepo, talentRepo, eventRepo)
 }
 
 func NewOffboardingService(offboardingRepo repositories.OffboardingRepository, talentRepo repositories.TalentRepository, eventRepo repositories.EventRepository) OffboardingService {
-	// TODO: Implement OffboardingServiceImpl
-	return nil
+	return NewOffboardingServiceImpl(offboardingRepo, talentRepo, eventRepo)
 }
 
 func NewHRAnalyticsService(talentRepo repositories.TalentRepository, performanceRepo repositories.PerformanceRepository, compensationRepo repositories.CompensationRepository) HRAnalyticsService {
-	// TODO: Implement HRAnalyticsServiceImpl
-	return nil
+	return NewHRAnalyticsServiceImpl(talentRepo, performanceRepo, compensationRepo)
 }

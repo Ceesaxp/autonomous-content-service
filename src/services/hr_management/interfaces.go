@@ -133,74 +133,29 @@ type TrainingService interface {
 
 // ComplianceManagementService handles HR compliance and legal requirements
 type ComplianceManagementService interface {
-	// Background checks and verification
-	InitiateBackgroundCheck(ctx context.Context, talentID uuid.UUID, checkType string) (*entities.ComplianceCheck, error)
-	ProcessComplianceCheckResult(ctx context.Context, checkID uuid.UUID, result ComplianceCheckResult) error
-	GetComplianceStatus(ctx context.Context, talentID uuid.UUID) (*repositories.TalentComplianceStatus, error)
-	ScheduleComplianceRenewal(ctx context.Context, checkID uuid.UUID, renewalDate time.Time) error
-
-	// Work authorization and eligibility
-	VerifyWorkAuthorization(ctx context.Context, talentID uuid.UUID, jurisdiction string) (*WorkAuthorizationStatus, error)
-	TrackVisaExpiration(ctx context.Context) ([]*ExpiringVisa, error)
-	UpdateWorkAuthorization(ctx context.Context, talentID uuid.UUID, authData WorkAuthorizationData) error
-
-	// Contract and agreement management
-	GenerateContractorAgreement(ctx context.Context, talentID uuid.UUID, terms ContractTerms) (*entities.ContractorAgreement, error)
-	ProcessAgreementSigning(ctx context.Context, agreementID uuid.UUID, signature SignatureData) error
-	TrackAgreementExpiration(ctx context.Context) ([]*ExpiringAgreement, error)
-	RenewAgreement(ctx context.Context, agreementID uuid.UUID, newTerms ContractTerms) (*entities.ContractorAgreement, error)
-
-	// Compliance reporting
-	GenerateComplianceReport(ctx context.Context, timeRange repositories.TimeRange) (*repositories.ComplianceReport, error)
-	TrackComplianceViolations(ctx context.Context) ([]*ComplianceViolation, error)
-	ResolveComplianceIssue(ctx context.Context, issueID uuid.UUID, resolution ComplianceResolution) error
+	// Compliance checking
+	CheckCompliance(ctx context.Context, talentID uuid.UUID) (*ComplianceStatus, error)
+	UpdateComplianceDocument(ctx context.Context, talentID uuid.UUID, docType string, documentURL string) error
+	GenerateComplianceReport(ctx context.Context, timeRange repositories.TimeRange) (*ComplianceReport, error)
 }
 
 // OffboardingService handles talent departure and knowledge transfer
 type OffboardingService interface {
 	// Offboarding workflow
-	InitiateOffboarding(ctx context.Context, talentID uuid.UUID, reason string, lastWorkingDate time.Time) (*entities.OffboardingChecklist, error)
-	ProcessOffboardingTask(ctx context.Context, taskID uuid.UUID, completion TaskCompletion) error
-	GetOffboardingStatus(ctx context.Context, talentID uuid.UUID) (*OffboardingStatus, error)
-	CompleteOffboarding(ctx context.Context, checklistID uuid.UUID) error
-
-	// Knowledge transfer
-	CreateKnowledgeTransferPlan(ctx context.Context, departingTalentID, successorID uuid.UUID) (*KnowledgeTransferPlan, error)
-	DocumentKnowledge(ctx context.Context, talentID uuid.UUID, knowledgeItems []KnowledgeItem) error
-	TransferKnowledge(ctx context.Context, planID uuid.UUID) (*KnowledgeTransferResult, error)
-
-	// Asset and access management
-	RevokeAllAccess(ctx context.Context, talentID uuid.UUID) (*AccessRevocationResult, error)
-	RecoverAssets(ctx context.Context, talentID uuid.UUID, assetList []AssetItem) (*AssetRecoveryResult, error)
-	CloseAccounts(ctx context.Context, talentID uuid.UUID) error
-
-	// Exit processing
-	ConductExitInterview(ctx context.Context, talentID uuid.UUID, interviewer uuid.UUID) (*ExitInterviewResult, error)
-	ProcessFinalPayment(ctx context.Context, talentID uuid.UUID) (*PaymentResult, error)
-	GenerateReferenceProfile(ctx context.Context, talentID uuid.UUID) (*ReferenceProfile, error)
+	StartOffboarding(ctx context.Context, talentID uuid.UUID, reason string) (*OffboardingWorkflow, error)
+	ProcessOffboardingStep(ctx context.Context, workflowID uuid.UUID, stepID string) error
+	RevokeAllAccess(ctx context.Context, talentID uuid.UUID) error
+	ConductExitInterview(ctx context.Context, talentID uuid.UUID, interviewData ExitInterviewData) (*ExitInterviewResult, error)
+	GenerateOffboardingReport(ctx context.Context, talentID uuid.UUID) (*OffboardingReport, error)
 }
 
 // HRAnalyticsService provides HR metrics and reporting
 type HRAnalyticsService interface {
-	// Workforce analytics
-	GetWorkforceMetrics(ctx context.Context, timeRange repositories.TimeRange) (*WorkforceMetrics, error)
-	AnalyzeTalentUtilization(ctx context.Context) (*TalentUtilizationAnalysis, error)
-	PredictTalentNeeds(ctx context.Context, projectPipeline []ProjectForecast) (*TalentDemandForecast, error)
-
-	// Performance analytics
-	GetPerformanceDistribution(ctx context.Context, timeRange repositories.TimeRange) (*repositories.PerformanceDistribution, error)
-	AnalyzePerformanceTrends(ctx context.Context) (*PerformanceTrendReport, error)
-	IdentifyTopPerformers(ctx context.Context, criteria PerformanceCriteria) ([]*entities.Talent, error)
-
-	// Retention analytics
-	AnalyzeTurnover(ctx context.Context, timeRange repositories.TimeRange) (*TurnoverAnalysis, error)
-	IdentifyRetentionRisks(ctx context.Context) ([]*RetentionRisk, error)
-	PredictTurnover(ctx context.Context, talentID uuid.UUID) (*TurnoverPrediction, error)
-
-	// Cost analytics
-	CalculateTalentROI(ctx context.Context, talentID uuid.UUID, timeRange repositories.TimeRange) (*TalentROI, error)
-	AnalyzeTalentCosts(ctx context.Context, timeRange repositories.TimeRange) (*TalentCostAnalysis, error)
-	BenchmarkCompensation(ctx context.Context, role string, location string) (*CompensationBenchmark, error)
+	// Analytics
+	GenerateTalentAnalytics(ctx context.Context) (*TalentAnalytics, error)
+	GeneratePerformanceAnalytics(ctx context.Context, timeRange repositories.TimeRange) (*PerformanceAnalytics, error)
+	GenerateCompensationAnalytics(ctx context.Context, timeRange repositories.TimeRange) (*CompensationAnalytics, error)
+	PredictTalentNeeds(ctx context.Context) (*TalentPrediction, error)
 }
 
 // Request and Response Types
@@ -1176,8 +1131,8 @@ type AssetRecovery struct {
 	Replacement  bool       `json:"replacement"`
 }
 
-// ExitInterviewResult represents the result of an exit interview
-type ExitInterviewResult struct {
+// ExitInterviewResultOld represents the result of an exit interview (detailed version)
+type ExitInterviewResultOld struct {
 	InterviewID      uuid.UUID              `json:"interview_id"`
 	TalentID         uuid.UUID              `json:"talent_id"`
 	InterviewerID    uuid.UUID              `json:"interviewer_id"`
@@ -1652,4 +1607,175 @@ type CompensationBenchmark struct {
 	LastUpdated        time.Time                 `json:"last_updated"`
 	DataSources        []string                  `json:"data_sources"`
 	Confidence         float64                   `json:"confidence"`
+}
+
+// ComplianceStatus represents compliance status for a talent
+type ComplianceStatus struct {
+	TalentID         uuid.UUID         `json:"talent_id"`
+	OverallStatus    string            `json:"overall_status"`
+	LastChecked      time.Time         `json:"last_checked"`
+	ComplianceChecks []ComplianceCheck `json:"compliance_checks"`
+	RequiredActions  []string          `json:"required_actions"`
+	ExpiringItems    []ComplianceItem  `json:"expiring_items"`
+}
+
+// ComplianceCheck represents a specific compliance check
+type ComplianceCheck struct {
+	Type        string    `json:"type"`
+	Status      string    `json:"status"`
+	LastChecked time.Time `json:"last_checked"`
+	Notes       string    `json:"notes"`
+}
+
+// ComplianceItem represents a compliance item that may expire
+type ComplianceItem struct {
+	Type       string    `json:"type"`
+	ExpiryDate time.Time `json:"expiry_date"`
+	Status     string    `json:"status"`
+}
+
+// ComplianceReport represents a compliance report
+type ComplianceReport struct {
+	ReportID           uuid.UUID                     `json:"report_id"`
+	TimeRange          repositories.TimeRange       `json:"time_range"`
+	TotalTalent        int                          `json:"total_talent"`
+	CompliantTalent    int                          `json:"compliant_talent"`
+	NonCompliantTalent int                          `json:"non_compliant_talent"`
+	ComplianceByType   map[string]ComplianceMetrics `json:"compliance_by_type"`
+	Issues             []ComplianceIssue            `json:"issues"`
+	GeneratedAt        time.Time                    `json:"generated_at"`
+}
+
+// ComplianceMetrics represents compliance metrics for a specific type
+type ComplianceMetrics struct {
+	Total     int     `json:"total"`
+	Compliant int     `json:"compliant"`
+	Rate      float64 `json:"rate"`
+}
+
+// ComplianceIssue represents a compliance issue
+type ComplianceIssue struct {
+	TalentID    uuid.UUID `json:"talent_id"`
+	Type        string    `json:"type"`
+	Description string    `json:"description"`
+	Severity    string    `json:"severity"`
+	DetectedAt  time.Time `json:"detected_at"`
+}
+
+// OffboardingWorkflow represents an offboarding workflow
+type OffboardingWorkflow struct {
+	ID                  uuid.UUID         `json:"id"`
+	TalentID            uuid.UUID         `json:"talent_id"`
+	Reason              string            `json:"reason"`
+	Status              string            `json:"status"`
+	Steps               []OffboardingStep `json:"steps"`
+	StartedAt           time.Time         `json:"started_at"`
+	EstimatedCompletion time.Time         `json:"estimated_completion"`
+}
+
+// OffboardingStep represents a step in the offboarding process
+type OffboardingStep struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Required    bool   `json:"required"`
+	Order       int    `json:"order"`
+}
+
+// ExitInterviewData represents data from an exit interview
+type ExitInterviewData struct {
+	InterviewerID uuid.UUID              `json:"interviewer_id"`
+	Feedback      map[string]interface{} `json:"feedback"`
+}
+
+// ExitInterviewResult represents the result of an exit interview
+type ExitInterviewResult struct {
+	TalentID        uuid.UUID `json:"talent_id"`
+	InterviewerID   uuid.UUID `json:"interviewer_id"`
+	Feedback        map[string]interface{} `json:"feedback"`
+	Recommendations []string  `json:"recommendations"`
+	CompletedAt     time.Time `json:"completed_at"`
+}
+
+// OffboardingReport represents an offboarding report
+type OffboardingReport struct {
+	TalentID          uuid.UUID `json:"talent_id"`
+	TalentName        string    `json:"talent_name"`
+	Department        string    `json:"department"`
+	OffboardingDate   time.Time `json:"offboarding_date"`
+	Reason            string    `json:"reason"`
+	AccessRevoked     bool      `json:"access_revoked"`
+	AssetsReturned    bool      `json:"assets_returned"`
+	FinalPayProcessed bool      `json:"final_pay_processed"`
+	Documentation     []string  `json:"documentation"`
+	GeneratedAt       time.Time `json:"generated_at"`
+}
+
+// TalentAnalytics represents talent analytics data
+type TalentAnalytics struct {
+	TotalTalent          int            `json:"total_talent"`
+	HumanTalent          int            `json:"human_talent"`
+	AIAgents             int            `json:"ai_agents"`
+	AvailableTalent      int            `json:"available_talent"`
+	EngagedTalent        int            `json:"engaged_talent"`
+	SkillDistribution    map[string]int `json:"skill_distribution"`
+	LocationDistribution map[string]int `json:"location_distribution"`
+	AverageReputation    float64        `json:"average_reputation"`
+	GeneratedAt          time.Time      `json:"generated_at"`
+}
+
+// PerformanceAnalytics represents performance analytics data
+type PerformanceAnalytics struct {
+	TimeRange               repositories.TimeRange              `json:"time_range"`
+	AveragePerformance      float64                             `json:"average_performance"`
+	PerformanceDistribution repositories.PerformanceDistribution `json:"performance_distribution"`
+	TopPerformers           int                                 `json:"top_performers"`
+	UnderPerformers         int                                 `json:"under_performers"`
+	PerformanceTrends       []MetricTrend                       `json:"performance_trends"`
+	GeneratedAt             time.Time                           `json:"generated_at"`
+}
+
+// CompensationAnalytics represents compensation analytics data
+type CompensationAnalytics struct {
+	TimeRange                repositories.TimeRange        `json:"time_range"`
+	TotalPayroll             *entities.Money               `json:"total_payroll"`
+	AverageCompensation      *entities.Money               `json:"average_compensation"`
+	CompensationDistribution CompensationDistribution      `json:"compensation_distribution"`
+	PayrollTrends            []PayrollTrend                `json:"payroll_trends"`
+	GeneratedAt              time.Time                     `json:"generated_at"`
+}
+
+// CompensationDistribution represents compensation distribution data
+type CompensationDistribution struct {
+	ByLevel    map[string]*entities.Money `json:"by_level"`
+	BySkill    map[string]*entities.Money `json:"by_skill"`
+	ByLocation map[string]*entities.Money `json:"by_location"`
+	ByType     map[string]*entities.Money `json:"by_type"`
+	Percentiles map[string]*entities.Money `json:"percentiles"`
+}
+
+// PayrollTrend represents payroll trend data (duplicate fix)
+type PayrollTrend struct {
+	Period        string          `json:"period"`
+	Amount        *entities.Money `json:"amount"`
+	ChangePercent float64         `json:"change_percent"`
+	Trend         string          `json:"trend"`
+}
+
+// TalentPrediction represents talent needs prediction
+type TalentPrediction struct {
+	TimeHorizon     time.Duration `json:"time_horizon"`
+	PredictedNeeds  []TalentNeed  `json:"predicted_needs"`
+	ConfidenceScore float64       `json:"confidence_score"`
+	Recommendations []string      `json:"recommendations"`
+	GeneratedAt     time.Time     `json:"generated_at"`
+}
+
+// TalentNeed represents a predicted talent need
+type TalentNeed struct {
+	SkillCategory     string        `json:"skill_category"`
+	RequiredCount     int           `json:"required_count"`
+	Confidence        float64       `json:"confidence"`
+	TimeToFulfill     time.Duration `json:"time_to_fulfill"`
+	RecommendedAction string        `json:"recommended_action"`
 }

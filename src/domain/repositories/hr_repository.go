@@ -83,6 +83,7 @@ type WorkAssignmentRepository interface {
 type PerformanceRepository interface {
 	// Performance reviews
 	CreatePerformanceReview(ctx context.Context, review *entities.PerformanceReview) error
+	GetPerformanceReview(ctx context.Context, id uuid.UUID) (*entities.PerformanceReview, error)
 	GetPerformanceReviewByID(ctx context.Context, id uuid.UUID) (*entities.PerformanceReview, error)
 	UpdatePerformanceReview(ctx context.Context, review *entities.PerformanceReview) error
 	
@@ -91,28 +92,46 @@ type PerformanceRepository interface {
 	GetPerformanceReviewsByPeriod(ctx context.Context, start, end time.Time) ([]*entities.PerformanceReview, error)
 	GetReviewsDue(ctx context.Context, beforeDate time.Time) ([]*entities.PerformanceReview, error)
 	
+	// Performance metrics
+	CreatePerformanceMetric(ctx context.Context, metric *entities.PerformanceMetric) error
+	GetPerformanceMetrics(ctx context.Context, talentID uuid.UUID, timeRange TimeRange) (*TalentPerformanceMetrics, error)
+	GetAllPerformanceMetrics(ctx context.Context, timeRange TimeRange) (map[uuid.UUID]*TalentPerformanceMetrics, error)
+	
+	// Performance goals
+	CreatePerformanceGoal(ctx context.Context, goal *entities.PerformanceGoal) error
+	GetPerformanceGoal(ctx context.Context, goalID uuid.UUID) (*entities.PerformanceGoal, error)
+	UpdatePerformanceGoal(ctx context.Context, goal *entities.PerformanceGoal) error
+	GetPerformanceGoalsByTalent(ctx context.Context, talentID uuid.UUID) ([]*entities.PerformanceGoal, error)
+	
 	// Performance analytics
 	GetTalentPerformanceMetrics(ctx context.Context, talentID uuid.UUID, timeRange TimeRange) (*TalentPerformanceMetrics, error)
 	GetPerformanceDistribution(ctx context.Context, timeRange TimeRange) (*PerformanceDistribution, error)
-	GetTopPerformers(ctx context.Context, metric string, limit int) ([]*entities.Talent, error)
-	GetUnderperformers(ctx context.Context, threshold float64) ([]*entities.Talent, error)
+	GetTopPerformers(ctx context.Context, criteria PerformanceCriteria) ([]*entities.Talent, error)
+	GetUnderperformers(ctx context.Context, criteria PerformanceCriteria) ([]*entities.Talent, error)
 }
 
 // CompensationRepository defines the interface for compensation data access
 type CompensationRepository interface {
 	// Compensation plans
 	CreateCompensationPlan(ctx context.Context, plan *entities.CompensationPlan) error
+	GetCompensationPlan(ctx context.Context, id uuid.UUID) (*entities.CompensationPlan, error)
 	GetCompensationPlanByID(ctx context.Context, id uuid.UUID) (*entities.CompensationPlan, error)
+	GetCompensationPlanByTalent(ctx context.Context, talentID uuid.UUID) (*entities.CompensationPlan, error)
 	UpdateCompensationPlan(ctx context.Context, plan *entities.CompensationPlan) error
 	GetCompensationPlansByTalent(ctx context.Context, talentID uuid.UUID) ([]*entities.CompensationPlan, error)
 	GetActiveCompensationPlan(ctx context.Context, talentID uuid.UUID) (*entities.CompensationPlan, error)
 	
 	// Payroll records
 	CreatePayrollRecord(ctx context.Context, record *entities.PayrollRecord) error
+	GetPayrollRecord(ctx context.Context, id uuid.UUID) (*entities.PayrollRecord, error)
 	GetPayrollRecordByID(ctx context.Context, id uuid.UUID) (*entities.PayrollRecord, error)
 	UpdatePayrollRecord(ctx context.Context, record *entities.PayrollRecord) error
 	GetPayrollRecordsByTalent(ctx context.Context, talentID uuid.UUID, timeRange TimeRange) ([]*entities.PayrollRecord, error)
+	GetPayrollRecordsByTalentAndYear(ctx context.Context, talentID uuid.UUID, taxYear int) ([]*entities.PayrollRecord, error)
 	GetPendingPayroll(ctx context.Context) ([]*entities.PayrollRecord, error)
+	
+	// Work assignments and hours
+	GetWorkAssignmentsForPeriod(ctx context.Context, talentID uuid.UUID, startDate, endDate time.Time) ([]*entities.WorkAssignment, error)
 	
 	// Compensation analytics
 	GetCompensationSummary(ctx context.Context, timeRange TimeRange) (*CompensationSummary, error)
@@ -308,6 +327,7 @@ type TalentPerformanceMetrics struct {
 	ClientSatisfactionScore float64           `json:"client_satisfaction_score"`
 	SkillGrowthRate     float64               `json:"skill_growth_rate"`
 	TrainingCompletion  float64               `json:"training_completion"`
+	Metrics            []*entities.PerformanceMetric `json:"metrics"`
 }
 
 // PerformanceDistribution represents performance distribution analytics
@@ -319,6 +339,10 @@ type PerformanceDistribution struct {
 	Unsatisfactory      int `json:"unsatisfactory"`
 	AverageScore        float64 `json:"average_score"`
 	TotalReviews        int     `json:"total_reviews"`
+	// Helper computed fields
+	ExceptionalCount      int `json:"exceptional_count"`
+	NeedsImprovementCount int `json:"needs_improvement_count"`
+	TotalCount           int `json:"total_count"`
 }
 
 // CompensationSummary represents compensation analytics
@@ -330,6 +354,15 @@ type CompensationSummary struct {
 	PayrollByType       map[string]*entities.Money `json:"payroll_by_type"`
 	TopEarners          []*entities.Talent    `json:"top_earners"`
 	PayrollGrowthRate   float64               `json:"payroll_growth_rate"`
+}
+
+// PerformanceCriteria represents criteria for performance queries
+type PerformanceCriteria struct {
+	MetricTypes []string   `json:"metric_types"`
+	MinRating   float64    `json:"min_rating"`
+	TimeRange   TimeRange  `json:"time_range"`
+	SortBy      string     `json:"sort_by"`
+	Limit       int        `json:"limit"`
 }
 
 // CompensationBenchmarks represents market compensation benchmarks

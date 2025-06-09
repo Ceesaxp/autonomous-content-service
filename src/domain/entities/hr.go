@@ -235,6 +235,37 @@ type Deliverable struct {
 	UpdatedAt      time.Time              `json:"updated_at" db:"updated_at"`
 }
 
+// PerformanceMetric represents a performance metric data point
+type PerformanceMetric struct {
+	ID          uuid.UUID              `json:"id" db:"metric_id"`
+	TalentID    uuid.UUID              `json:"talent_id" db:"talent_id"`
+	Type        string                 `json:"type" db:"type"`
+	Value       float64                `json:"value" db:"value"`
+	Unit        string                 `json:"unit" db:"unit"`
+	Description string                 `json:"description" db:"description"`
+	Source      string                 `json:"source" db:"source"`
+	Context     map[string]interface{} `json:"context" db:"context"`
+	CreatedAt   time.Time              `json:"created_at" db:"created_at"`
+}
+
+// PerformanceGoal represents a performance goal
+type PerformanceGoal struct {
+	ID           uuid.UUID              `json:"id" db:"goal_id"`
+	TalentID     uuid.UUID              `json:"talent_id" db:"talent_id"`
+	Title        string                 `json:"title" db:"title"`
+	Description  string                 `json:"description" db:"description"`
+	Type         string                 `json:"type" db:"type"`
+	TargetValue  float64                `json:"target_value" db:"target_value"`
+	CurrentValue float64                `json:"current_value" db:"current_value"`
+	Unit         string                 `json:"unit" db:"unit"`
+	Priority     Priority               `json:"priority" db:"priority"`
+	DueDate      time.Time              `json:"due_date" db:"due_date"`
+	Status       string                 `json:"status" db:"status"`
+	Metrics      map[string]interface{} `json:"metrics" db:"metrics"`
+	CreatedAt    time.Time              `json:"created_at" db:"created_at"`
+	UpdatedAt    time.Time              `json:"updated_at" db:"updated_at"`
+}
+
 // PerformanceReview represents a performance evaluation
 type PerformanceReview struct {
 	ID               uuid.UUID              `json:"id" db:"review_id"`
@@ -254,6 +285,8 @@ type PerformanceReview struct {
 	Comments         string                 `json:"comments" db:"comments"`
 	Metrics          map[string]interface{} `json:"metrics" db:"metrics"`
 	CompensationAdjustment *Money           `json:"compensation_adjustment" db:"-"`
+	CompensationAdjustmentAmount *int64     `json:"compensation_adjustment_amount" db:"compensation_adjustment_amount"`
+	CompensationAdjustmentCurrency *string  `json:"compensation_adjustment_currency" db:"compensation_adjustment_currency"`
 	NextReviewDate   *time.Time             `json:"next_review_date" db:"next_review_date"`
 	CreatedAt        time.Time              `json:"created_at" db:"created_at"`
 }
