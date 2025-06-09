@@ -22,6 +22,7 @@ The Autonomous Content Creation Service is a digital-native business that functi
 3. Financial Infrastructure
 4. Client Interface
 5. Governance and Improvement
+   - Treasury allocation service: create, execute, and process installment allocations
 6. System Integration and Deployment
 
 ## Getting Started

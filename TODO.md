@@ -26,10 +26,144 @@
 - [x] 5.3: Risk Management System
 - [x] 5.4: Legal & Compliance System
 - [x] 5.5: DAO-style Governance & Treasury
-- [x] 5.6: HR, Resource & Talent Management System
+- [x] 5.6: HR, Resource & Talent Management System ✅ (committed ecd039f)
 
 ## Phase 6: Integration & Deployment
-- [ ] 6.1: Service Orchestration
+
+### 🚧 Phase 6.1: Service Orchestration - IN PROGRESS
+
+**Objective**: Transform monolithic application into Docker Compose-based microservices architecture
+
+#### Implementation Plan (Docker Compose Approach)
+
+**Service Decomposition Strategy:**
+1. **API Gateway Service** - Entry point, routing, authentication
+2. **Content Service** - Content creation pipeline, LLM orchestration  
+3. **Decision Service** - AI decision making, policy enforcement
+4. **HR Service** - Talent management, workforce operations
+5. **Financial Service** - Payments, pricing, treasury management
+6. **Governance Service** - DAO governance, voting, proposals
+7. **Legal Service** - Compliance, contracts, regulations
+8. **Risk Service** - Risk assessment, incident management
+9. **Self-Improvement Service** - Learning, optimization, experimentation
+
+**Platform Services:**
+- **Consul** - Service discovery & configuration management
+- **Redis** - Caching & async message broker (with Streams)
+- **PostgreSQL** - Shared database with service isolation
+- **Temporal** - Workflow orchestration for complex business processes
+- **Prometheus** - Metrics collection
+- **Grafana** - Monitoring dashboards
+
+**Communication Architecture:**
+- **Synchronous**: REST APIs through API Gateway and direct service-to-service
+- **Asynchronous**: Redis Streams for event-driven workflows
+- **Service Discovery**: Consul-based registration and discovery
+- **Configuration**: Multi-layer config (env vars → Consul KV → config files → defaults)
+
+**Resilience Patterns:**
+- Circuit breakers for service failure isolation
+- Retry with exponential backoff for transient failures
+- Health checks for all services with auto-restart
+- Event-driven workflows for loose coupling
+
+**Development Workflow:**
+- Same Docker Compose for dev and production
+- Individual service development with hot reload
+- Integration testing with full stack
+- Rolling updates for zero-downtime deployments
+
+#### Implementation Tasks
+
+- [ ] **Step 1**: Create service entry points in `src/cmd/` directory
+  - [ ] Extract current `main.go` logic into API Gateway service
+  - [ ] Create individual service main packages for each microservice
+  - [ ] Implement service discovery integration with Consul
+  - [ ] Add health check endpoints for all services
+
+- [ ] **Step 2**: Implement shared infrastructure libraries in `src/pkg/`
+  - [ ] Service discovery client for Consul integration
+  - [ ] Event system for Redis Streams communication
+  - [ ] Configuration management with multi-layer support
+  - [ ] Monitoring utilities for Prometheus metrics
+  - [ ] Resilience patterns (circuit breakers, retries)
+  - [ ] Authentication middleware for service communication
+
+- [ ] **Step 3**: Create microservices Docker Compose configuration
+  - [ ] `docker-compose.microservices.yml` with all business services
+  - [ ] `docker-compose.monitoring.yml` for observability stack
+  - [ ] Update existing Dockerfiles for individual services
+  - [ ] Network isolation and service dependencies
+  - [ ] Environment-specific overrides (dev, staging, prod)
+
+- [ ] **Step 4**: Implement event-driven communication
+  - [ ] Define event schemas for inter-service communication
+  - [ ] Implement Redis Streams publishers and consumers
+  - [ ] Create event handlers for each service
+  - [ ] Add event-driven workflows for business processes
+
+- [ ] **Step 5**: Add Temporal workflow orchestration
+  - [ ] Install and configure Temporal server
+  - [ ] Define workflow templates for complex business processes
+  - [ ] Implement workflow activities for each service
+  - [ ] Add workflow monitoring and management
+
+- [ ] **Step 6**: Implement service observability
+  - [ ] Add Prometheus metrics collection to all services
+  - [ ] Create Grafana dashboards for service monitoring
+  - [ ] Implement distributed tracing across services
+  - [ ] Add centralized logging with structured logs
+
+- [ ] **Step 7**: Update existing services for microservices architecture
+  - [ ] Refactor existing service implementations for independence
+  - [ ] Add event publishing for domain events
+  - [ ] Implement service-specific configuration
+  - [ ] Update API handlers for microservices routing
+
+- [ ] **Step 8**: Testing and validation
+  - [ ] Unit tests for new infrastructure components
+  - [ ] Integration tests for service communication
+  - [ ] End-to-end tests for complete workflows
+  - [ ] Performance testing under load
+  - [ ] Chaos engineering for resilience validation
+
+#### Migration Strategy
+
+**Phase 1: Infrastructure Setup**
+- Set up platform services (Consul, Redis Streams, Temporal)
+- Create shared libraries for service communication
+- Implement service discovery and configuration management
+
+**Phase 2: Service Extraction**
+- Extract individual services from monolithic application
+- Implement service-specific main packages and entry points
+- Add health checks and monitoring for each service
+
+**Phase 3: Communication Implementation**
+- Implement event-driven communication between services
+- Add workflow orchestration for complex business processes
+- Update APIs for microservices routing
+
+**Phase 4: Testing and Optimization**
+- Comprehensive testing of service interactions
+- Performance optimization and load testing
+- Security validation and access control
+
+#### Benefits Achieved
+
+✅ **Service Independence**: Each service can be developed, deployed, and scaled independently  
+✅ **Fault Isolation**: Failures in one service don't cascade to others  
+✅ **Technology Flexibility**: Services can use different technologies as needed  
+✅ **Team Autonomy**: Different teams can own different services  
+✅ **Scalability**: Services can be scaled based on individual demand  
+✅ **Development Simplicity**: Docker Compose for everything  
+✅ **Production Readiness**: Can upgrade orchestration layer if needed  
+✅ **Cost Efficiency**: No operational overhead of complex orchestration
+
+#### Technical Documentation
+
+📋 **Reference**: Complete service orchestration approach documented in `/docs/ServiceOrchestration.md`
+
 - [ ] 6.2: System Integration Testing
 - [ ] 6.3: Deployment Automation
 

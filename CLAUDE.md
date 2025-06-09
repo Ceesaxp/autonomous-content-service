@@ -12,6 +12,8 @@ GitHub repo of the project is `Ceesaxp/autonomous-content-service`.
 
 Always cleanup after test builds, do not leave binaries laying around.
 
+Always test that the app compiles and that there are no critical linter errors before concluding that the task you were
+
 ## Documentation
 
 

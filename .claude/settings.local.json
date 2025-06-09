@@ -11,8 +11,13 @@
       "Bash(go vet)",
       "Bash(go test)",
       "Bash(golangci-lint run)",
-      "Bash(golangci-lint run:*)"
+      "Bash(golangci-lint run:*)",
+      "Bash(rg:*)",
+      "Bash(go build:*)",
+      "Bash(grep:*)",
+      "Bash(go test:*)"
     ],
     "deny": []
-  }
+  },
+  "enableAllProjectMcpServers": false
 }

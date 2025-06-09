@@ -1,184 +1,90 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
-	"time"
-
-	"github.com/Ceesaxp/autonomous-content-service/src/api"
-	"github.com/Ceesaxp/autonomous-content-service/src/api/handlers"
-	"github.com/Ceesaxp/autonomous-content-service/src/config"
-	"github.com/Ceesaxp/autonomous-content-service/src/infrastructure/database"
-	"github.com/Ceesaxp/autonomous-content-service/src/services/content_creation"
-	"github.com/Ceesaxp/autonomous-content-service/src/services/risk_management"
-	"github.com/gorilla/mux"
+	"os/exec"
+	"strings"
 )
 
 func main() {
-	// Load configuration
-	config, err := config.LoadConfig()
-	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
+	// Get service name from command line argument or environment
+	serviceName := getServiceName()
+
+	// Map of available services
+	services := map[string]string{
+		"api-gateway":             "./src/cmd/api-gateway/main.go",
+		"content-service":         "./src/cmd/content-service/main.go",
+		"decision-service":        "./src/cmd/decision-service/main.go",
+		"hr-service":              "./src/cmd/hr-service/main.go",
+		"financial-service":       "./src/cmd/financial-service/main.go",
+		"governance-service":      "./src/cmd/governance-service/main.go",
+		"legal-service":           "./src/cmd/legal-service/main.go",
+		"risk-service":            "./src/cmd/risk-service/main.go",
+		"self-improvement-service": "./src/cmd/self-improvement-service/main.go",
 	}
 
-	// Set up database connection
-	db, err := database.NewPostgresDB(config.GetDSN())
-	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
-	}
-	defer db.Close()
-
-	// Run migrations
-	if err := database.RunMigrations(db); err != nil {
-		log.Fatalf("Failed to run database migrations: %v", err)
+	if serviceName == "help" || serviceName == "--help" || serviceName == "-h" {
+		printUsage(services)
+		return
 	}
 
-	// Initialize repositories
-	clientRepo := database.NewClientRepository(db)
-	projectRepo := database.NewProjectRepository(db)
-	contentRepo := database.NewContentRepository(db)
-	contentVersionRepo := database.NewContentVersionRepository(db)
-	feedbackRepo := database.NewFeedbackRepository(db)
-	eventRepo := database.NewEventRepository(db)
-	riskRepo := database.NewRiskRepository(db)
-
-	// Initialize services
-	llmClient := content_creation.NewOpenAIClient(
-		config.LLMAPIKey,
-		config.LLMModel,
-		config.LLMMaxTokens,
-		config.LLMTemperature,
-	)
-
-	searchService := content_creation.NewWebSearchService(
-		config.SearchAPIKey,
-		config.SearchURL,
-	)
-
-	plagiarismAPI := content_creation.NewSimplePlagiarismAPI()
-	readabilityScorer := content_creation.NewBasicReadabilityScorer()
-	seoAnalyzer := content_creation.NewBasicSEOAnalyzer()
-
-	contextManager := content_creation.NewInMemoryContextManager(
-		clientRepo,
-		config.ContextWindowSize,
-	)
-
-	qualityChecker := content_creation.NewLLMQualityChecker(
-		llmClient,
-		plagiarismAPI,
-		readabilityScorer,
-		seoAnalyzer,
-	)
-
-	pipelineConfig := content_creation.PipelineConfig{
-		MaxRetries:           3,
-		ContextWindowSize:    config.ContextWindowSize,
-		EnableFactChecking:   config.EnableFactChecking,
-		EnablePlagiarismCheck: config.EnablePlagiarism,
-		SEOOptimization:      config.EnableSEO,
+	// Default to API Gateway for backward compatibility
+	if serviceName == "" {
+		serviceName = "api-gateway"
 	}
 
-	// Initialize the researcher
-	researcher := content_creation.NewLLMResearcher(
-		llmClient,
-		searchService,
-	)
-
-	contentPipeline := content_creation.NewContentPipeline(
-		contentRepo,
-		contentVersionRepo,
-		projectRepo,
-		eventRepo,
-		llmClient,
-		contextManager,
-		researcher,
-		qualityChecker,
-		pipelineConfig,
-	)
-
-	// Initialize handlers
-	contentHandler := handlers.NewContentHandler(
-		contentRepo,
-		projectRepo,
-		feedbackRepo,
-		contentPipeline,
-	)
-
-	projectHandler := handlers.NewProjectHandler(
-		projectRepo,
-		contentRepo,
-		clientRepo,
-	)
-
-	// Initialize risk management service (using existing repos for financial analysis)
-	riskService := risk_management.NewRiskManagementService(
-		riskRepo,
-		nil, // payment repo - will implement stub methods for now
-		clientRepo,
-		eventRepo,
-	)
-
-	// Initialize risk handlers
-	riskHandler := handlers.NewRiskHandlers(riskService)
-
-	// Set up router
-	router := mux.NewRouter()
-	router.Use(loggingMiddleware)
-
-	// Dashboard handler can be nil for now since we don't have a complete dashboard service implementation
-	var dashboardHandler *handlers.DashboardHandlers = nil
-	
-	// Self-improvement handler can be nil for now since we don't have a complete implementation
-	var selfImprovementHandler *handlers.SelfImprovementHandler = nil
-
-	// Set up API routes
-	api.SetupRoutes(router, contentHandler, projectHandler, nil, dashboardHandler, selfImprovementHandler, riskHandler) // nil for onboarding handler until we initialize it
-
-	// Set up server
-	server := &http.Server{
-		Addr:         fmt.Sprintf("%s:%d", config.Host, config.Port),
-		Handler:      router,
-		ReadTimeout:  15 * time.Second,
-		WriteTimeout: 15 * time.Second,
-		IdleTimeout:  60 * time.Second,
+	serviceMain, exists := services[serviceName]
+	if !exists {
+		log.Fatalf("Unknown service: %s. Use 'help' to see available services.", serviceName)
 	}
 
-	// Start server in a goroutine
-	go func() {
-		log.Printf("Server listening on %s", server.Addr)
-		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("Server error: %v", err)
-		}
-	}()
+	log.Printf("Starting %s...", serviceName)
 
-	// Wait for interrupt signal to gracefully shut down the server
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
-	log.Println("Shutting down server...")
+	// Execute the service
+	cmd := exec.Command("go", "run", serviceMain)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Env = os.Environ()
 
-	// Create a deadline for server shutdown
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-
-	// Attempt graceful shutdown
-	if err := server.Shutdown(ctx); err != nil {
-		log.Fatalf("Server forced to shutdown: %v", err)
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("Failed to start service %s: %v", serviceName, err)
 	}
-
-	log.Println("Server exited gracefully")
 }
 
-// loggingMiddleware logs all requests
-func loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("%s %s %s", r.RemoteAddr, r.Method, r.URL)
-		next.ServeHTTP(w, r)
-	})
+// getServiceName gets the service name from command line args or environment
+func getServiceName() string {
+	// Check command line arguments first
+	if len(os.Args) > 1 {
+		return strings.ToLower(os.Args[1])
+	}
+
+	// Check environment variable
+	if service := os.Getenv("SERVICE_NAME"); service != "" {
+		return strings.ToLower(service)
+	}
+
+	return ""
+}
+
+// printUsage prints usage information
+func printUsage(services map[string]string) {
+	fmt.Println("Autonomous Content Service - Microservices Launcher")
+	fmt.Println("")
+	fmt.Println("Usage:")
+	fmt.Println("  go run main.go [service-name]")
+	fmt.Println("  SERVICE_NAME=service-name go run main.go")
+	fmt.Println("")
+	fmt.Println("Available services:")
+	for service := range services {
+		fmt.Printf("  - %s\n", service)
+	}
+	fmt.Println("")
+	fmt.Println("Examples:")
+	fmt.Println("  go run main.go api-gateway")
+	fmt.Println("  go run main.go content-service")
+	fmt.Println("  SERVICE_NAME=hr-service go run main.go")
+	fmt.Println("")
+	fmt.Println("Default: api-gateway (for backward compatibility)")
 }
