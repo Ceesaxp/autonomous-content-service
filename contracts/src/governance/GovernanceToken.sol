@@ -40,7 +40,7 @@ contract GovernanceToken is ERC20, ERC20Permit, ERC20Votes, Ownable, Pausable {
     error MintingTooFrequent();
     error ExceedsMintLimit();
     error UnauthorizedMinter();
-    error AddressBlocked();
+    error AccountBlocked();
     error InvalidAddress();
     
     /**
@@ -185,7 +185,7 @@ contract GovernanceToken is ERC20, ERC20Permit, ERC20Votes, Ownable, Pausable {
      * @param delegatee Address to delegate voting power to
      */
     function delegate(address delegatee) public override {
-        if (blockedAddresses[msg.sender]) revert AddressBlocked();
+        if (blockedAddresses[msg.sender]) revert AccountBlocked();
         super.delegate(delegatee);
     }
     
@@ -217,7 +217,7 @@ contract GovernanceToken is ERC20, ERC20Permit, ERC20Votes, Ownable, Pausable {
         uint256 amount
     ) internal override whenNotPaused {
         if (blockedAddresses[from] || blockedAddresses[to]) {
-            revert AddressBlocked();
+            revert AccountBlocked();
         }
         super._beforeTokenTransfer(from, to, amount);
     }

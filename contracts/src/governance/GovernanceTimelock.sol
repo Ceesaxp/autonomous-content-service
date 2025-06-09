@@ -251,7 +251,7 @@ contract GovernanceTimelock is TimelockController, ReentrancyGuard {
      * @notice Updates the minimum delay for operations
      * @param newDelay New minimum delay
      */
-    function updateDelay(uint256 newDelay) external {
+    function updateDelay(uint256 newDelay) external override {
         require(msg.sender == address(this), "GovernanceTimelock: caller must be timelock");
         if (newDelay < MIN_DELAY || newDelay > MAX_DELAY) revert InvalidDelay();
         

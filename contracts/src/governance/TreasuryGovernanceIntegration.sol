@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+import "./AccessControl.sol";
+import "../utils/ReentrancyGuard.sol";
+import "../utils/Pausable.sol";
 import "../TreasuryCore.sol";
 import "../AssetManager.sol";
 
@@ -126,18 +126,18 @@ contract TreasuryGovernanceIntegration is AccessControl, ReentrancyGuard, Pausab
      * @param _emergencyRecipient Address for emergency withdrawals
      */
     constructor(
-        address _treasury,
-        address _assetManager,
+        TreasuryCore _treasury,
+        AssetManager _assetManager,
         address _governance,
         address _emergencyRecipient
     ) {
-        require(_treasury != address(0), "Invalid treasury address");
-        require(_assetManager != address(0), "Invalid asset manager address");
+        require(address(_treasury) != address(0), "Invalid treasury address");
+        require(address(_assetManager) != address(0), "Invalid asset manager address");
         require(_governance != address(0), "Invalid governance address");
         require(_emergencyRecipient != address(0), "Invalid emergency recipient");
         
-        treasury = TreasuryCore(_treasury);
-        assetManager = AssetManager(_assetManager);
+        treasury = _treasury;
+        assetManager = _assetManager;
         emergencyRecipient = _emergencyRecipient;
         
         // Set initial parameters

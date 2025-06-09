@@ -97,7 +97,7 @@ contract DAOGovernor is
         bool isEmergency
     );
     
-    error GovernorPaused();
+    error GovernorIsPaused();
     error InvalidProposalType();
     error InvalidThreshold();
     error InvalidVotingPeriod();
@@ -154,7 +154,7 @@ contract DAOGovernor is
         string memory discussionUrl,
         bool isEmergency
     ) public returns (uint256) {
-        if (paused) revert GovernorPaused();
+        if (paused) revert GovernorIsPaused();
         
         // Validate proposal type
         if (proposalType > 0 && proposalTypeConfigs[proposalType].proposalThreshold == 0) {
@@ -277,7 +277,7 @@ contract DAOGovernor is
      * @param proposalId Proposal ID
      * @return Quorum required for the proposal
      */
-    function quorum(uint256 proposalId) public view override returns (uint256) {
+    function quorum(uint256 proposalId) public view override(IGovernor, GovernorVotesQuorumFraction) returns (uint256) {
         uint8 proposalType = proposalMetadata[proposalId].proposalType;
         
         if (proposalType > 0 && proposalTypeConfigs[proposalType].quorumFraction > 0) {
@@ -293,7 +293,7 @@ contract DAOGovernor is
      * @param proposalId Proposal ID
      * @return Voting period for the proposal
      */
-    function proposalDeadline(uint256 proposalId) public view override returns (uint256) {
+    function proposalDeadline(uint256 proposalId) public view override(IGovernor, Governor) returns (uint256) {
         uint8 proposalType = proposalMetadata[proposalId].proposalType;
         
         if (proposalType > 0 && proposalTypeConfigs[proposalType].votingPeriod > 0) {
@@ -307,7 +307,7 @@ contract DAOGovernor is
      * @notice Returns the proposal threshold for a specific proposal type
      * @return Current proposal threshold
      */
-    function proposalThreshold() public view override returns (uint256) {
+    function proposalThreshold() public view override(Governor, GovernorSettings) returns (uint256) {
         return super.proposalThreshold();
     }
     
@@ -339,7 +339,7 @@ contract DAOGovernor is
         return super.votingPeriod();
     }
     
-    function getVotes(address account, uint256 timepoint) public view override(IGovernor, GovernorVotes) returns (uint256) {
+    function getVotes(address account, uint256 timepoint) public view override(IGovernor, Governor) returns (uint256) {
         return super.getVotes(account, timepoint);
     }
     
@@ -353,7 +353,7 @@ contract DAOGovernor is
         bytes[] memory calldatas,
         string memory description
     ) public override(Governor, IGovernor) returns (uint256) {
-        if (paused) revert GovernorPaused();
+        if (paused) revert GovernorIsPaused();
         return super.propose(targets, values, calldatas, description);
     }
     

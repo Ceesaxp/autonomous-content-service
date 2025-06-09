@@ -218,6 +218,20 @@ contract TreasuryCore is ITreasury, MultiSigWallet, ReentrancyGuard, Pausable, A
     }
 
     /**
+     * @notice Transfers funds to a recipient. Public wrapper for integration contracts.
+     * @param recipient Address to receive funds
+     * @param amount Amount to transfer
+     * @param token Token address (address(0) for ETH)
+     */
+    function transferFunds(
+        address recipient,
+        uint256 amount,
+        address token
+    ) external onlyRole(TREASURER_ROLE) nonReentrant whenNotPaused {
+        _transferFunds(token, recipient, amount);
+    }
+
+    /**
      * @dev Rebalance portfolio according to target allocations
      */
     function rebalancePortfolio() external onlyRole(TREASURER_ROLE) whenNotPaused {
@@ -360,20 +374,22 @@ contract TreasuryCore is ITreasury, MultiSigWallet, ReentrancyGuard, Pausable, A
 
     // View functions for financial reporting
     function getTransactionsByCategory(TransactionCategory category) external view returns (uint256[] memory) {
-        uint256[] memory txIds = new uint256[](financialTransactionCounter);
         uint256 count = 0;
-        
         for (uint256 i = 1; i <= financialTransactionCounter; i++) {
             if (financialTransactions[i].category == category) {
-                txIds[count] = i;
                 count++;
             }
         }
-        
-        assembly {
-            mstore(txIds, count)
+
+        uint256[] memory txIds = new uint256[](count);
+        uint256 idx = 0;
+        for (uint256 i = 1; i <= financialTransactionCounter; i++) {
+            if (financialTransactions[i].category == category) {
+                txIds[idx] = i;
+                idx++;
+            }
         }
-        
+
         return txIds;
     }
 
