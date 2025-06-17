@@ -1,35 +1,48 @@
-# Multi-stage build for Content Service
-FROM golang:1.23-alpine AS builder
+# Build stage
+FROM golang:1.21-alpine AS builder
 
-# Install build dependencies
+# Install necessary packages
 RUN apk add --no-cache git ca-certificates
 
 # Set working directory
-WORKDIR /app
+WORKDIR /build
 
 # Copy go mod files
 COPY go.mod go.sum ./
+
+# Download dependencies
 RUN go mod download
 
 # Copy source code
 COPY src/ ./src/
 
-# Build the content service
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o legal-service ./src/cmd/legal-service
+# Build the binary
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags '-extldflags "-static"' -o legal-service ./src/cmd/legal-service
 
-# Final stage - minimal image
+# Final stage
 FROM alpine:latest
 
-# Install ca-certificates for HTTPS requests
+# Install ca-certificates for HTTPS requests and curl for health checks
 RUN apk --no-cache add ca-certificates curl
 
-WORKDIR /root/
+# Create non-root user
+RUN addgroup -g 1001 -S appgroup && \
+    adduser -u 1001 -S appuser -G appgroup
 
-# Copy the binary from builder stage
-COPY --from=builder /app/legal-service .
+# Set working directory
+WORKDIR /app
 
-# Expose service port
-EXPOSE 8081
+# Copy binary from builder stage
+COPY --from=builder /build/legal-service .
+
+# Change ownership to non-root user
+RUN chown -R appuser:appgroup /app
+
+# Switch to non-root user
+USER appuser
+
+# Expose port
+EXPOSE 8086
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
