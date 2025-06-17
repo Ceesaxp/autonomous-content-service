@@ -11,6 +11,9 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"github.com/Ceesaxp/autonomous-content-service/src/domain/entities"
+	"github.com/Ceesaxp/autonomous-content-service/src/services/decision_making"
 )
 
 // LLMClient defines the interface for interacting with an LLM service
@@ -70,6 +73,21 @@ type OpenAIClient struct {
 	MaxTokens   int
 	Temperature float64
 	HTTPClient  *http.Client
+}
+
+// AnalyzeRisksBenefits implements decision_making.LLMClient.
+func (c *OpenAIClient) AnalyzeRisksBenefits(ctx context.Context, prompt string) (*decision_making.RiskBenefitAnalysis, error) {
+	panic("unimplemented")
+}
+
+// GenerateOptions implements decision_making.LLMClient.
+func (c *OpenAIClient) GenerateOptions(ctx context.Context, prompt string) ([]entities.DecisionOption, error) {
+	panic("unimplemented")
+}
+
+// GenerateText implements decision_making.LLMClient.
+func (c *OpenAIClient) GenerateText(ctx context.Context, prompt string) (string, error) {
+	panic("unimplemented")
 }
 
 // NewOpenAIClient creates a new client for the OpenAI API

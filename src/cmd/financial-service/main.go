@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Ceesaxp/autonomous-content-service/src/api/handlers"
 	"github.com/Ceesaxp/autonomous-content-service/src/config"
 	"github.com/Ceesaxp/autonomous-content-service/src/infrastructure/database"
 	"github.com/gorilla/mux"
@@ -31,8 +32,8 @@ func main() {
 	}
 	defer db.Close()
 
-	// Initialize repositories for future use
-	_ = database.NewTransactionRepository(db)
+	// Initialize repositories
+	transactionRepo := database.NewTransactionRepository(db)
 
 	// Set up router
 	router := mux.NewRouter()
@@ -41,9 +42,12 @@ func main() {
 	// Health check endpoint
 	router.HandleFunc("/health", healthCheckHandler).Methods("GET")
 
+	// Initialize handlers
+	financialHandler := handlers.NewFinancialHandlers(transactionRepo)
+
 	// Financial service routes
 	financialRouter := router.PathPrefix("/api/v1").Subrouter()
-	setupFinancialRoutes(financialRouter)
+	setupFinancialRoutes(financialRouter, financialHandler)
 
 	// Set up server
 	port := getServicePort("FINANCIAL_SERVICE_PORT", 8084)
@@ -81,33 +85,24 @@ func main() {
 	log.Println("Financial Service exited gracefully")
 }
 
-// setupFinancialRoutes configures financial-specific routes
-func setupFinancialRoutes(router *mux.Router) {
+// setupFinancialRoutes configures financial-specific routes with real implementations
+func setupFinancialRoutes(router *mux.Router, handler *handlers.FinancialHandlers) {
 	// Payment processing
-	router.HandleFunc("/payments/process", basicHandler("payment processed")).Methods("POST")
-	router.HandleFunc("/payments/refund", basicHandler("payment refunded")).Methods("POST")
-	router.HandleFunc("/payments/{id}/status", basicHandler("payment status")).Methods("GET")
-	router.HandleFunc("/payments/methods", basicHandler("payment methods")).Methods("GET")
+	router.HandleFunc("/payments/process", handler.ProcessPayment).Methods("POST")
+	router.HandleFunc("/payments/refund", handler.RefundPayment).Methods("POST")
+	router.HandleFunc("/payments/{id}/status", handler.GetPaymentStatus).Methods("GET")
+	router.HandleFunc("/payments/methods", handler.GetPaymentMethods).Methods("GET")
 	
 	// Pricing and quotes
-	router.HandleFunc("/pricing/quote", basicHandler("price quote")).Methods("POST")
-	router.HandleFunc("/pricing/models", basicHandler("pricing models")).Methods("GET")
-	router.HandleFunc("/pricing/experiments", basicHandler("pricing experiment")).Methods("POST")
-	router.HandleFunc("/pricing/market-data", basicHandler("market data")).Methods("GET")
+	router.HandleFunc("/pricing/quote", handler.GetPriceQuote).Methods("POST")
+	router.HandleFunc("/pricing/models", handler.GetPricingModels).Methods("GET")
+	router.HandleFunc("/pricing/experiments", handler.CreatePricingExperiment).Methods("POST")
+	router.HandleFunc("/pricing/market-data", handler.GetMarketData).Methods("GET")
 	
 	// Treasury operations
-	router.HandleFunc("/treasury/balance", basicHandler("treasury balance")).Methods("GET")
-	router.HandleFunc("/treasury/allocate", basicHandler("funds allocated")).Methods("POST")
-	router.HandleFunc("/treasury/transactions", basicHandler("treasury transactions")).Methods("GET")
-}
-
-// basicHandler returns a simple JSON response for testing
-func basicHandler(action string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(fmt.Sprintf(`{"status":"success","action":"%s","message":"Financial service endpoint - implementation pending"}`, action)))
-	}
+	router.HandleFunc("/treasury/balance", handler.GetTreasuryBalance).Methods("GET")
+	router.HandleFunc("/treasury/allocate", handler.AllocateFunds).Methods("POST")
+	router.HandleFunc("/treasury/transactions", handler.GetTreasuryTransactions).Methods("GET")
 }
 
 // healthCheckHandler provides health status for the Financial Service

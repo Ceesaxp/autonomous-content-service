@@ -30,7 +30,7 @@ const (
 
 // Money represents a monetary amount with currency
 type Money struct {
-	Amount   float64 `json:"amount"`
+	Amount   float64 `json:"amount"` // FIXME: NEVER USE FLOAT for MONEY!!
 	Currency string  `json:"currency"`
 }
 

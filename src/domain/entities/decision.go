@@ -43,24 +43,30 @@ const (
 
 // Decision represents an autonomous decision made by the system
 type Decision struct {
-	ID               string           `json:"id"`
-	Type             DecisionType     `json:"type"`
-	Priority         DecisionPriority `json:"priority"`
-	Status           DecisionStatus   `json:"status"`
-	Title            string           `json:"title"`
-	Description      string           `json:"description"`
-	Context          map[string]interface{} `json:"context"`
-	Options          []DecisionOption `json:"options"`
-	SelectedOption   *DecisionOption  `json:"selected_option,omitempty"`
-	Justification    string           `json:"justification"`
-	ConfidenceScore  float64          `json:"confidence_score"`
-	ImpactAnalysis   *ImpactAnalysis  `json:"impact_analysis,omitempty"`
-	PolicyViolations []PolicyViolation `json:"policy_violations,omitempty"`
-	Override         *DecisionOverride `json:"override,omitempty"`
-	ExecutionResult  *ExecutionResult  `json:"execution_result,omitempty"`
-	CreatedAt        time.Time        `json:"created_at"`
-	UpdatedAt        time.Time        `json:"updated_at"`
-	ExecutedAt       *time.Time       `json:"executed_at,omitempty"`
+	ID                 string                 `json:"id"`
+	Type               DecisionType           `json:"type"`
+	Priority           DecisionPriority       `json:"priority"`
+	Status             DecisionStatus         `json:"status"`
+	Title              string                 `json:"title"`
+	Description        string                 `json:"description"`
+	Context            map[string]interface{} `json:"context"`
+	Options            []DecisionOption       `json:"options"`
+	SelectedOption     *DecisionOption        `json:"selected_option,omitempty"`
+	Justification      string                 `json:"justification"`
+	ConfidenceScore    float64                `json:"confidence_score"`
+	Confidence         float64                `json:"confidence"` // Alias for compatibility
+	Reasoning          string                 `json:"reasoning"`  // Alias for justification
+	ImpactAnalysis     *ImpactAnalysis        `json:"impact_analysis,omitempty"`
+	StakeholderImpact  []StakeholderImpact    `json:"stakeholder_impact,omitempty"`
+	Constraints        []string               `json:"constraints,omitempty"`
+	PolicyViolations   []PolicyViolation      `json:"policy_violations,omitempty"`
+	Override           *DecisionOverride      `json:"override,omitempty"`
+	ExecutionResult    *ExecutionResult       `json:"execution_result,omitempty"`
+	Deadline           *time.Time             `json:"deadline,omitempty"`
+	Metadata           map[string]interface{} `json:"metadata,omitempty"`
+	CreatedAt          time.Time              `json:"created_at"`
+	UpdatedAt          time.Time              `json:"updated_at"`
+	ExecutedAt         *time.Time             `json:"executed_at,omitempty"`
 }
 
 // DecisionOption represents a possible choice in a decision

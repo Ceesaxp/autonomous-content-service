@@ -1,0 +1,97 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Consul service discovery
+  - job_name: 'consul'
+    static_configs:
+      - targets: ['consul:8500']
+
+  # Microservices - discovered via Consul
+  - job_name: 'microservices'
+    consul_sd_configs:
+      - server: 'consul:8500'
+        services: []
+    relabel_configs:
+      - source_labels: [__meta_consul_service]
+        target_label: job
+      - source_labels: [__meta_consul_service_address]
+        target_label: __address__
+      - source_labels: [__meta_consul_service_port]
+        target_label: __port__
+
+  # Static microservices (fallback if Consul discovery fails)
+  - job_name: 'api-gateway'
+    static_configs:
+      - targets: ['api-gateway:8080']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  - job_name: 'content-service'
+    static_configs:
+      - targets: ['content-service:8081']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  - job_name: 'decision-service'
+    static_configs:
+      - targets: ['decision-service:8082']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  - job_name: 'financial-service'
+    static_configs:
+      - targets: ['financial-service:8083']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  - job_name: 'governance-service'
+    static_configs:
+      - targets: ['governance-service:8084']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  - job_name: 'hr-service'
+    static_configs:
+      - targets: ['hr-service:8085']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  - job_name: 'legal-service'
+    static_configs:
+      - targets: ['legal-service:8086']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  - job_name: 'risk-service'
+    static_configs:
+      - targets: ['risk-service:8087']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  - job_name: 'self-improvement-service'
+    static_configs:
+      - targets: ['self-improvement-service:8088']
+    metrics_path: '/metrics'
+    scrape_interval: 30s
+
+  # Infrastructure services
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+    scrape_interval: 60s
+
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    scrape_interval: 60s

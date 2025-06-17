@@ -10,8 +10,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Ceesaxp/autonomous-content-service/src/api/handlers"
 	"github.com/Ceesaxp/autonomous-content-service/src/config"
 	"github.com/Ceesaxp/autonomous-content-service/src/infrastructure/database"
+	"github.com/Ceesaxp/autonomous-content-service/src/services/hr_management"
 	"github.com/gorilla/mux"
 )
 
@@ -31,19 +33,35 @@ func main() {
 	}
 	defer db.Close()
 
-	// Initialize repositories for future use
-	_ = database.NewEventRepository(db)
+	// Initialize repositories
+	repos := database.NewRepositories(db)
+	
+	// Initialize HR service
+	hrService := hr_management.NewHRService(
+		repos.Talent,
+		repos.Engagement,
+		repos.WorkAssignment,
+		repos.Performance,
+		repos.Compensation,
+		repos.Training,
+		repos.TalentApplication,
+		repos.Compliance,
+		repos.Offboarding,
+		repos.Event,
+	)
+	
+	// Initialize handlers
+	hrHandlers := handlers.NewHRHandlers(hrService)
 
-	// Set up router with basic handlers for initial microservices implementation
+	// Set up router 
 	router := mux.NewRouter()
 	router.Use(loggingMiddleware)
 
 	// Health check endpoint
 	router.HandleFunc("/health", healthCheckHandler).Methods("GET")
 
-	// HR service routes (basic implementations for testing)
-	hrRouter := router.PathPrefix("/api/v1").Subrouter()
-	setupHRRoutes(hrRouter)
+	// Register HR handlers
+	hrHandlers.RegisterRoutes(router)
 
 	// Set up server
 	port := getServicePort("HR_SERVICE_PORT", 8083)
@@ -79,47 +97,6 @@ func main() {
 	}
 
 	log.Println("HR Service exited gracefully")
-}
-
-// setupHRRoutes configures HR-specific routes with basic implementations
-func setupHRRoutes(router *mux.Router) {
-	// Talent management
-	router.HandleFunc("/talent", basicHandler("talent created")).Methods("POST")
-	router.HandleFunc("/talent", basicHandler("talent profiles")).Methods("GET")
-	router.HandleFunc("/talent/{id}", basicHandler("talent profile")).Methods("GET")
-	router.HandleFunc("/talent/{id}", basicHandler("talent updated")).Methods("PUT")
-	router.HandleFunc("/talent/{id}/status", basicHandler("status updated")).Methods("PUT")
-	
-	// Job postings and applications
-	router.HandleFunc("/job-postings", basicHandler("job posting created")).Methods("POST")
-	router.HandleFunc("/job-postings", basicHandler("job postings")).Methods("GET")
-	router.HandleFunc("/job-postings/{id}/applications", basicHandler("applications")).Methods("GET")
-	router.HandleFunc("/applications/{id}/screen", basicHandler("application screened")).Methods("POST")
-	
-	// Engagements and assignments
-	router.HandleFunc("/engagements", basicHandler("engagement created")).Methods("POST")
-	router.HandleFunc("/engagements", basicHandler("engagements")).Methods("GET")
-	router.HandleFunc("/engagements/{id}/assignments", basicHandler("assignment created")).Methods("POST")
-	router.HandleFunc("/assignments/{id}/complete", basicHandler("assignment completed")).Methods("POST")
-	
-	// Performance and reviews
-	router.HandleFunc("/talent/{id}/performance", basicHandler("performance metrics")).Methods("GET")
-	router.HandleFunc("/talent/{id}/reviews", basicHandler("review created")).Methods("POST")
-	router.HandleFunc("/talent/{id}/compensation", basicHandler("compensation plan")).Methods("GET")
-	
-	// Training and development
-	router.HandleFunc("/training-programs", basicHandler("training programs")).Methods("GET")
-	router.HandleFunc("/talent/{id}/training", basicHandler("training assigned")).Methods("POST")
-	router.HandleFunc("/talent/{id}/progress", basicHandler("training progress")).Methods("GET")
-}
-
-// basicHandler returns a simple JSON response for testing
-func basicHandler(action string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(fmt.Sprintf(`{"status":"success","action":"%s","message":"HR service endpoint - implementation pending"}`, action)))
-	}
 }
 
 // healthCheckHandler provides health status for the HR Service

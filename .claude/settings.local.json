@@ -15,7 +15,9 @@
       "Bash(rg:*)",
       "Bash(go build:*)",
       "Bash(grep:*)",
-      "Bash(go test:*)"
+      "Bash(go test:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)"
     ],
     "deny": []
   },

@@ -1,0 +1,319 @@
+version: '3.8'
+
+services:
+  # Infrastructure Services
+  postgres:
+    image: postgres:15
+    container_name: acs-postgres
+    environment:
+      POSTGRES_DB: contentservice
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../src/infrastructure/database/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ../src/infrastructure/database/self_improvement_schema.sql:/docker-entrypoint-initdb.d/02-self_improvement_schema.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: acs-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  consul:
+    image: consul:1.16
+    container_name: acs-consul
+    command: consul agent -dev -client=0.0.0.0 -ui
+    environment:
+      CONSUL_BIND_INTERFACE: eth0
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    healthcheck:
+      test: ["CMD", "consul", "members"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: acs-prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    depends_on:
+      - consul
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: acs-grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+
+  # Business Microservices
+  api-gateway:
+    build:
+      context: ..
+      dockerfile: docker/services/api-gateway/Dockerfile
+    container_name: acs-api-gateway
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/contentservice?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=consul:8500
+      - PORT=8080
+      - CONTENT_SERVICE_URL=http://content-service:8081
+      - DECISION_SERVICE_URL=http://decision-service:8082
+      - FINANCIAL_SERVICE_URL=http://financial-service:8083
+      - GOVERNANCE_SERVICE_URL=http://governance-service:8084
+      - HR_SERVICE_URL=http://hr-service:8085
+      - LEGAL_SERVICE_URL=http://legal-service:8086
+      - RISK_SERVICE_URL=http://risk-service:8087
+      - SELF_IMPROVEMENT_SERVICE_URL=http://self-improvement-service:8088
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+      - consul
+      - content-service
+      - decision-service
+      - financial-service
+      - governance-service
+      - hr-service
+      - legal-service
+      - risk-service
+      - self-improvement-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  content-service:
+    build:
+      context: ..
+      dockerfile: docker/services/content/Dockerfile
+    container_name: acs-content-service
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/contentservice?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=consul:8500
+      - CONTENT_SERVICE_PORT=8081
+      - LLM_API_KEY=${LLM_API_KEY}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4}
+      - LLM_MAX_TOKENS=${LLM_MAX_TOKENS:-2000}
+      - LLM_TEMPERATURE=${LLM_TEMPERATURE:-0.7}
+      - SEARCH_API_KEY=${SEARCH_API_KEY}
+      - SEARCH_URL=${SEARCH_URL}
+      - CONTEXT_WINDOW_SIZE=${CONTEXT_WINDOW_SIZE:-8000}
+      - ENABLE_FACT_CHECKING=${ENABLE_FACT_CHECKING:-true}
+      - ENABLE_PLAGIARISM=${ENABLE_PLAGIARISM:-true}
+      - ENABLE_SEO=${ENABLE_SEO:-true}
+    ports:
+      - "8081:8081"
+    depends_on:
+      - postgres
+      - redis
+      - consul
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  decision-service:
+    build:
+      context: ..
+      dockerfile: docker/services/decision/Dockerfile
+    container_name: acs-decision-service
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/contentservice?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=consul:8500
+      - DECISION_SERVICE_PORT=8082
+    ports:
+      - "8082:8082"
+    depends_on:
+      - postgres
+      - redis
+      - consul
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  financial-service:
+    build:
+      context: ..
+      dockerfile: docker/services/financial/Dockerfile
+    container_name: acs-financial-service
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/contentservice?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=consul:8500
+      - FINANCIAL_SERVICE_PORT=8083
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+    ports:
+      - "8083:8083"
+    depends_on:
+      - postgres
+      - redis
+      - consul
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  governance-service:
+    build:
+      context: ..
+      dockerfile: docker/services/governance/Dockerfile
+    container_name: acs-governance-service
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/contentservice?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=consul:8500
+      - GOVERNANCE_SERVICE_PORT=8084
+    ports:
+      - "8084:8084"
+    depends_on:
+      - postgres
+      - redis
+      - consul
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  hr-service:
+    build:
+      context: ..
+      dockerfile: docker/services/hr/Dockerfile
+    container_name: acs-hr-service
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/contentservice?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=consul:8500
+      - HR_SERVICE_PORT=8085
+    ports:
+      - "8085:8085"
+    depends_on:
+      - postgres
+      - redis
+      - consul
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8085/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  legal-service:
+    build:
+      context: ..
+      dockerfile: docker/services/legal/Dockerfile
+    container_name: acs-legal-service
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/contentservice?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=consul:8500
+      - LEGAL_SERVICE_PORT=8086
+    ports:
+      - "8086:8086"
+    depends_on:
+      - postgres
+      - redis
+      - consul
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8086/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  risk-service:
+    build:
+      context: ..
+      dockerfile: docker/services/risk/Dockerfile
+    container_name: acs-risk-service
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/contentservice?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=consul:8500
+      - RISK_SERVICE_PORT=8087
+    ports:
+      - "8087:8087"
+    depends_on:
+      - postgres
+      - redis
+      - consul
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8087/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  self-improvement-service:
+    build:
+      context: ..
+      dockerfile: docker/services/self-improvement/Dockerfile
+    container_name: acs-self-improvement-service
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/contentservice?sslmode=disable
+      - REDIS_URL=redis://redis:6379
+      - CONSUL_URL=consul:8500
+      - SELF_IMPROVEMENT_SERVICE_PORT=8088
+    ports:
+      - "8088:8088"
+    depends_on:
+      - postgres
+      - redis
+      - consul
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  default:
+    name: acs-microservices
+    driver: bridge

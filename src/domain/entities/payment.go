@@ -9,20 +9,29 @@ type PaymentMethod string
 
 const (
 	// Fiat methods
-	PaymentMethodStripe       PaymentMethod     = "stripe"
-	PaymentMethodPayPal       PaymentMethod     = "paypal"
-	PaymentMethodBankWire     PaymentMethod     = "bank_wire"
-	PaymentMethodACH          PaymentMethod     = "ach"
+	PaymentMethodCash PaymentMethod = "cash"
+	PaymentMethodWire PaymentMethod = "wire"
+
+	// Crypto methods
+	PaymentMethodEthereum  PaymentMethod = "eth"
+	PaymentMethodBitcoin   PaymentMethod = "btc"
+	PaymentMethodSolana    PaymentMethod = "sol"
+	PaymentMethodPolygon   PaymentMethod = "polygon"
+	PaymentMethodAvalanche PaymentMethod = "avalanche"
+	PaymentMethodTezos     PaymentMethod = "tezos"
+	PaymentMethodStellar   PaymentMethod = "stellar"
+	PaymentMethodUSDC      PaymentMethod = "usdc"
+	PaymentMethodDAI       PaymentMethod = "dai"
+)
+
+const (
+	// Fiat methods
 	PaymentMethodCreditCard   PaymentMethodType = "creditCard"
 	PaymentMethodBankTransfer PaymentMethodType = "bankTransfer"
-	PaymentMethodSquare       PaymentMethodType = "square" // probably not needed?
-	// Crypto methods
-	PaymentMethodCrypto   PaymentMethod = "crypto"
-	PaymentMethodEthereum PaymentMethod = "ethereum"
-	PaymentMethodUSDC     PaymentMethod = "usdc"
-	PaymentMethodUSDT     PaymentMethod = "usdt"
-	PaymentMethodDAI      PaymentMethod = "dai"
-	PaymentMethodBitcoin  PaymentMethod = "bitcoin"
+	PaymentMethodCrypto       PaymentMethodType = "crypto"
+	PaymentMethodStripe       PaymentMethodType = "stripe"
+	PaymentMethodPayPal       PaymentMethodType = "paypal"
+	PaymentMethodACH          PaymentMethodType = "ach"
 )
 
 // PaymentStatus represents the current state of a payment
@@ -163,25 +172,25 @@ type FeeStructure struct {
 
 // PaymentNotification represents notifications sent for payment events
 type PaymentNotification struct {
-	ID               string                 `json:"id" db:"id"`
-	PaymentID        string                 `json:"payment_id" db:"payment_id"`
-	InvoiceID        *string                `json:"invoice_id" db:"invoice_id"`
-	ClientID         string                 `json:"client_id" db:"client_id"`
-	NotificationType PaymentNotificationType       `json:"notification_type" db:"notification_type"`
-	Channel          NotificationChannel    `json:"channel" db:"channel"`
-	Recipient        string                 `json:"recipient" db:"recipient"`
-	Subject          string                 `json:"subject" db:"subject"`
-	Content          string                 `json:"content" db:"content"`
-	Metadata         map[string]interface{} `json:"metadata" db:"metadata"`
-	Status           NotificationStatus     `json:"status" db:"status"`
-	SentAt           *time.Time             `json:"sent_at" db:"sent_at"`
-	DeliveredAt      *time.Time             `json:"delivered_at" db:"delivered_at"`
-	OpenedAt         *time.Time             `json:"opened_at" db:"opened_at"`
-	ClickedAt        *time.Time             `json:"clicked_at" db:"clicked_at"`
-	FailureReason    *string                `json:"failure_reason" db:"failure_reason"`
-	RetryAttempts    int                    `json:"retry_attempts" db:"retry_attempts"`
-	CreatedAt        time.Time              `json:"created_at" db:"created_at"`
-	UpdatedAt        time.Time              `json:"updated_at" db:"updated_at"`
+	ID               string                  `json:"id" db:"id"`
+	PaymentID        string                  `json:"payment_id" db:"payment_id"`
+	InvoiceID        *string                 `json:"invoice_id" db:"invoice_id"`
+	ClientID         string                  `json:"client_id" db:"client_id"`
+	NotificationType PaymentNotificationType `json:"notification_type" db:"notification_type"`
+	Channel          NotificationChannel     `json:"channel" db:"channel"`
+	Recipient        string                  `json:"recipient" db:"recipient"`
+	Subject          string                  `json:"subject" db:"subject"`
+	Content          string                  `json:"content" db:"content"`
+	Metadata         map[string]interface{}  `json:"metadata" db:"metadata"`
+	Status           NotificationStatus      `json:"status" db:"status"`
+	SentAt           *time.Time              `json:"sent_at" db:"sent_at"`
+	DeliveredAt      *time.Time              `json:"delivered_at" db:"delivered_at"`
+	OpenedAt         *time.Time              `json:"opened_at" db:"opened_at"`
+	ClickedAt        *time.Time              `json:"clicked_at" db:"clicked_at"`
+	FailureReason    *string                 `json:"failure_reason" db:"failure_reason"`
+	RetryAttempts    int                     `json:"retry_attempts" db:"retry_attempts"`
+	CreatedAt        time.Time               `json:"created_at" db:"created_at"`
+	UpdatedAt        time.Time               `json:"updated_at" db:"updated_at"`
 }
 
 // PaymentNotificationType represents different types of payment notifications

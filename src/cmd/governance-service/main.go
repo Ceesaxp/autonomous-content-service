@@ -10,8 +10,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Ceesaxp/autonomous-content-service/src/api/handlers"
 	"github.com/Ceesaxp/autonomous-content-service/src/config"
 	"github.com/Ceesaxp/autonomous-content-service/src/infrastructure/database"
+	"github.com/Ceesaxp/autonomous-content-service/src/services/dao_governance"
 	"github.com/gorilla/mux"
 )
 
@@ -31,8 +33,15 @@ func main() {
 	}
 	defer db.Close()
 
-	// Initialize repositories for future use
-	_ = database.NewEventRepository(db)
+	// Initialize repositories (using simple implementations for microservices testing)
+	governanceRepo := database.NewGovernanceRepository(db)
+	eventRepo := database.NewEventRepository(db)
+
+	// Initialize simplified governance service
+	governanceService, votingService, membershipService := dao_governance.NewSimpleGovernanceService(governanceRepo, eventRepo)
+
+	// Initialize handlers
+	governanceHandler := handlers.NewGovernanceHandlers(governanceService, votingService, membershipService)
 
 	// Set up router
 	router := mux.NewRouter()
@@ -41,9 +50,8 @@ func main() {
 	// Health check endpoint
 	router.HandleFunc("/health", healthCheckHandler).Methods("GET")
 
-	// Governance service routes
-	govRouter := router.PathPrefix("/api/v1").Subrouter()
-	setupGovernanceRoutes(govRouter)
+	// Set up governance routes using real handlers
+	governanceHandler.RegisterRoutes(router)
 
 	// Set up server
 	port := getServicePort("GOVERNANCE_SERVICE_PORT", 8085)
@@ -81,39 +89,6 @@ func main() {
 	log.Println("Governance Service exited gracefully")
 }
 
-// setupGovernanceRoutes configures governance-specific routes
-func setupGovernanceRoutes(router *mux.Router) {
-	// Proposal management
-	router.HandleFunc("/proposals", basicHandler("proposal created")).Methods("POST")
-	router.HandleFunc("/proposals", basicHandler("proposals")).Methods("GET")
-	router.HandleFunc("/proposals/{id}", basicHandler("proposal")).Methods("GET")
-	router.HandleFunc("/proposals/{id}/vote", basicHandler("vote cast")).Methods("POST")
-	router.HandleFunc("/proposals/{id}/execute", basicHandler("proposal executed")).Methods("POST")
-	
-	// Member management
-	router.HandleFunc("/members", basicHandler("member registered")).Methods("POST")
-	router.HandleFunc("/members", basicHandler("members")).Methods("GET")
-	router.HandleFunc("/members/{id}", basicHandler("member")).Methods("GET")
-	router.HandleFunc("/members/{id}/delegate", basicHandler("vote delegated")).Methods("POST")
-	
-	// Treasury allocations
-	router.HandleFunc("/treasury/allocations", basicHandler("allocation created")).Methods("POST")
-	router.HandleFunc("/treasury/allocations", basicHandler("treasury allocations")).Methods("GET")
-	router.HandleFunc("/treasury/allocations/{id}/release", basicHandler("funds released")).Methods("POST")
-	
-	// Governance metrics
-	router.HandleFunc("/governance/metrics", basicHandler("governance metrics")).Methods("GET")
-	router.HandleFunc("/governance/reports", basicHandler("governance report")).Methods("POST")
-}
-
-// basicHandler returns a simple JSON response for testing
-func basicHandler(action string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(fmt.Sprintf(`{"status":"success","action":"%s","message":"Governance service endpoint - implementation pending"}`, action)))
-	}
-}
 
 // healthCheckHandler provides health status for the Governance Service
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {

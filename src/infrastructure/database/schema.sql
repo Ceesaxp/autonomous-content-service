@@ -6,6 +6,9 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Include legal and compliance schema
 \i legal_schema.sql
 
+-- Include governance schema
+\i governance_schema.sql
+
 -- Create enums for entity statuses
 
 -- Client status enum
@@ -500,6 +503,62 @@ CREATE INDEX idx_service_dependencies_service ON service_dependencies(service_na
 CREATE INDEX idx_service_dependencies_critical ON service_dependencies(critical);
 CREATE INDEX idx_service_dependencies_status ON service_dependencies(status);
 CREATE INDEX idx_service_dependencies_last_check ON service_dependencies(last_check);
+
+-- Decision-related enums
+CREATE TYPE decision_type AS ENUM (
+    'Strategic',
+    'Operational',
+    'Financial',
+    'Technical',
+    'Risk',
+    'Governance',
+    'HR',
+    'Legal',
+    'Business'
+);
+
+CREATE TYPE decision_status AS ENUM (
+    'Pending',
+    'InProgress',
+    'Approved',
+    'Rejected',
+    'Executed',
+    'Cancelled',
+    'Deferred'
+);
+
+CREATE TYPE decision_priority AS ENUM (
+    'Critical',
+    'High',
+    'Medium',
+    'Low'
+);
+
+-- Decisions table
+CREATE TABLE decisions (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    type decision_type NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    description TEXT NOT NULL,
+    status decision_status NOT NULL DEFAULT 'Pending',
+    priority decision_priority NOT NULL DEFAULT 'Medium',
+    options JSONB,
+    selected_option VARCHAR(255),
+    confidence DECIMAL(3, 2) CHECK (confidence >= 0 AND confidence <= 1),
+    reasoning TEXT,
+    stakeholder_impact JSONB,
+    constraints JSONB,
+    deadline TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    metadata JSONB
+);
+
+CREATE INDEX idx_decisions_type ON decisions(type);
+CREATE INDEX idx_decisions_status ON decisions(status);
+CREATE INDEX idx_decisions_priority ON decisions(priority);
+CREATE INDEX idx_decisions_created_at ON decisions(created_at);
+CREATE INDEX idx_decisions_deadline ON decisions(deadline);
 
 -- Include governance schema  
 \i governance_schema.sql

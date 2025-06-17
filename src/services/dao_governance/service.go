@@ -779,3 +779,15 @@ func (s *Service) UpdateGovernanceConfig(ctx context.Context, config *entities.G
 func (s *Service) GetGovernanceConfig(ctx context.Context) (*entities.GovernanceConfig, error) {
 	return s.governanceRepo.GetActiveConfig(ctx)
 }
+
+// NewSimpleGovernanceService creates a simple implementation of all governance services
+// This is used for the initial microservice setup before full implementation
+func NewSimpleGovernanceService(
+	governanceRepo repositories.GovernanceRepository,
+	eventRepo repositories.EventRepository,
+) (GovernanceService, VotingService, MembershipService) {
+	service := NewSimpleGovernanceServiceImpl(governanceRepo, eventRepo)
+	
+	// The same service implements all three interfaces
+	return service, service, service
+}

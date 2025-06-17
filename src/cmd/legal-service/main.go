@@ -10,8 +10,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Ceesaxp/autonomous-content-service/src/api/handlers"
 	"github.com/Ceesaxp/autonomous-content-service/src/config"
 	"github.com/Ceesaxp/autonomous-content-service/src/infrastructure/database"
+	"github.com/Ceesaxp/autonomous-content-service/src/services/legal_compliance"
 	"github.com/gorilla/mux"
 )
 
@@ -31,8 +33,23 @@ func main() {
 	}
 	defer db.Close()
 
-	// Initialize repositories (using existing event repo for now)
-	_ = database.NewEventRepository(db) // eventRepo for future use
+	// Initialize repositories
+	repos := database.NewRepositories(db)
+	
+	// Initialize legal compliance service
+	legalService := legal_compliance.NewService(
+		repos.Legal,
+		repos.Client,
+		repos.Project,
+		repos.Content,
+		&mockSignatureProvider{},
+		&mockComplianceEngine{},
+		&mockIPAnalyzer{},
+		&mockRegulatoryAPI{},
+	)
+	
+	// Initialize handlers
+	legalHandlers := handlers.NewLegalHandlers(legalService)
 
 	// Set up router
 	router := mux.NewRouter()
@@ -41,9 +58,8 @@ func main() {
 	// Health check endpoint
 	router.HandleFunc("/health", healthCheckHandler).Methods("GET")
 
-	// Legal service routes (basic implementations for testing)
-	legalRouter := router.PathPrefix("/api/v1").Subrouter()
-	setupLegalRoutes(legalRouter)
+	// Register legal handlers
+	legalHandlers.RegisterRoutes(router)
 
 	// Set up server
 	port := getServicePort("LEGAL_SERVICE_PORT", 8086)
@@ -81,48 +97,44 @@ func main() {
 	log.Println("Legal Service exited gracefully")
 }
 
-// setupLegalRoutes configures legal-specific routes with basic implementations
-func setupLegalRoutes(router *mux.Router) {
-	// Contract management
-	router.HandleFunc("/contracts", basicHandler("contracts", "contract generated")).Methods("POST")
-	router.HandleFunc("/contracts", basicHandler("contracts", "contracts retrieved")).Methods("GET")
-	router.HandleFunc("/contracts/{id}", basicHandler("contracts", "contract retrieved")).Methods("GET")
-	router.HandleFunc("/contracts/{id}/review", basicHandler("contracts", "contract reviewed")).Methods("POST")
-	router.HandleFunc("/contracts/{id}/sign", basicHandler("contracts", "signature requested")).Methods("POST")
-	
-	// Compliance monitoring
-	router.HandleFunc("/compliance/check", basicHandler("compliance", "compliance checked")).Methods("POST")
-	router.HandleFunc("/compliance/requirements", basicHandler("compliance", "requirements retrieved")).Methods("GET")
-	router.HandleFunc("/compliance/reports", basicHandler("compliance", "report generated")).Methods("POST")
-	
-	// Data privacy (GDPR)
-	router.HandleFunc("/privacy/data-subject-request", basicHandler("privacy", "data subject request processed")).Methods("POST")
-	router.HandleFunc("/privacy/detect-pii", basicHandler("privacy", "PII detected")).Methods("POST")
-	router.HandleFunc("/privacy/consent", basicHandler("privacy", "consent managed")).Methods("POST")
-	
-	// IP management
-	router.HandleFunc("/ip/licenses", basicHandler("ip", "IP license registered")).Methods("POST")
-	router.HandleFunc("/ip/licenses", basicHandler("ip", "IP licenses retrieved")).Methods("GET")
-	router.HandleFunc("/ip/usage/validate", basicHandler("ip", "IP usage validated")).Methods("POST")
-	
-	// Insurance management
-	router.HandleFunc("/insurance/policies", basicHandler("insurance", "policies retrieved")).Methods("GET")
-	router.HandleFunc("/insurance/requirements", basicHandler("insurance", "requirements calculated")).Methods("POST")
-	router.HandleFunc("/insurance/claims", basicHandler("insurance", "claim processed")).Methods("POST")
-	
-	// Dispute management
-	router.HandleFunc("/disputes", basicHandler("disputes", "dispute created")).Methods("POST")
-	router.HandleFunc("/disputes", basicHandler("disputes", "disputes retrieved")).Methods("GET")
-	router.HandleFunc("/disputes/{id}/resolve", basicHandler("disputes", "dispute resolved")).Methods("POST")
+// Mock implementations for external dependencies
+type mockSignatureProvider struct{}
+
+func (m *mockSignatureProvider) CreateSignature(ctx context.Context, contractID string, signerID string) (interface{}, error) {
+	return map[string]interface{}{
+		"signature_id": "mock-signature",
+		"status":      "signed",
+	}, nil
 }
 
-// basicHandler creates a basic JSON response handler
-func basicHandler(action, message string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(fmt.Sprintf(`{"status":"success","action":"%s","message":"Legal service endpoint - implementation pending: %s"}`, action, message)))
-	}
+func (m *mockSignatureProvider) VerifySignature(ctx context.Context, signatureID string) (bool, error) {
+	return true, nil
+}
+
+type mockComplianceEngine struct{}
+
+func (m *mockComplianceEngine) CheckCompliance(ctx context.Context, content string, regulations []string) (interface{}, error) {
+	return map[string]interface{}{
+		"status":     "compliant",
+		"violations": []string{},
+	}, nil
+}
+
+type mockIPAnalyzer struct{}
+
+func (m *mockIPAnalyzer) ValidateIPUsage(ctx context.Context, content string, licenses []string) (interface{}, error) {
+	return map[string]interface{}{
+		"status": "valid",
+		"issues": []string{},
+	}, nil
+}
+
+type mockRegulatoryAPI struct{}
+
+func (m *mockRegulatoryAPI) GetLatestRegulations(ctx context.Context, jurisdiction string) (interface{}, error) {
+	return map[string]interface{}{
+		"regulations": []string{"GDPR", "CCPA"},
+	}, nil
 }
 
 // healthCheckHandler provides health status for the Legal Service
