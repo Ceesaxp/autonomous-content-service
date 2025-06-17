@@ -1,0 +1,39 @@
+{
+    email {$ADMIN_EMAIL:admin@localhost}
+    http_port 8088
+    https_port 8443
+    auto_https off
+}
+
+{$DOMAIN:localhost}:8088 {
+    encode gzip zstd
+
+    header {
+        -Server
+    }
+
+    handle /api/* {
+        reverse_proxy {$API_URL:http://api:8080}
+    }
+
+    handle {
+        root * /srv/web
+        try_files {path} {path}/ /index.html
+        file_server
+    }
+
+    handle /health {
+        respond "OK" 200
+    }
+
+    handle /api/health {
+        rewrite * /health
+        reverse_proxy {$API_URL:http://api:8080}
+    }
+
+    log {
+        output stdout
+        format console
+        level {$LOG_LEVEL:DEBUG}
+    }
+}

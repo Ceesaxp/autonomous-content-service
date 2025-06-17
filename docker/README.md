@@ -21,6 +21,11 @@ This directory contains the Docker configuration for deploying the Autonomous Co
    ./scripts/deploy.sh
    ```
 
+The development compose file mounts `.air.toml` and `Caddyfile.dev` for hot reload:
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+```
+
 ## Services
 
 The deployment includes the following services:
