@@ -9,6 +9,7 @@ services:
       target: builder  # Use builder stage for hot reload
     volumes:
       - ../src:/build/src:ro
+      - ../.air.toml:/build/.air.toml:ro
       - go_mod_cache:/go/pkg/mod
     environment:
       CGO_ENABLED: 0
