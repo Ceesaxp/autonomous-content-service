@@ -159,9 +159,10 @@ func TestWorkflowEngineWithRetry(t *testing.T) {
 		UpdatedAt: time.Now(),
 	}
 
-	// Mock first call to fail, second to succeed
+	// Mock first call to fail, second to succeed, and system completion event
 	publisher.On("Publish", mock.Anything, StreamContent, mock.AnythingOfType("events.Event")).Return(assert.AnError).Once()
 	publisher.On("Publish", mock.Anything, StreamContent, mock.AnythingOfType("events.Event")).Return(nil).Once()
+	publisher.On("Publish", mock.Anything, StreamSystem, mock.AnythingOfType("events.Event")).Return(nil)
 
 	// Start the workflow
 	err := engine.StartWorkflow(context.Background(), workflow)
@@ -477,7 +478,7 @@ func BenchmarkWorkflowExecution(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		workflow := createWorkflow()
-		engine.StartWorkflow(context.Background(), workflow)
+		_ = engine.StartWorkflow(context.Background(), workflow) // Ignore error for benchmark
 	}
 }
 

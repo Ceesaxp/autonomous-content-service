@@ -372,7 +372,7 @@ func BenchmarkMapToStruct(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		var result ContentEventData
-		mapToStruct(data, &result)
+		_ = mapToStruct(data, &result) // Ignore error for benchmark
 	}
 }
 

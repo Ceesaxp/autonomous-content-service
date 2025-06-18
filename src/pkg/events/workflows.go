@@ -154,7 +154,7 @@ func (e *WorkflowEngine) executeStep(ctx context.Context, workflow *Workflow, st
 			log.Printf("[WorkflowEngine] Retrying step %s (attempt %d/%d)", step.ID, step.RetryCount, step.MaxRetries)
 			step.Status = StepStatusPending
 			time.AfterFunc(time.Second*time.Duration(step.RetryCount), func() {
-				e.executeStep(ctx, workflow, step)
+				_ = e.executeStep(ctx, workflow, step) // Execute retry step
 			})
 			return nil
 		}
@@ -198,7 +198,7 @@ func (e *WorkflowEngine) completeWorkflow(workflow *Workflow) error {
 				},
 			},
 		)
-		e.eventClient.Publish(context.Background(), StreamSystem, event)
+		_ = e.eventClient.Publish(context.Background(), StreamSystem, event) // Best effort workflow completion event
 	}
 
 	return nil

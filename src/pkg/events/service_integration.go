@@ -92,7 +92,7 @@ func (bus *ServiceEventBus) Stop() error {
 	// Deregister from service discovery
 	if bus.serviceDiscovery != nil {
 		if consulClient, ok := bus.serviceDiscovery.(*discovery.ConsulClient); ok {
-			consulClient.DeregisterAll()
+			_ = consulClient.DeregisterAll() // Best effort deregistration
 		}
 	}
 
@@ -187,7 +187,7 @@ func (bus *ServiceEventBus) publishErrorEvent(ctx context.Context, originalEvent
 		},
 	)
 
-	bus.eventClient.Publish(ctx, StreamSystem, errorEvent)
+	_ = bus.eventClient.Publish(ctx, StreamSystem, errorEvent) // Best effort error event publishing
 }
 
 // PublishEvent publishes an event to the appropriate stream
@@ -305,11 +305,11 @@ func (factory *ServiceEventBusFactory) CreateEventBus(serviceName string) *Servi
 	// Register appropriate event handler based on service name
 	switch serviceName {
 	case "content-service":
-		bus.RegisterServiceEventHandler(NewContentServiceServiceEventHandler())
+		_ = bus.RegisterServiceEventHandler(NewContentServiceServiceEventHandler()) // Default handler registration
 	case "decision-service":
-		bus.RegisterServiceEventHandler(NewDecisionServiceServiceEventHandler())
+		_ = bus.RegisterServiceEventHandler(NewDecisionServiceServiceEventHandler()) // Default handler registration
 	case "financial-service":
-		bus.RegisterServiceEventHandler(NewFinancialServiceServiceEventHandler())
+		_ = bus.RegisterServiceEventHandler(NewFinancialServiceServiceEventHandler()) // Default handler registration
 	// Add more services as needed
 	default:
 		log.Printf("[ServiceEventBusFactory] No default handler for service: %s", serviceName)
