@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"compress/gzip"
-	"fmt"
+	"context"
 	"io"
 	"log"
 	"net/http"
@@ -95,8 +95,7 @@ func RequestID(next http.Handler) http.Handler {
 		w.Header().Set("X-Request-ID", requestID)
 
 		// Add request ID to request context
-		ctx := r.Context()
-		ctx = AddToContext(ctx, "request_id", requestID)
+		ctx := context.WithValue(r.Context(), "request_id", requestID)
 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -111,7 +110,7 @@ func Logging(next http.Handler) http.Handler {
 		wrapped := &responseWriter{ResponseWriter: w, statusCode: http.StatusOK}
 
 		// Get request ID from context
-		requestID := GetFromContext(r.Context(), "request_id")
+		requestID := r.Context().Value("request_id")
 
 		// Log request start
 		log.Printf("[%s] Started %s %s from %s", requestID, r.Method, r.URL.Path, r.RemoteAddr)
@@ -220,7 +219,7 @@ func Recovery(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				requestID := GetFromContext(r.Context(), "request_id")
+				requestID := r.Context().Value("request_id")
 				log.Printf("[%s] Panic recovered: %v", requestID, err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			}
@@ -284,18 +283,6 @@ func getClientIP(r *http.Request) string {
 	return r.RemoteAddr
 }
 
-// Context utility functions
-func AddToContext(ctx interface{}, key, value string) interface{} {
-	// This is a simplified version - in a real implementation,
-	// you would use context.WithValue
-	return ctx
-}
-
-func GetFromContext(ctx interface{}, key string) string {
-	// This is a simplified version - in a real implementation,
-	// you would use ctx.Value(key)
-	return ""
-}
 
 // Chain combines multiple middleware functions
 func Chain(middlewares ...func(http.Handler) http.Handler) func(http.Handler) http.Handler {
