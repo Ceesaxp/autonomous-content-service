@@ -127,6 +127,9 @@ func (s *EventIntegratedDecisionService) HandleRiskDetected(ctx context.Context,
 	if len(ethicalIssues) > 0 {
 		log.Printf("[DecisionService] Ethical issues detected: %v", ethicalIssues)
 		// Add to decision metadata
+		if decision.Metadata == nil {
+			decision.Metadata = make(map[string]interface{})
+		}
 		decision.Metadata["ethical_issues"] = ethicalIssues
 	}
 
@@ -145,26 +148,29 @@ func (s *EventIntegratedDecisionService) HandleRiskDetected(ctx context.Context,
 	s.publishDecisionCreatedEvent(ctx, decision)
 
 	// Execute the selected option
-	if err := s.executeDecisionOption(ctx, decision, selectedOption); err != nil {
-		decision.Status = entities.DecisionStatusFailed
-		decision.ExecutionResult = &entities.ExecutionResult{
-			Success: false,
-			Error:   err.Error(),
-			ExecutedAt: time.Now(),
-		}
-		s.decisionRepo.Update(ctx, decision)
+	if decision.SelectedOption != nil {
+		if err := s.executeDecisionOption(ctx, decision, decision.SelectedOption); err != nil {
+			decision.Status = entities.StatusRejected
+			decision.ExecutionResult = &entities.ExecutionResult{
+				Success:      false,
+				ErrorMessage: err.Error(),
+				Metrics:      map[string]interface{}{"error_time": time.Now()},
+			}
+			s.decisionRepo.UpdateDecision(ctx, decision)
 		return fmt.Errorf("failed to execute decision: %w", err)
 	}
 
-	// Mark as executed
-	decision.Status = entities.DecisionStatusExecuted
-	executedAt := time.Now()
-	decision.ExecutedAt = &executedAt
-	decision.ExecutionResult = &entities.ExecutionResult{
-		Success: true,
-		ExecutedAt: executedAt,
+		// Mark as executed
+		decision.Status = entities.StatusExecuted
+		executedAt := time.Now()
+		decision.ExecutedAt = &executedAt
+		decision.ExecutionResult = &entities.ExecutionResult{
+			Success:    true,
+			Metrics:    map[string]interface{}{"executed_at": executedAt},
+			Reversible: true,
+		}
+		s.decisionRepo.UpdateDecision(ctx, decision)
 	}
-	s.decisionRepo.Update(ctx, decision)
 
 	// Publish execution event
 	s.publishDecisionExecutedEvent(ctx, decision)
@@ -215,16 +221,16 @@ func (s *EventIntegratedDecisionService) HandleIncidentCreated(ctx context.Conte
 
 	// Fast-track execution for critical incidents
 	if severity == "critical" {
-		decision.SelectedOption = options[0] // Take most aggressive action
+		decision.SelectedOption = &options[0] // Take most aggressive action
 		decision.Confidence = 0.95
 		decision.Reasoning = "Critical incident requires immediate automated response"
 		
 		// Execute immediately
-		s.executeDecisionOption(ctx, decision, decision.SelectedOption)
+		_ = s.executeDecisionOption(ctx, decision, decision.SelectedOption)
 	}
 
 	// Save and publish
-	s.decisionRepo.Create(ctx, decision)
+	_ = s.decisionRepo.CreateDecision(ctx, decision)
 	s.publishDecisionCreatedEvent(ctx, decision)
 
 	return nil
@@ -259,12 +265,18 @@ func (s *EventIntegratedDecisionService) HandleComplianceIssue(ctx context.Conte
 	decision.Options = options
 
 	// Evaluate and save
-	selectedOption, confidence, reasoning := s.engine.EvaluateOptions(ctx, options, decision.Context)
-	decision.SelectedOption = selectedOption
-	decision.Confidence = confidence
-	decision.Reasoning = reasoning
+	if err := s.engine.AnalyzeOptions(ctx, decision); err != nil {
+		return fmt.Errorf("failed to analyze options: %w", err)
+	}
+	
+	// Select best option
+	if len(decision.Options) > 0 {
+		decision.SelectedOption = &decision.Options[0]
+		decision.Confidence = 0.7
+		decision.Reasoning = "Selected highest priority compliance option"
+	}
 
-	s.decisionRepo.Create(ctx, decision)
+	_ = s.decisionRepo.CreateDecision(ctx, decision)
 	s.publishDecisionCreatedEvent(ctx, decision)
 
 	return nil
@@ -324,12 +336,18 @@ func (s *EventIntegratedDecisionService) HandleProposalCreated(ctx context.Conte
 	decision.Options = options
 
 	// Make recommendation
-	selectedOption, confidence, reasoning := s.engine.EvaluateOptions(ctx, options, decision.Context)
-	decision.SelectedOption = selectedOption
-	decision.Confidence = confidence
-	decision.Reasoning = reasoning
+	if err := s.engine.AnalyzeOptions(ctx, decision); err != nil {
+		return fmt.Errorf("failed to analyze options: %w", err)
+	}
+	
+	// Select recommendation option
+	if len(decision.Options) > 0 {
+		decision.SelectedOption = &decision.Options[0]
+		decision.Confidence = 0.8
+		decision.Reasoning = "Selected based on strategic analysis"
+	}
 
-	s.decisionRepo.Create(ctx, decision)
+	_ = s.decisionRepo.CreateDecision(ctx, decision)
 	s.publishDecisionCreatedEvent(ctx, decision)
 
 	return nil
@@ -469,11 +487,30 @@ func (s *EventIntegratedDecisionService) generateComplianceOptions(issue string)
 func (s *EventIntegratedDecisionService) analyzeProposalImpact(proposalType string) *entities.ImpactAnalysis {
 	// Simplified impact analysis
 	return &entities.ImpactAnalysis{
-		FinancialImpact: entities.ImpactLevel("medium"),
-		OperationalImpact: entities.ImpactLevel("low"),
-		ReputationalImpact: entities.ImpactLevel("low"),
-		TimelineImpact: "1-3 months implementation",
-		ResourceRequirements: []string{"Development time", "Testing resources"},
+		FinancialImpact: &entities.FinancialImpact{
+			EstimatedCost:    5000.0,
+			EstimatedRevenue: 15000.0,
+		},
+		OperationalImpact: &entities.OperationalImpact{
+			ResourceRequirements: map[string]float64{
+				"development_hours": 120.0,
+				"testing_hours":     40.0,
+			},
+			TimelineImpact:      160,
+			ComplexityIncrease:  0.3,
+			AutomationPotential: 0.8,
+		},
+		ReputationalRisk:   0.2,
+		ComplianceRisk:     0.1,
+		ReversibilityScore: 0.8,
+		StakeholderImpacts: []entities.StakeholderImpact{
+			{
+				StakeholderType: "development_team",
+				ImpactLevel:     "medium",
+				Description:     "1-3 months implementation time",
+				Sentiment:       0.7,
+			},
+		},
 	}
 }
 
