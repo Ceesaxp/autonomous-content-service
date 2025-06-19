@@ -10,5 +10,6 @@ This directory contains the implementation plans and detailed prompts for execut
 - `/phase4-interface`: Client Interface implementation
 - `/phase5-governance`: Governance and Improvement implementation
 - `/phase6-integration`: System Integration and Deployment implementation
+- `/phase7-extended-services`: Extended Services implementation
 
 Each phase directory contains detailed prompts and implementation guides for the components within that phase.

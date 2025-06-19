@@ -12,6 +12,7 @@ import (
 
 	"github.com/Ceesaxp/autonomous-content-service/src/api/handlers"
 	"github.com/Ceesaxp/autonomous-content-service/src/config"
+	"github.com/Ceesaxp/autonomous-content-service/src/domain/entities"
 	"github.com/Ceesaxp/autonomous-content-service/src/infrastructure/database"
 	"github.com/Ceesaxp/autonomous-content-service/src/services/legal_compliance"
 	"github.com/gorilla/mux"
@@ -38,7 +39,7 @@ func main() {
 	clientRepo := database.NewClientRepository(db)
 	projectRepo := database.NewProjectRepository(db)
 	contentRepo := database.NewContentRepository(db)
-	
+
 	// Initialize legal compliance service
 	legalService := legal_compliance.NewService(
 		legalRepo,
@@ -50,7 +51,7 @@ func main() {
 		&mockIPAnalyzer{},
 		&mockRegulatoryAPI{},
 	)
-	
+
 	// Initialize handlers
 	legalHandlers := handlers.NewLegalHandlers(legalService)
 
@@ -107,8 +108,11 @@ type mockSignatureProvider struct{}
 
 func (m *mockSignatureProvider) CreateSignature(ctx context.Context, request legal_compliance.SignatureCreationRequest) (*legal_compliance.SignatureData, error) {
 	return &legal_compliance.SignatureData{
-		SignatureID: "mock-signature-123",
-		Status:      "pending",
+		Data:      "mock-signature",
+		Hash:      "mock-hash",
+		IPAddress: "127.0.0.1",
+		UserAgent: "Mozilla",
+		Timestamp: time.Now(),
 	}, nil
 }
 
@@ -116,8 +120,9 @@ type mockComplianceEngine struct{}
 
 func (m *mockComplianceEngine) CheckCompliance(ctx context.Context, regulation string, data interface{}) (*legal_compliance.ComplianceResult, error) {
 	return &legal_compliance.ComplianceResult{
-		Compliant: true,
-		Issues:    []string{},
+		IsCompliant: true,
+		Issues:      []string{},
+		Score:       0.99,
 	}, nil
 }
 
@@ -125,8 +130,11 @@ type mockIPAnalyzer struct{}
 
 func (m *mockIPAnalyzer) AnalyzeContent(ctx context.Context, content string) (*legal_compliance.IPAnalysisResult, error) {
 	return &legal_compliance.IPAnalysisResult{
-		Status: "valid",
-		Issues: []string{},
+		NoViolations:    true,
+		UsagePermitted:  true,
+		Restrictions:    []string{},
+		RequiredActions: []string{},
+		License:         &entities.IPLicense{},
 	}, nil
 }
 
@@ -134,8 +142,9 @@ type mockRegulatoryAPI struct{}
 
 func (m *mockRegulatoryAPI) SubmitReport(ctx context.Context, report *entities.RegulatoryReport) (*legal_compliance.SubmissionResult, error) {
 	return &legal_compliance.SubmissionResult{
-		SubmissionID: "mock-submission-123",
-		Status:       "submitted",
+		Success:        true,
+		ConfirmationID: "mock-submission-123",
+		Message:        "submitted",
 	}, nil
 }
 
