@@ -156,7 +156,7 @@ func (s *EventIntegratedDecisionService) HandleRiskDetected(ctx context.Context,
 				ErrorMessage: err.Error(),
 				Metrics:      map[string]interface{}{"error_time": time.Now()},
 			}
-			s.decisionRepo.UpdateDecision(ctx, decision)
+			_ = s.decisionRepo.UpdateDecision(ctx, decision) // Best effort update
 		return fmt.Errorf("failed to execute decision: %w", err)
 	}
 
@@ -169,7 +169,7 @@ func (s *EventIntegratedDecisionService) HandleRiskDetected(ctx context.Context,
 			Metrics:    map[string]interface{}{"executed_at": executedAt},
 			Reversible: true,
 		}
-		s.decisionRepo.UpdateDecision(ctx, decision)
+		_ = s.decisionRepo.UpdateDecision(ctx, decision) // Best effort update
 	}
 
 	// Publish execution event
@@ -598,7 +598,7 @@ func (s *EventIntegratedDecisionService) publishDecisionExecutedEvent(ctx contex
 }
 
 func (s *EventIntegratedDecisionService) publishDecisionRejectedEvent(ctx context.Context, decision *entities.Decision, reason string) {
-	s.eventBus.PublishEvent(ctx, "decision.rejected", map[string]interface{}{
+	_ = s.eventBus.PublishEvent(ctx, "decision.rejected", map[string]interface{}{ // Best effort event publication
 		"decision_id": decision.ID,
 		"reason":      reason,
 		"violations":  decision.PolicyViolations,

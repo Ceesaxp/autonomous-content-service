@@ -2,11 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"net/http"
-	"os"
-	"time"
 
 	"github.com/Ceesaxp/autonomous-content-service/src/api/handlers"
 	"github.com/Ceesaxp/autonomous-content-service/src/config"
@@ -157,7 +153,7 @@ func main() {
 	if err := eventBus.Start(context.Background()); err != nil {
 		log.Printf("Warning: Failed to start event bus: %v", err)
 	}
-	defer eventBus.Stop()
+	defer func() { _ = eventBus.Stop() }() // Best effort cleanup
 
 	// Start event listeners
 	if err := eventIntegratedContentService.StartEventListeners(context.Background()); err != nil {
@@ -185,28 +181,4 @@ func setupContentRoutes(router *mux.Router, contentHandler *handlers.ContentHand
 	router.HandleFunc("/content/{content_id}/versions", contentHandler.GetContentVersions).Methods("GET")
 }
 
-// healthCheckHandler provides health status for the Content Service
-func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"status":"healthy","service":"content-service","timestamp":"` + time.Now().UTC().Format(time.RFC3339) + `"}`))
-}
-
-// loggingMiddleware logs all requests
-func loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("[Content Service] %s %s %s", r.RemoteAddr, r.Method, r.URL)
-		next.ServeHTTP(w, r)
-	})
-}
-
-// getServicePort gets port from environment or uses default
-func getServicePort(envVar string, defaultPort int) int {
-	if portStr := os.Getenv(envVar); portStr != "" {
-		var port int
-		if _, err := fmt.Sscanf(portStr, "%d", &port); err == nil {
-			return port
-		}
-	}
-	return defaultPort
-}
+// Utility functions removed as they were unused in current implementation

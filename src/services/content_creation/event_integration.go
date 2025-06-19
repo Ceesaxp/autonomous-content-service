@@ -280,29 +280,7 @@ func (s *EventIntegratedContentService) HandleDecisionExecuted(ctx context.Conte
 	return nil
 }
 
-// Pipeline stage progress monitoring
-
-func (s *EventIntegratedContentService) publishPipelineProgress(ctx context.Context, contentID, projectID uuid.UUID, stage PipelineStage, status string, details string) {
-	progressEvent := PipelineProgressEvent{
-		ContentID: contentID,
-		ProjectID: projectID,
-		Stage:     stage,
-		Status:    status,
-		Details:   details,
-		Timestamp: time.Now(),
-	}
-
-	eventData := map[string]interface{}{
-		"content_id": contentID.String(),
-		"project_id": projectID.String(),
-		"stage":      string(stage),
-		"status":     status,
-		"details":    details,
-		"timestamp":  progressEvent.Timestamp,
-	}
-
-	s.eventBus.PublishEvent(ctx, "content.pipeline_progress", eventData)
-}
+// Pipeline stage progress monitoring methods would go here if needed
 
 // Workflow integration
 
