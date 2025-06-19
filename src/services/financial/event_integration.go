@@ -19,7 +19,7 @@ type EventIntegratedFinancialService struct {
 	paymentProcessor payment.PaymentProcessor
 	pricingEngine    *pricing.DynamicPricingEngine
 	eventBus         *events.ServiceEventBus
-	invoiceRepo      repositories.InvoiceRepository
+	// Note: InvoiceRepository not yet implemented, using PaymentRepository
 	paymentRepo      repositories.PaymentRepository
 	projectRepo      repositories.ProjectRepository
 }
@@ -29,7 +29,6 @@ func NewEventIntegratedFinancialService(
 	paymentProcessor payment.PaymentProcessor,
 	pricingEngine *pricing.DynamicPricingEngine,
 	eventBus *events.ServiceEventBus,
-	invoiceRepo repositories.InvoiceRepository,
 	paymentRepo repositories.PaymentRepository,
 	projectRepo repositories.ProjectRepository,
 ) *EventIntegratedFinancialService {
@@ -37,7 +36,6 @@ func NewEventIntegratedFinancialService(
 		paymentProcessor: paymentProcessor,
 		pricingEngine:    pricingEngine,
 		eventBus:         eventBus,
-		invoiceRepo:      invoiceRepo,
 		paymentRepo:      paymentRepo,
 		projectRepo:      projectRepo,
 	}
@@ -63,35 +61,39 @@ func (s *EventIntegratedFinancialService) HandleProjectCreated(ctx context.Conte
 	}
 
 	// Calculate pricing if not set
-	if project.Budget == 0 {
-		quote, err := s.pricingEngine.GenerateQuote(ctx, &pricing.QuoteRequest{
-			ClientID:    clientID,
-			ProjectType: project.Type,
-			Complexity:  pricing.ComplexityMedium, // Should be calculated
-			Urgency:     pricing.UrgencyStandard,
-			Features:    []string{},
-		})
-		if err != nil {
-			log.Printf("[FinancialService] Failed to generate quote: %v", err)
-		} else {
-			project.Budget = quote.TotalAmount
-			s.projectRepo.Update(ctx, project)
+	if project.Budget.Amount == 0 {
+		// Simplified pricing calculation since QuoteRequest structure is not available
+		// In real implementation, this would use proper pricing engine
+		estimatedAmount := s.calculateBasicProjectCost(project.ContentType)
+		project.Budget = entities.Money{
+			Amount:   estimatedAmount,
+			Currency: "USD",
+		}
+		// Update project with calculated budget
+		if err := s.projectRepo.Update(ctx, project); err != nil {
+			log.Printf("[FinancialService] Failed to update project budget: %v", err)
 		}
 	}
 
 	// Create initial invoice (deposit or full payment based on amount)
+	projectIDStr := project.ProjectID.String()
+	depositAmount := int64(project.Budget.Amount * 0.5 * 100) // Convert to cents and take 50% deposit
 	invoice := &entities.Invoice{
-		ID:          uuid.New(),
-		ProjectID:   projectUUID,
-		ClientID:    uuid.MustParse(clientID),
-		Amount:      project.Budget * 0.5, // 50% deposit
-		Currency:    "USD",
-		Status:      entities.InvoiceStatusDraft,
-		DueDate:     time.Now().AddDate(0, 0, 14), // 14 days payment terms
-		Items: []entities.InvoiceItem{
+		ID:            uuid.New().String(),
+		InvoiceNumber: fmt.Sprintf("INV-%s-%d", projectIDStr[:8], time.Now().Unix()),
+		ProjectID:     &projectIDStr,
+		ClientID:      clientID,
+		Amount:        depositAmount,
+		Currency:      "USD",
+		TotalAmount:   depositAmount,
+		Status:        entities.InvoiceStatusDraft,
+		DueDate:       time.Now().AddDate(0, 0, 14), // 14 days payment terms
+		Description:   fmt.Sprintf("Project deposit for %s", project.Title),
+		LineItems: []entities.InvoiceLineItem{
 			{
+				ID:          uuid.New().String(),
 				Description: fmt.Sprintf("Initial deposit for project: %s", project.Title),
-				Amount:      project.Budget * 0.5,
+				UnitPrice:   depositAmount,
 				Quantity:    1,
 			},
 		},
@@ -512,6 +514,27 @@ func (s *EventIntegratedFinancialService) publishPaymentFailedEvent(ctx context.
 	event := events.CreateFinancialEvent(events.EventPaymentFailed, "financial-service", eventData)
 	if err := s.eventBus.PublishTypedEvent(ctx, event); err != nil {
 		log.Printf("[FinancialService] Failed to publish payment failed event: %v", err)
+	}
+}
+
+// calculateBasicProjectCost provides simple pricing based on content type
+func (s *EventIntegratedFinancialService) calculateBasicProjectCost(contentType entities.ContentType) float64 {
+	// Simple base pricing by content type
+	switch contentType {
+	case "article":
+		return 500.0
+	case "blog_post":
+		return 300.0
+	case "whitepaper":
+		return 1500.0
+	case "social_media":
+		return 150.0
+	case "email_campaign":
+		return 400.0
+	case "video_script":
+		return 800.0
+	default:
+		return 500.0 // Default pricing
 	}
 }
 

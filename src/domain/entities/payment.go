@@ -9,8 +9,9 @@ type PaymentMethod string
 
 const (
 	// Fiat methods
-	PaymentMethodCash PaymentMethod = "cash"
-	PaymentMethodWire PaymentMethod = "wire"
+	PaymentMethodCash   PaymentMethod = "cash"
+	PaymentMethodWire   PaymentMethod = "wire"
+	PaymentMethodStripe PaymentMethod = "stripe"
 
 	// Crypto methods
 	PaymentMethodEthereum  PaymentMethod = "eth"
@@ -29,7 +30,6 @@ const (
 	PaymentMethodCreditCard   PaymentMethodType = "creditCard"
 	PaymentMethodBankTransfer PaymentMethodType = "bankTransfer"
 	PaymentMethodCrypto       PaymentMethodType = "crypto"
-	PaymentMethodStripe       PaymentMethodType = "stripe"
 	PaymentMethodPayPal       PaymentMethodType = "paypal"
 	PaymentMethodACH          PaymentMethodType = "ach"
 )
