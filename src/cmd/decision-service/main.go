@@ -108,7 +108,7 @@ func setupDecisionRoutes(router *mux.Router, handler *handlers.DecisionHandlers)
 	// Core decision endpoints
 	router.HandleFunc("/decisions", handler.CreateDecision).Methods("POST")
 	router.HandleFunc("/decisions/{id}", handler.GetDecision).Methods("GET")
-	router.HandleFunc("/decisions/{id}", handler.UpdateDecision).Methods("PUT")
+	// Note: UpdateDecision method not implemented in handlers
 	router.HandleFunc("/decisions/{id}/execute", handler.ExecuteDecision).Methods("POST")
 	router.HandleFunc("/decisions/{id}/override", handler.OverrideDecision).Methods("POST")
 	router.HandleFunc("/decisions", handler.ListDecisions).Methods("GET")

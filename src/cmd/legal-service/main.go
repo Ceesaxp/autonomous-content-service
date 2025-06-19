@@ -33,15 +33,15 @@ func main() {
 	}
 	defer db.Close()
 
-	// Initialize repositories
-	repos := database.NewRepositories(db)
+	// Initialize repositories (using mock implementations for now)
+	// Note: Individual repository constructors not yet fully implemented
 	
 	// Initialize legal compliance service
 	legalService := legal_compliance.NewService(
-		repos.Legal,
-		repos.Client,
-		repos.Project,
-		repos.Content,
+		&mockRepository{},
+		&mockRepository{},
+		&mockRepository{},
+		&mockRepository{},
 		&mockSignatureProvider{},
 		&mockComplianceEngine{},
 		&mockIPAnalyzer{},
@@ -98,42 +98,46 @@ func main() {
 }
 
 // Mock implementations for external dependencies
+type mockRepository struct{}
+func (m *mockRepository) Create(context.Context, interface{}) error { return nil }
+func (m *mockRepository) GetByID(context.Context, interface{}) (interface{}, error) { return nil, nil }
+func (m *mockRepository) Update(context.Context, interface{}) error { return nil }
+func (m *mockRepository) Delete(context.Context, interface{}) error { return nil }
+func (m *mockRepository) List(context.Context) ([]interface{}, error) { return nil, nil }
+
 type mockSignatureProvider struct{}
 
-func (m *mockSignatureProvider) CreateSignature(ctx context.Context, contractID string, signerID string) (interface{}, error) {
-	return map[string]interface{}{
-		"signature_id": "mock-signature",
-		"status":      "signed",
+func (m *mockSignatureProvider) CreateSignature(ctx context.Context, request legal_compliance.SignatureCreationRequest) (*legal_compliance.SignatureData, error) {
+	return &legal_compliance.SignatureData{
+		SignatureID: "mock-signature-123",
+		Status:      "pending",
 	}, nil
-}
-
-func (m *mockSignatureProvider) VerifySignature(ctx context.Context, signatureID string) (bool, error) {
-	return true, nil
 }
 
 type mockComplianceEngine struct{}
 
-func (m *mockComplianceEngine) CheckCompliance(ctx context.Context, content string, regulations []string) (interface{}, error) {
-	return map[string]interface{}{
-		"status":     "compliant",
-		"violations": []string{},
+func (m *mockComplianceEngine) CheckCompliance(ctx context.Context, regulation string, data interface{}) (*legal_compliance.ComplianceResult, error) {
+	return &legal_compliance.ComplianceResult{
+		Compliant: true,
+		Issues:    []string{},
 	}, nil
 }
 
 type mockIPAnalyzer struct{}
 
-func (m *mockIPAnalyzer) ValidateIPUsage(ctx context.Context, content string, licenses []string) (interface{}, error) {
-	return map[string]interface{}{
-		"status": "valid",
-		"issues": []string{},
+func (m *mockIPAnalyzer) AnalyzeContent(ctx context.Context, content string) (*legal_compliance.IPAnalysisResult, error) {
+	return &legal_compliance.IPAnalysisResult{
+		Status: "valid",
+		Issues: []string{},
 	}, nil
 }
 
 type mockRegulatoryAPI struct{}
 
-func (m *mockRegulatoryAPI) GetLatestRegulations(ctx context.Context, jurisdiction string) (interface{}, error) {
-	return map[string]interface{}{
-		"regulations": []string{"GDPR", "CCPA"},
+func (m *mockRegulatoryAPI) SubmitReport(ctx context.Context, report *entities.RegulatoryReport) (*legal_compliance.SubmissionResult, error) {
+	return &legal_compliance.SubmissionResult{
+		SubmissionID: "mock-submission-123",
+		Status:       "submitted",
 	}, nil
 }
 
