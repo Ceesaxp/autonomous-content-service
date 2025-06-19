@@ -33,21 +33,30 @@ func main() {
 	}
 	defer db.Close()
 
-	// Initialize repositories (using mock implementations for now)
-	// Note: Individual repository constructors not yet fully implemented
+	// Initialize repositories
+	talentRepo := database.NewTalentRepository(db)
+	engagementRepo := database.NewEngagementRepository(db)
+	workAssignmentRepo := database.NewWorkAssignmentRepository(db)
+	performanceRepo := database.NewPerformanceRepository(db)
+	compensationRepo := database.NewCompensationRepository(db)
+	trainingRepo := database.NewTrainingRepository(db)
+	talentApplicationRepo := database.NewTalentApplicationRepository(db)
+	complianceRepo := database.NewComplianceRepository(db)
+	offboardingRepo := database.NewOffboardingRepository(db)
+	eventRepo := database.NewEventRepository(db)
 	
-	// Initialize HR service with mock repositories
+	// Initialize HR service with real repositories
 	hrService := hr_management.NewHRService(
-		&mockTalentRepository{},
-		&mockEngagementRepository{},
-		&mockWorkAssignmentRepository{},
-		&mockPerformanceRepository{},
-		&mockRepository{},
-		&mockRepository{},
-		&mockRepository{},
-		&mockRepository{},
-		&mockRepository{},
-		&mockRepository{},
+		talentRepo,
+		engagementRepo,
+		workAssignmentRepo,
+		performanceRepo,
+		compensationRepo,
+		trainingRepo,
+		talentApplicationRepo,
+		complianceRepo,
+		offboardingRepo,
+		eventRepo,
 	)
 	
 	// Initialize handlers
@@ -125,38 +134,4 @@ func getServicePort(envVar string, defaultPort int) int {
 	return defaultPort
 }
 
-// Mock repository implementations for development
-type mockRepository struct{}
-func (m *mockRepository) Create(context.Context, interface{}) error { return nil }
-func (m *mockRepository) GetByID(context.Context, interface{}) (interface{}, error) { return nil, nil }
-func (m *mockRepository) Update(context.Context, interface{}) error { return nil }
-func (m *mockRepository) Delete(context.Context, interface{}) error { return nil }
-func (m *mockRepository) List(context.Context) ([]interface{}, error) { return nil, nil }
-
-type mockTalentRepository struct{}
-func (m *mockTalentRepository) Create(context.Context, interface{}) error { return nil }
-func (m *mockTalentRepository) GetByID(context.Context, interface{}) (interface{}, error) { return nil, nil }
-func (m *mockTalentRepository) Update(context.Context, interface{}) error { return nil }
-func (m *mockTalentRepository) Delete(context.Context, interface{}) error { return nil }
-func (m *mockTalentRepository) List(context.Context) ([]interface{}, error) { return nil, nil }
-
-type mockEngagementRepository struct{}
-func (m *mockEngagementRepository) Create(context.Context, interface{}) error { return nil }
-func (m *mockEngagementRepository) GetByID(context.Context, interface{}) (interface{}, error) { return nil, nil }
-func (m *mockEngagementRepository) Update(context.Context, interface{}) error { return nil }
-func (m *mockEngagementRepository) Delete(context.Context, interface{}) error { return nil }
-func (m *mockEngagementRepository) List(context.Context) ([]interface{}, error) { return nil, nil }
-
-type mockWorkAssignmentRepository struct{}
-func (m *mockWorkAssignmentRepository) Create(context.Context, interface{}) error { return nil }
-func (m *mockWorkAssignmentRepository) GetByID(context.Context, interface{}) (interface{}, error) { return nil, nil }
-func (m *mockWorkAssignmentRepository) Update(context.Context, interface{}) error { return nil }
-func (m *mockWorkAssignmentRepository) Delete(context.Context, interface{}) error { return nil }
-func (m *mockWorkAssignmentRepository) List(context.Context) ([]interface{}, error) { return nil, nil }
-
-type mockPerformanceRepository struct{}
-func (m *mockPerformanceRepository) Create(context.Context, interface{}) error { return nil }
-func (m *mockPerformanceRepository) GetByID(context.Context, interface{}) (interface{}, error) { return nil, nil }
-func (m *mockPerformanceRepository) Update(context.Context, interface{}) error { return nil }
-func (m *mockPerformanceRepository) Delete(context.Context, interface{}) error { return nil }
-func (m *mockPerformanceRepository) List(context.Context) ([]interface{}, error) { return nil, nil }
+// Note: Mock implementations removed - now using real database repositories

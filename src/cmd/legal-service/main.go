@@ -33,15 +33,18 @@ func main() {
 	}
 	defer db.Close()
 
-	// Initialize repositories (using mock implementations for now)
-	// Note: Individual repository constructors not yet fully implemented
+	// Initialize repositories
+	legalRepo := database.NewLegalRepository(db)
+	clientRepo := database.NewClientRepository(db)
+	projectRepo := database.NewProjectRepository(db)
+	contentRepo := database.NewContentRepository(db)
 	
 	// Initialize legal compliance service
 	legalService := legal_compliance.NewService(
-		&mockRepository{},
-		&mockRepository{},
-		&mockRepository{},
-		&mockRepository{},
+		legalRepo,
+		clientRepo,
+		projectRepo,
+		contentRepo,
 		&mockSignatureProvider{},
 		&mockComplianceEngine{},
 		&mockIPAnalyzer{},
@@ -97,13 +100,8 @@ func main() {
 	log.Println("Legal Service exited gracefully")
 }
 
-// Mock implementations for external dependencies
-type mockRepository struct{}
-func (m *mockRepository) Create(context.Context, interface{}) error { return nil }
-func (m *mockRepository) GetByID(context.Context, interface{}) (interface{}, error) { return nil, nil }
-func (m *mockRepository) Update(context.Context, interface{}) error { return nil }
-func (m *mockRepository) Delete(context.Context, interface{}) error { return nil }
-func (m *mockRepository) List(context.Context) ([]interface{}, error) { return nil, nil }
+// Mock implementations for external service dependencies (kept for now)
+// Note: Repository mocks have been replaced with real database implementations
 
 type mockSignatureProvider struct{}
 
