@@ -25,43 +25,144 @@ func NewClientRepository(db *sql.DB) repositories.ClientRepository {
 }
 
 func (r *PostgresClientRepository) FindByStatus(ctx context.Context, status entities.ClientStatus, offset, limit int) ([]*entities.Client, int, error) {
-	// Placeholder implementation
-	return nil, 0, nil
+	countQuery := "SELECT COUNT(*) FROM clients WHERE status = $1"
+	var total int
+	err := r.db.QueryRowContext(ctx, countQuery, status).Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	query := `
+		SELECT client_id, name, contact_email, contact_phone, billing_address, 
+			   timezone, created_at, updated_at, status
+		FROM clients 
+		WHERE status = $1
+		ORDER BY created_at DESC
+		OFFSET $2 LIMIT $3`
+
+	rows, err := r.db.QueryContext(ctx, query, status, offset, limit)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	var clients []*entities.Client
+	for rows.Next() {
+		client, err := r.scanClient(rows)
+		if err != nil {
+			return nil, 0, err
+		}
+		clients = append(clients, client)
+	}
+
+	return clients, total, rows.Err()
 }
 
 func (r *PostgresClientRepository) FindByID(ctx context.Context, id uuid.UUID) (*entities.Client, error) {
-	// Placeholder implementation
-	return nil, nil
+	query := `
+		SELECT client_id, name, contact_email, contact_phone, billing_address, 
+			   timezone, created_at, updated_at, status
+		FROM clients WHERE client_id = $1`
+
+	row := r.db.QueryRowContext(ctx, query, id)
+	return r.scanClient(row)
 }
 
 func (r *PostgresClientRepository) FindByEmail(ctx context.Context, email string) (*entities.Client, error) {
-	// Placeholder implementation
-	return nil, nil
+	query := `
+		SELECT client_id, name, contact_email, contact_phone, billing_address, 
+			   timezone, created_at, updated_at, status
+		FROM clients WHERE contact_email = $1`
+
+	row := r.db.QueryRowContext(ctx, query, email)
+	return r.scanClient(row)
 }
 
 func (r *PostgresClientRepository) FindAll(ctx context.Context, offset, limit int) ([]*entities.Client, int, error) {
-	// Placeholder implementation
-	return nil, 0, nil
+	countQuery := "SELECT COUNT(*) FROM clients"
+	var total int
+	err := r.db.QueryRowContext(ctx, countQuery).Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	query := `
+		SELECT client_id, name, contact_email, contact_phone, billing_address, 
+			   timezone, created_at, updated_at, status
+		FROM clients 
+		ORDER BY created_at DESC
+		OFFSET $1 LIMIT $2`
+
+	rows, err := r.db.QueryContext(ctx, query, offset, limit)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+
+	var clients []*entities.Client
+	for rows.Next() {
+		client, err := r.scanClient(rows)
+		if err != nil {
+			return nil, 0, err
+		}
+		clients = append(clients, client)
+	}
+
+	return clients, total, rows.Err()
 }
 
 func (r *PostgresClientRepository) Save(ctx context.Context, client *entities.Client) error {
-	// Placeholder implementation
-	return nil
+	if client.ClientID == uuid.Nil {
+		return r.Create(ctx, client)
+	}
+	return r.Update(ctx, client)
 }
 
 func (r *PostgresClientRepository) Create(ctx context.Context, client *entities.Client) error {
-	// Placeholder implementation
-	return nil
+	if client.ClientID == uuid.Nil {
+		client.ClientID = uuid.New()
+	}
+
+	now := time.Now()
+	client.CreatedAt = now
+	client.UpdatedAt = now
+
+	addressJSON, _ := json.Marshal(client.BillingAddress)
+
+	query := `
+		INSERT INTO clients (client_id, name, contact_email, contact_phone, billing_address, 
+							timezone, created_at, updated_at, status)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
+
+	_, err := r.db.ExecContext(ctx, query,
+		client.ClientID, client.Name, client.ContactEmail, client.ContactPhone,
+		addressJSON, client.Timezone, client.CreatedAt, client.UpdatedAt, client.Status)
+
+	return err
 }
 
 func (r *PostgresClientRepository) Update(ctx context.Context, client *entities.Client) error {
-	// Placeholder implementation
-	return nil
+	client.UpdatedAt = time.Now()
+
+	addressJSON, _ := json.Marshal(client.BillingAddress)
+
+	query := `
+		UPDATE clients SET 
+			name = $2, contact_email = $3, contact_phone = $4, billing_address = $5,
+			timezone = $6, updated_at = $7, status = $8
+		WHERE client_id = $1`
+
+	_, err := r.db.ExecContext(ctx, query,
+		client.ClientID, client.Name, client.ContactEmail, client.ContactPhone,
+		addressJSON, client.Timezone, client.UpdatedAt, client.Status)
+
+	return err
 }
 
 func (r *PostgresClientRepository) Delete(ctx context.Context, id uuid.UUID) error {
-	// Placeholder implementation
-	return nil
+	query := "DELETE FROM clients WHERE client_id = $1"
+	_, err := r.db.ExecContext(ctx, query, id)
+	return err
 }
 
 // PostgresClientProfileRepository implements the ClientProfileRepository interface
@@ -115,18 +216,63 @@ func NewProjectRepository(db *sql.DB) repositories.ProjectRepository {
 }
 
 func (r *PostgresProjectRepository) FindByID(ctx context.Context, id uuid.UUID) (*entities.Project, error) {
-	// Placeholder implementation
-	return nil, nil
+	query := `
+		SELECT project_id, client_id, title, description, content_type, deadline, budget_amount,
+			   budget_currency, priority, status, requirements, metadata, created_at, updated_at
+		FROM projects WHERE project_id = $1`
+	
+	row := r.db.QueryRowContext(ctx, query, id)
+	return r.scanProject(row)
 }
 
 func (r *PostgresProjectRepository) FindByStatus(ctx context.Context, status entities.ProjectStatus, offset, limit int) ([]*entities.Project, int, error) {
-	// Placeholder implementation
-	return nil, 0, nil
+	countQuery := "SELECT COUNT(*) FROM projects WHERE status = $1"
+	var total int
+	err := r.db.QueryRowContext(ctx, countQuery, status).Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+	
+	query := `
+		SELECT project_id, client_id, title, description, content_type, deadline, budget_amount,
+			   budget_currency, priority, status, requirements, metadata, created_at, updated_at
+		FROM projects WHERE status = $1
+		ORDER BY created_at DESC
+		OFFSET $2 LIMIT $3`
+	
+	rows, err := r.db.QueryContext(ctx, query, status, offset, limit)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+	
+	projects, err := r.scanProjects(rows)
+	return projects, total, err
 }
 
 func (r *PostgresProjectRepository) FindActive(ctx context.Context, offset, limit int) ([]*entities.Project, int, error) {
-	// Placeholder implementation
-	return nil, 0, nil
+	countQuery := "SELECT COUNT(*) FROM projects WHERE status NOT IN ('Completed', 'Cancelled')"
+	var total int
+	err := r.db.QueryRowContext(ctx, countQuery).Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+	
+	query := `
+		SELECT project_id, client_id, title, description, content_type, deadline, budget_amount,
+			   budget_currency, priority, status, requirements, metadata, created_at, updated_at
+		FROM projects WHERE status NOT IN ('Completed', 'Cancelled')
+		ORDER BY deadline ASC
+		OFFSET $1 LIMIT $2`
+	
+	rows, err := r.db.QueryContext(ctx, query, offset, limit)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+	
+	projects, err := r.scanProjects(rows)
+	return projects, total, err
 }
 
 func (r *PostgresProjectRepository) FindAll(ctx context.Context, offset, limit int) ([]*entities.Project, int, error) {
@@ -150,13 +296,53 @@ func (r *PostgresProjectRepository) Save(ctx context.Context, project *entities.
 }
 
 func (r *PostgresProjectRepository) Create(ctx context.Context, project *entities.Project) error {
-	// Placeholder implementation
-	return nil
+	if project.ProjectID == uuid.Nil {
+		project.ProjectID = uuid.New()
+	}
+	
+	now := time.Now()
+	project.CreatedAt = now
+	project.UpdatedAt = now
+	
+	requirementsJSON, _ := json.Marshal(project.Requirements)
+	metadataJSON, _ := json.Marshal(project.Metadata)
+	
+	query := `
+		INSERT INTO projects (
+			project_id, client_id, title, description, content_type, deadline,
+			budget_amount, budget_currency, priority, status, requirements,
+			metadata, created_at, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`
+	
+	_, err := r.db.ExecContext(ctx, query,
+		project.ProjectID, project.ClientID, project.Title, project.Description,
+		project.ContentType, project.Deadline, project.Budget.Amount, project.Budget.Currency,
+		project.Priority, project.Status, requirementsJSON, metadataJSON,
+		project.CreatedAt, project.UpdatedAt)
+	
+	return err
 }
 
 func (r *PostgresProjectRepository) Update(ctx context.Context, project *entities.Project) error {
-	// Placeholder implementation
-	return nil
+	project.UpdatedAt = time.Now()
+	
+	requirementsJSON, _ := json.Marshal(project.Requirements)
+	metadataJSON, _ := json.Marshal(project.Metadata)
+	
+	query := `
+		UPDATE projects SET
+			title = $2, description = $3, content_type = $4, deadline = $5,
+			budget_amount = $6, budget_currency = $7, priority = $8, status = $9,
+			requirements = $10, metadata = $11, updated_at = $12
+		WHERE project_id = $1`
+	
+	_, err := r.db.ExecContext(ctx, query,
+		project.ProjectID, project.Title, project.Description, project.ContentType,
+		project.Deadline, project.Budget.Amount, project.Budget.Currency,
+		project.Priority, project.Status, requirementsJSON, metadataJSON,
+		project.UpdatedAt)
+	
+	return err
 }
 
 func (r *PostgresProjectRepository) Delete(ctx context.Context, id uuid.UUID) error {
@@ -186,18 +372,54 @@ func NewContentRepository(db *sql.DB) repositories.ContentRepository {
 }
 
 func (r *PostgresContentRepository) FindByID(ctx context.Context, id uuid.UUID) (*entities.Content, error) {
-	// Placeholder implementation
-	return nil, nil
+	query := `
+		SELECT content_id, project_id, title, type, status, data, metadata, version,
+			   word_count, created_at, updated_at
+		FROM content WHERE content_id = $1`
+	
+	row := r.db.QueryRowContext(ctx, query, id)
+	return r.scanContent(row)
 }
 
 func (r *PostgresContentRepository) FindByProjectID(ctx context.Context, projectID uuid.UUID) ([]*entities.Content, error) {
-	// Placeholder implementation
-	return nil, nil
+	query := `
+		SELECT content_id, project_id, title, type, status, data, metadata, version,
+			   word_count, created_at, updated_at
+		FROM content WHERE project_id = $1
+		ORDER BY created_at DESC`
+	
+	rows, err := r.db.QueryContext(ctx, query, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	
+	return r.scanContents(rows)
 }
 
 func (r *PostgresContentRepository) FindByStatus(ctx context.Context, status entities.ContentStatus, offset, limit int) ([]*entities.Content, int, error) {
-	// Placeholder implementation
-	return nil, 0, nil
+	countQuery := "SELECT COUNT(*) FROM content WHERE status = $1"
+	var total int
+	err := r.db.QueryRowContext(ctx, countQuery, status).Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+	
+	query := `
+		SELECT content_id, project_id, title, type, status, data, metadata, version,
+			   word_count, created_at, updated_at
+		FROM content WHERE status = $1
+		ORDER BY created_at DESC
+		OFFSET $2 LIMIT $3`
+	
+	rows, err := r.db.QueryContext(ctx, query, status, offset, limit)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+	
+	contents, err := r.scanContents(rows)
+	return contents, total, err
 }
 
 func (r *PostgresContentRepository) FindByType(ctx context.Context, contentType entities.ContentType, offset, limit int) ([]*entities.Content, int, error) {
@@ -211,13 +433,47 @@ func (r *PostgresContentRepository) Save(ctx context.Context, content *entities.
 }
 
 func (r *PostgresContentRepository) Create(ctx context.Context, content *entities.Content) error {
-	// Placeholder implementation
-	return nil
+	if content.ContentID == uuid.Nil {
+		content.ContentID = uuid.New()
+	}
+	
+	now := time.Now()
+	content.CreatedAt = now
+	content.UpdatedAt = now
+	
+	metadataJSON, _ := json.Marshal(content.Metadata)
+	
+	query := `
+		INSERT INTO content (
+			content_id, project_id, title, type, status, data, metadata,
+			version, word_count, created_at, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
+	
+	_, err := r.db.ExecContext(ctx, query,
+		content.ContentID, content.ProjectID, content.Title, content.Type,
+		content.Status, content.Data, metadataJSON, content.Version,
+		content.WordCount, content.CreatedAt, content.UpdatedAt)
+	
+	return err
 }
 
 func (r *PostgresContentRepository) Update(ctx context.Context, content *entities.Content) error {
-	// Placeholder implementation
-	return nil
+	content.UpdatedAt = time.Now()
+	
+	metadataJSON, _ := json.Marshal(content.Metadata)
+	
+	query := `
+		UPDATE content SET
+			title = $2, type = $3, status = $4, data = $5, metadata = $6,
+			version = $7, word_count = $8, updated_at = $9
+		WHERE content_id = $1`
+	
+	_, err := r.db.ExecContext(ctx, query,
+		content.ContentID, content.Title, content.Type, content.Status,
+		content.Data, metadataJSON, content.Version, content.WordCount,
+		content.UpdatedAt)
+	
+	return err
 }
 
 func (r *PostgresContentRepository) Delete(ctx context.Context, id uuid.UUID) error {
@@ -435,13 +691,40 @@ func NewTransactionRepository(db *sql.DB) repositories.TransactionRepository {
 }
 
 func (r *PostgresTransactionRepository) FindByID(ctx context.Context, id uuid.UUID) (*entities.Transaction, error) {
-	// Placeholder implementation
-	return nil, nil
+	query := `
+		SELECT transaction_id, client_id, project_id, type, status, amount, currency,
+			   payment_method, payment_reference, description, processed_at,
+			   created_at, updated_at, metadata
+		FROM transactions WHERE transaction_id = $1`
+	
+	row := r.db.QueryRowContext(ctx, query, id)
+	return r.scanTransaction(row)
 }
 
 func (r *PostgresTransactionRepository) FindByClientID(ctx context.Context, clientID uuid.UUID, offset, limit int) ([]*entities.Transaction, int, error) {
-	// Placeholder implementation
-	return nil, 0, nil
+	countQuery := "SELECT COUNT(*) FROM transactions WHERE client_id = $1"
+	var total int
+	err := r.db.QueryRowContext(ctx, countQuery, clientID).Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+	
+	query := `
+		SELECT transaction_id, client_id, project_id, type, status, amount, currency,
+			   payment_method, payment_reference, description, processed_at,
+			   created_at, updated_at, metadata
+		FROM transactions WHERE client_id = $1
+		ORDER BY created_at DESC
+		OFFSET $2 LIMIT $3`
+	
+	rows, err := r.db.QueryContext(ctx, query, clientID, offset, limit)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+	
+	transactions, err := r.scanTransactions(rows)
+	return transactions, total, err
 }
 
 func (r *PostgresTransactionRepository) FindByProjectID(ctx context.Context, projectID uuid.UUID, offset, limit int) ([]*entities.Transaction, int, error) {
@@ -450,8 +733,29 @@ func (r *PostgresTransactionRepository) FindByProjectID(ctx context.Context, pro
 }
 
 func (r *PostgresTransactionRepository) FindByStatus(ctx context.Context, status entities.TransactionStatus, offset, limit int) ([]*entities.Transaction, int, error) {
-	// Placeholder implementation
-	return nil, 0, nil
+	countQuery := "SELECT COUNT(*) FROM transactions WHERE status = $1"
+	var total int
+	err := r.db.QueryRowContext(ctx, countQuery, status).Scan(&total)
+	if err != nil {
+		return nil, 0, err
+	}
+	
+	query := `
+		SELECT transaction_id, client_id, project_id, type, status, amount, currency,
+			   payment_method, payment_reference, description, processed_at,
+			   created_at, updated_at, metadata
+		FROM transactions WHERE status = $1
+		ORDER BY created_at DESC
+		OFFSET $2 LIMIT $3`
+	
+	rows, err := r.db.QueryContext(ctx, query, status, offset, limit)
+	if err != nil {
+		return nil, 0, err
+	}
+	defer rows.Close()
+	
+	transactions, err := r.scanTransactions(rows)
+	return transactions, total, err
 }
 
 func (r *PostgresTransactionRepository) FindByType(ctx context.Context, transactionType entities.TransactionType, offset, limit int) ([]*entities.Transaction, int, error) {
@@ -470,13 +774,51 @@ func (r *PostgresTransactionRepository) Save(ctx context.Context, transaction *e
 }
 
 func (r *PostgresTransactionRepository) Create(ctx context.Context, transaction *entities.Transaction) error {
-	// Placeholder implementation
-	return nil
+	if transaction.TransactionID == uuid.Nil {
+		transaction.TransactionID = uuid.New()
+	}
+	
+	now := time.Now()
+	transaction.CreatedAt = now
+	transaction.UpdatedAt = now
+	
+	metadataJSON, _ := json.Marshal(transaction.Metadata)
+	
+	query := `
+		INSERT INTO transactions (
+			transaction_id, client_id, project_id, type, status, amount, currency,
+			payment_method, payment_reference, description, processed_at,
+			created_at, updated_at, metadata
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)`
+	
+	_, err := r.db.ExecContext(ctx, query,
+		transaction.TransactionID, transaction.ClientID, transaction.ProjectID,
+		transaction.Type, transaction.Status, transaction.Amount.Amount, transaction.Amount.Currency,
+		transaction.PaymentMethod, transaction.PaymentReference, transaction.Description,
+		transaction.ProcessedAt, transaction.CreatedAt, transaction.UpdatedAt, metadataJSON)
+	
+	return err
 }
 
 func (r *PostgresTransactionRepository) Update(ctx context.Context, transaction *entities.Transaction) error {
-	// Placeholder implementation
-	return nil
+	transaction.UpdatedAt = time.Now()
+	
+	metadataJSON, _ := json.Marshal(transaction.Metadata)
+	
+	query := `
+		UPDATE transactions SET
+			type = $2, status = $3, amount = $4, currency = $5, payment_method = $6,
+			payment_reference = $7, description = $8, processed_at = $9,
+			updated_at = $10, metadata = $11
+		WHERE transaction_id = $1`
+	
+	_, err := r.db.ExecContext(ctx, query,
+		transaction.TransactionID, transaction.Type, transaction.Status,
+		transaction.Amount.Amount, transaction.Amount.Currency, transaction.PaymentMethod,
+		transaction.PaymentReference, transaction.Description, transaction.ProcessedAt,
+		transaction.UpdatedAt, metadataJSON)
+	
+	return err
 }
 
 // PostgresRiskRepository implements the RiskRepository interface
@@ -1037,5 +1379,172 @@ func (r *PostgresRiskRepository) GetLastSuccessfulBackup(ctx context.Context, ba
 
 func (r *PostgresRiskRepository) CleanupOldBackups(ctx context.Context, retentionDays int) error {
 	return nil
+}
+
+// Helper methods for scanning database rows
+
+// scanClient scans a database row into a Client entity
+func (r *PostgresClientRepository) scanClient(scanner interface {
+	Scan(dest ...interface{}) error
+}) (*entities.Client, error) {
+	var client entities.Client
+	var addressJSON []byte
+
+	err := scanner.Scan(
+		&client.ClientID, &client.Name, &client.ContactEmail, &client.ContactPhone,
+		&addressJSON, &client.Timezone, &client.CreatedAt, &client.UpdatedAt, &client.Status)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	// Unmarshal address JSON
+	if err := json.Unmarshal(addressJSON, &client.BillingAddress); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal billing address: %w", err)
+	}
+
+	return &client, nil
+}
+
+// Scanning helper methods for Project, Content, and Transaction entities
+
+func (r *PostgresProjectRepository) scanProject(scanner interface {
+	Scan(dest ...interface{}) error
+}) (*entities.Project, error) {
+	var project entities.Project
+	var requirementsJSON, metadataJSON []byte
+	
+	err := scanner.Scan(
+		&project.ProjectID, &project.ClientID, &project.Title, &project.Description,
+		&project.ContentType, &project.Deadline, &project.Budget.Amount, &project.Budget.Currency,
+		&project.Priority, &project.Status, &requirementsJSON, &metadataJSON,
+		&project.CreatedAt, &project.UpdatedAt)
+	
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	
+	// Unmarshal JSON fields
+	if err := json.Unmarshal(requirementsJSON, &project.Requirements); err != nil {
+		project.Requirements = []string{}
+	}
+	if err := json.Unmarshal(metadataJSON, &project.Metadata); err != nil {
+		project.Metadata = make(map[string]interface{})
+	}
+	
+	return &project, nil
+}
+
+func (r *PostgresProjectRepository) scanProjects(rows *sql.Rows) ([]*entities.Project, error) {
+	var projects []*entities.Project
+	
+	for rows.Next() {
+		project, err := r.scanProject(rows)
+		if err != nil {
+			return nil, err
+		}
+		projects = append(projects, project)
+	}
+	
+	return projects, rows.Err()
+}
+
+func (r *PostgresContentRepository) scanContent(scanner interface {
+	Scan(dest ...interface{}) error
+}) (*entities.Content, error) {
+	var content entities.Content
+	var metadataJSON []byte
+	
+	err := scanner.Scan(
+		&content.ContentID, &content.ProjectID, &content.Title, &content.Type,
+		&content.Status, &content.Data, &metadataJSON, &content.Version,
+		&content.WordCount, &content.CreatedAt, &content.UpdatedAt)
+	
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	
+	// Unmarshal JSON fields
+	if err := json.Unmarshal(metadataJSON, &content.Metadata); err != nil {
+		content.Metadata = make(map[string]interface{})
+	}
+	
+	return &content, nil
+}
+
+func (r *PostgresContentRepository) scanContents(rows *sql.Rows) ([]*entities.Content, error) {
+	var contents []*entities.Content
+	
+	for rows.Next() {
+		content, err := r.scanContent(rows)
+		if err != nil {
+			return nil, err
+		}
+		contents = append(contents, content)
+	}
+	
+	return contents, rows.Err()
+}
+
+func (r *PostgresTransactionRepository) scanTransaction(scanner interface {
+	Scan(dest ...interface{}) error
+}) (*entities.Transaction, error) {
+	var transaction entities.Transaction
+	var metadataJSON []byte
+	var projectID sql.NullString
+	var processedAt sql.NullTime
+	
+	err := scanner.Scan(
+		&transaction.TransactionID, &transaction.ClientID, &projectID, &transaction.Type,
+		&transaction.Status, &transaction.Amount.Amount, &transaction.Amount.Currency,
+		&transaction.PaymentMethod, &transaction.PaymentReference, &transaction.Description,
+		&processedAt, &transaction.CreatedAt, &transaction.UpdatedAt, &metadataJSON)
+	
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+	
+	// Handle nullable fields
+	if projectID.Valid {
+		if id, err := uuid.Parse(projectID.String); err == nil {
+			transaction.ProjectID = &id
+		}
+	}
+	if processedAt.Valid {
+		transaction.ProcessedAt = &processedAt.Time
+	}
+	
+	// Unmarshal JSON fields
+	if err := json.Unmarshal(metadataJSON, &transaction.Metadata); err != nil {
+		transaction.Metadata = make(map[string]interface{})
+	}
+	
+	return &transaction, nil
+}
+
+func (r *PostgresTransactionRepository) scanTransactions(rows *sql.Rows) ([]*entities.Transaction, error) {
+	var transactions []*entities.Transaction
+	
+	for rows.Next() {
+		transaction, err := r.scanTransaction(rows)
+		if err != nil {
+			return nil, err
+		}
+		transactions = append(transactions, transaction)
+	}
+	
+	return transactions, rows.Err()
 }
 

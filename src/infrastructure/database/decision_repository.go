@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/Ceesaxp/autonomous-content-service/src/domain/entities"
@@ -224,59 +223,228 @@ func (r *PostgresDecisionRepository) scanDecisions(rows *sql.Rows) ([]*entities.
 	return decisions, rows.Err()
 }
 
-// Stub implementations for policy, ethical guidelines, and other operations
-// TODO: Implement these fully when needed
+// Policy Management Implementation
 
 func (r *PostgresDecisionRepository) CreatePolicy(ctx context.Context, policy *entities.Policy) error {
-	return fmt.Errorf("policy operations not implemented yet")
+	rulesJSON, _ := json.Marshal(policy.Rules)
+	metadataJSON, _ := json.Marshal(policy.Metadata)
+	
+	query := `
+		INSERT INTO policies (
+			id, name, category, description, rules, priority, effective_from,
+			effective_until, metadata, active, created_at, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`
+	
+	now := time.Now()
+	_, err := r.db.ExecContext(ctx, query,
+		policy.ID, policy.Name, policy.Category, policy.Description, rulesJSON,
+		policy.Priority, policy.EffectiveFrom, policy.EffectiveUntil, metadataJSON,
+		policy.Active, now, now)
+	
+	return err
 }
 
 func (r *PostgresDecisionRepository) GetPolicy(ctx context.Context, id string) (*entities.Policy, error) {
-	return nil, fmt.Errorf("policy operations not implemented yet")
+	query := `
+		SELECT id, name, category, description, rules, priority, effective_from,
+			   effective_until, metadata, active, created_at, updated_at
+		FROM policies WHERE id = $1`
+	
+	row := r.db.QueryRowContext(ctx, query, id)
+	return r.scanPolicy(row)
 }
 
 func (r *PostgresDecisionRepository) UpdatePolicy(ctx context.Context, policy *entities.Policy) error {
-	return fmt.Errorf("policy operations not implemented yet")
+	rulesJSON, _ := json.Marshal(policy.Rules)
+	metadataJSON, _ := json.Marshal(policy.Metadata)
+	
+	query := `
+		UPDATE policies SET
+			name = $2, category = $3, description = $4, rules = $5, priority = $6,
+			effective_from = $7, effective_until = $8, metadata = $9, active = $10,
+			updated_at = $11
+		WHERE id = $1`
+	
+	_, err := r.db.ExecContext(ctx, query,
+		policy.ID, policy.Name, policy.Category, policy.Description, rulesJSON,
+		policy.Priority, policy.EffectiveFrom, policy.EffectiveUntil, metadataJSON,
+		policy.Active, time.Now())
+	
+	return err
 }
 
 func (r *PostgresDecisionRepository) DeletePolicy(ctx context.Context, id string) error {
-	return fmt.Errorf("policy operations not implemented yet")
+	query := "DELETE FROM policies WHERE id = $1"
+	_, err := r.db.ExecContext(ctx, query, id)
+	return err
 }
 
 func (r *PostgresDecisionRepository) ListPolicies(ctx context.Context, category string) ([]*entities.Policy, error) {
-	return []*entities.Policy{}, nil
+	var query string
+	var args []interface{}
+	
+	if category != "" {
+		query = `
+			SELECT id, name, category, description, rules, priority, effective_from,
+				   effective_until, metadata, active, created_at, updated_at
+			FROM policies WHERE category = $1
+			ORDER BY priority DESC, created_at DESC`
+		args = []interface{}{category}
+	} else {
+		query = `
+			SELECT id, name, category, description, rules, priority, effective_from,
+				   effective_until, metadata, active, created_at, updated_at
+			FROM policies
+			ORDER BY priority DESC, created_at DESC`
+	}
+	
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	
+	return r.scanPolicies(rows)
 }
 
 func (r *PostgresDecisionRepository) GetActivePolicies(ctx context.Context) ([]*entities.Policy, error) {
-	return []*entities.Policy{}, nil
+	query := `
+		SELECT id, name, category, description, rules, priority, effective_from,
+			   effective_until, metadata, active, created_at, updated_at
+		FROM policies 
+		WHERE active = true AND effective_from <= NOW() 
+		AND (effective_until IS NULL OR effective_until > NOW())
+		ORDER BY priority DESC`
+	
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	
+	return r.scanPolicies(rows)
 }
 
+// Ethical Guidelines Implementation
+
 func (r *PostgresDecisionRepository) CreateEthicalGuideline(ctx context.Context, guideline *entities.EthicalGuideline) error {
-	return fmt.Errorf("ethical guidelines not implemented yet")
+	examplesJSON, _ := json.Marshal(guideline.Examples)
+	redLinesJSON, _ := json.Marshal(guideline.RedLines)
+	
+	query := `
+		INSERT INTO ethical_guidelines (
+			id, principle, description, examples, red_lines, weight, created_at, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
+	
+	now := time.Now()
+	_, err := r.db.ExecContext(ctx, query,
+		guideline.ID, guideline.Principle, guideline.Description, examplesJSON,
+		redLinesJSON, guideline.Weight, now, now)
+	
+	return err
 }
 
 func (r *PostgresDecisionRepository) GetEthicalGuideline(ctx context.Context, id string) (*entities.EthicalGuideline, error) {
-	return nil, fmt.Errorf("ethical guidelines not implemented yet")
+	query := `
+		SELECT id, principle, description, examples, red_lines, weight, created_at, updated_at
+		FROM ethical_guidelines WHERE id = $1`
+	
+	row := r.db.QueryRowContext(ctx, query, id)
+	return r.scanEthicalGuideline(row)
 }
 
 func (r *PostgresDecisionRepository) UpdateEthicalGuideline(ctx context.Context, guideline *entities.EthicalGuideline) error {
-	return fmt.Errorf("ethical guidelines not implemented yet")
+	examplesJSON, _ := json.Marshal(guideline.Examples)
+	redLinesJSON, _ := json.Marshal(guideline.RedLines)
+	
+	query := `
+		UPDATE ethical_guidelines SET
+			principle = $2, description = $3, examples = $4, red_lines = $5,
+			weight = $6, updated_at = $7
+		WHERE id = $1`
+	
+	_, err := r.db.ExecContext(ctx, query,
+		guideline.ID, guideline.Principle, guideline.Description, examplesJSON,
+		redLinesJSON, guideline.Weight, time.Now())
+	
+	return err
 }
 
 func (r *PostgresDecisionRepository) ListEthicalGuidelines(ctx context.Context) ([]*entities.EthicalGuideline, error) {
-	return []*entities.EthicalGuideline{}, nil
+	query := `
+		SELECT id, principle, description, examples, red_lines, weight, created_at, updated_at
+		FROM ethical_guidelines
+		ORDER BY weight DESC, principle ASC`
+	
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	
+	return r.scanEthicalGuidelines(rows)
 }
 
+// Decision Template Implementation
+
 func (r *PostgresDecisionRepository) CreateDecisionTemplate(ctx context.Context, template *entities.DecisionTemplate) error {
-	return fmt.Errorf("decision templates not implemented yet")
+	requiredContextJSON, _ := json.Marshal(template.RequiredContext)
+	decisionCriteriaJSON, _ := json.Marshal(template.DecisionCriteria)
+	defaultOptionsJSON, _ := json.Marshal(template.DefaultOptions)
+	policyChecksJSON, _ := json.Marshal(template.PolicyChecks)
+	metadataJSON, _ := json.Marshal(template.Metadata)
+	
+	query := `
+		INSERT INTO decision_templates (
+			id, name, type, description, required_context, decision_criteria,
+			default_options, policy_checks, metadata, created_at, updated_at
+		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
+	
+	now := time.Now()
+	_, err := r.db.ExecContext(ctx, query,
+		template.ID, template.Name, template.Type, template.Description,
+		requiredContextJSON, decisionCriteriaJSON, defaultOptionsJSON,
+		policyChecksJSON, metadataJSON, now, now)
+	
+	return err
 }
 
 func (r *PostgresDecisionRepository) GetDecisionTemplate(ctx context.Context, id string) (*entities.DecisionTemplate, error) {
-	return nil, fmt.Errorf("decision templates not implemented yet")
+	query := `
+		SELECT id, name, type, description, required_context, decision_criteria,
+			   default_options, policy_checks, metadata, created_at, updated_at
+		FROM decision_templates WHERE id = $1`
+	
+	row := r.db.QueryRowContext(ctx, query, id)
+	return r.scanDecisionTemplate(row)
 }
 
 func (r *PostgresDecisionRepository) ListDecisionTemplates(ctx context.Context, decisionType entities.DecisionType) ([]*entities.DecisionTemplate, error) {
-	return []*entities.DecisionTemplate{}, nil
+	var query string
+	var args []interface{}
+	
+	if decisionType != "" {
+		query = `
+			SELECT id, name, type, description, required_context, decision_criteria,
+				   default_options, policy_checks, metadata, created_at, updated_at
+			FROM decision_templates WHERE type = $1
+			ORDER BY name ASC`
+		args = []interface{}{decisionType}
+	} else {
+		query = `
+			SELECT id, name, type, description, required_context, decision_criteria,
+				   default_options, policy_checks, metadata, created_at, updated_at
+			FROM decision_templates
+			ORDER BY type, name ASC`
+	}
+	
+	rows, err := r.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	
+	return r.scanDecisionTemplates(rows)
 }
 
 func (r *PostgresDecisionRepository) CreateDecisionLog(ctx context.Context, log *entities.DecisionLog) error {
@@ -331,4 +499,152 @@ func (r *PostgresDecisionRepository) GetStakeholderImpactSummary(ctx context.Con
 		MitigationActions:   0,
 		StakeholderFeedback: []repositories.StakeholderFeedback{},
 	}, nil
+}
+
+// Helper scanning methods for Policy, EthicalGuideline, and DecisionTemplate
+
+func (r *PostgresDecisionRepository) scanPolicy(scanner interface {
+	Scan(dest ...interface{}) error
+}) (*entities.Policy, error) {
+	var policy entities.Policy
+	var rulesJSON, metadataJSON []byte
+	var effectiveUntil sql.NullTime
+	var createdAt, updatedAt time.Time
+
+	err := scanner.Scan(
+		&policy.ID, &policy.Name, &policy.Category, &policy.Description, &rulesJSON,
+		&policy.Priority, &policy.EffectiveFrom, &effectiveUntil, &metadataJSON,
+		&policy.Active, &createdAt, &updatedAt)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	// Handle nullable fields
+	if effectiveUntil.Valid {
+		policy.EffectiveUntil = &effectiveUntil.Time
+	}
+
+	// Unmarshal JSON fields
+	if err := json.Unmarshal(rulesJSON, &policy.Rules); err != nil {
+		policy.Rules = []entities.PolicyRule{}
+	}
+	if err := json.Unmarshal(metadataJSON, &policy.Metadata); err != nil {
+		policy.Metadata = make(map[string]interface{})
+	}
+
+	return &policy, nil
+}
+
+func (r *PostgresDecisionRepository) scanPolicies(rows *sql.Rows) ([]*entities.Policy, error) {
+	var policies []*entities.Policy
+
+	for rows.Next() {
+		policy, err := r.scanPolicy(rows)
+		if err != nil {
+			return nil, err
+		}
+		policies = append(policies, policy)
+	}
+
+	return policies, rows.Err()
+}
+
+func (r *PostgresDecisionRepository) scanEthicalGuideline(scanner interface {
+	Scan(dest ...interface{}) error
+}) (*entities.EthicalGuideline, error) {
+	var guideline entities.EthicalGuideline
+	var examplesJSON, redLinesJSON []byte
+	var createdAt, updatedAt time.Time
+
+	err := scanner.Scan(
+		&guideline.ID, &guideline.Principle, &guideline.Description, &examplesJSON,
+		&redLinesJSON, &guideline.Weight, &createdAt, &updatedAt)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	// Unmarshal JSON fields
+	if err := json.Unmarshal(examplesJSON, &guideline.Examples); err != nil {
+		guideline.Examples = []string{}
+	}
+	if err := json.Unmarshal(redLinesJSON, &guideline.RedLines); err != nil {
+		guideline.RedLines = []string{}
+	}
+
+	return &guideline, nil
+}
+
+func (r *PostgresDecisionRepository) scanEthicalGuidelines(rows *sql.Rows) ([]*entities.EthicalGuideline, error) {
+	var guidelines []*entities.EthicalGuideline
+
+	for rows.Next() {
+		guideline, err := r.scanEthicalGuideline(rows)
+		if err != nil {
+			return nil, err
+		}
+		guidelines = append(guidelines, guideline)
+	}
+
+	return guidelines, rows.Err()
+}
+
+func (r *PostgresDecisionRepository) scanDecisionTemplate(scanner interface {
+	Scan(dest ...interface{}) error
+}) (*entities.DecisionTemplate, error) {
+	var template entities.DecisionTemplate
+	var requiredContextJSON, decisionCriteriaJSON, defaultOptionsJSON, policyChecksJSON, metadataJSON []byte
+	var createdAt, updatedAt time.Time
+
+	err := scanner.Scan(
+		&template.ID, &template.Name, &template.Type, &template.Description,
+		&requiredContextJSON, &decisionCriteriaJSON, &defaultOptionsJSON,
+		&policyChecksJSON, &metadataJSON, &createdAt, &updatedAt)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	// Unmarshal JSON fields
+	if err := json.Unmarshal(requiredContextJSON, &template.RequiredContext); err != nil {
+		template.RequiredContext = []string{}
+	}
+	if err := json.Unmarshal(decisionCriteriaJSON, &template.DecisionCriteria); err != nil {
+		template.DecisionCriteria = []string{}
+	}
+	if err := json.Unmarshal(defaultOptionsJSON, &template.DefaultOptions); err != nil {
+		template.DefaultOptions = []entities.DecisionOption{}
+	}
+	if err := json.Unmarshal(policyChecksJSON, &template.PolicyChecks); err != nil {
+		template.PolicyChecks = []string{}
+	}
+	if err := json.Unmarshal(metadataJSON, &template.Metadata); err != nil {
+		template.Metadata = make(map[string]interface{})
+	}
+
+	return &template, nil
+}
+
+func (r *PostgresDecisionRepository) scanDecisionTemplates(rows *sql.Rows) ([]*entities.DecisionTemplate, error) {
+	var templates []*entities.DecisionTemplate
+
+	for rows.Next() {
+		template, err := r.scanDecisionTemplate(rows)
+		if err != nil {
+			return nil, err
+		}
+		templates = append(templates, template)
+	}
+
+	return templates, rows.Err()
 }
