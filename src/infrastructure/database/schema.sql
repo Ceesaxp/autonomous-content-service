@@ -560,5 +560,11 @@ CREATE INDEX idx_decisions_priority ON decisions(priority);
 CREATE INDEX idx_decisions_created_at ON decisions(created_at);
 CREATE INDEX idx_decisions_deadline ON decisions(deadline);
 
--- Include governance schema  
+-- Include governance schema
 \i governance_schema.sql
+
+-- Include HR schema
+\i hr_schema.sql
+
+-- Include self-improvement schema
+\i self_improvement_schema.sql
